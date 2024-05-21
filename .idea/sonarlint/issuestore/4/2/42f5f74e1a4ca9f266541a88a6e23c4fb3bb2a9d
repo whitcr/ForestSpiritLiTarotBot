@@ -1,0 +1,4 @@
+
+cpython:S5720"?Rename "user_id" to "self" or add the missing "self" parameter.(•Ã®úÿÿÿÿ8î³¸“î1
+<python:S3626$"Remove this redundant return.(ÙãŞŸ8î³¸“î1
+qpython:S930"SRemove 1 unexpected arguments; 'check_subscription' expects 0 positional arguments.(·æğ”8ï³¸“î1
