@@ -208,4 +208,4 @@ async def ban(message: types.Message):
 
 @dp.message_handler(IDFilter(chat_id = CHAT_ID), commands = ['тест'], commands_prefix = '!', is_chat_admin = True)
 async def ban(message: types.Message):
-    print(message)
+

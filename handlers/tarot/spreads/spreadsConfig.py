@@ -1,6 +1,6 @@
 from constants import FONT_L, FONT_M
-from .getDaySpread import tomorrow_spread, today_spread
-from .getWeekMonthSpread import get_month_week_spread_cb, get_month_week_spread
+from handlers.tarot.spreads.day.daySpread import tomorrow_spread, today_spread
+from handlers.tarot.spreads.weekAndMonth.weekAndMonthDefault import get_month_week_spread_cb, get_month_week_spread
 
 SPREADS = {
     "universe_sign_spread": {

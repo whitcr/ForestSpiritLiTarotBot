@@ -3,14 +3,16 @@ import requests
 from bs4 import BeautifulSoup
 from random import randint
 from database import execute_select
+from filters.subscriptions import SubscriptionLevel
 
 router = Router()
 
 
-@router.message(F.text.lower() == "совет луны")
+@router.message(F.text.lower() == "совет луны", SubscriptionLevel(1))
 async def get_moon_advice(message: types.Message):
     num = randint(0, 43)
-    result = execute_select("SELECT moon_advice.advice, moon_advice.name FROM moon_advice WHERE number = %s", (num,))
+    result = await execute_select("SELECT moon_advice.advice, moon_advice.name FROM moon_advice WHERE number = $1",
+                                  (num,))
     moon_advice_text = result[0].replace("(", " ")
     moon_name = result[1].replace("(", " ")
     await message.answer(f'<b>{moon_name}</b> \n \n{moon_advice_text}')
@@ -39,7 +41,7 @@ async def get_moon_today():
         return None
 
 
-@router.message(F.text.lower() == "луна")
+@router.message(F.text.lower() == "луна", SubscriptionLevel(1))
 async def get_moon_text(message: types.Message):
     moon_data = await get_moon_today()
     if moon_data:

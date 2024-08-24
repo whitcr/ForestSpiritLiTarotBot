@@ -4,8 +4,6 @@ from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, User
 from cachetools import TTLCache
 
-from main import bot
-
 CACHE = TTLCache(maxsize = 10_000, ttl = 1)  # Максимальный размер кэша - 10000 ключей, а время жизни ключа - 5 секунд
 
 
@@ -18,6 +16,7 @@ class ThrottlingMiddleware(BaseMiddleware):
             data: Dict[str, Any],
     ) -> Any:
         user: User = data.get('event_from_user')
+        bot = data['bot']
 
         if user.id in CACHE:
             await bot.send_message(user.id, 'Не флудите!')

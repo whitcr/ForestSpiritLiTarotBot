@@ -1,5 +1,4 @@
-from .getTarotIntuitionPractice import dp
-from .getPracticesMeditation import dp
-
+from .tarot import dp
+from .defaults import dp
 
 __all__ = ["dp"]

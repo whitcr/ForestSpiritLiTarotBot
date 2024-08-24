@@ -1,77 +1,121 @@
 import asyncio
 import logging
-from aiogram import Bot, Dispatcher
-from config import load_config
+from contextlib import asynccontextmanager
 
-config = load_config()
-API_TOKEN = config.tg_bot.token
-ADMIN_ID = config.tg_bot.admin_ids[0]
+import uvicorn
+from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from aiogram.types import Update
+
+from config import load_config
+from middlewares.logger import LoggingMiddleware
+from middlewares.statsHandler import HandlerStatisticsMiddleware
+from middlewares.statsUser import UserStatisticsMiddleware
+from routers import setup_routers
+
+from tech.schedule.setSchedule import schedule
+from functions.store.temporaryStore import delete_expired_data
+from middlewares.coupons import CouponMiddleware
+from middlewares.throttling import ThrottlingMiddleware
+from middlewares.subscription import CheckingSubscription
+
+from fastapi import FastAPI, Request
 
 logger = logging.getLogger(__name__)
 
-bot: Bot = Bot(token = API_TOKEN, parse_mode = "HTML")
-dp: Dispatcher = Dispatcher()
 
-
-# @dp.error()
-async def handle_error(exception: Exception) -> None:
+async def on_startup(bot: Bot, admin_id, channel_id) -> None:
     try:
-        await bot.send_message(ADMIN_ID, f"Error: {exception}")
-    except Exception as e:
-        logger.exception(f"An error occurred while sending error message: {e}")
-
-
-async def on_startup() -> None:
-    try:
-
-        from functions.temporaryStore import delete_expired_data
-        # asyncio.create_task(delete_expired_data())
+        _delete_data_task = asyncio.create_task(delete_expired_data())
+        _schedule_task = asyncio.create_task(schedule(bot, channel_id, admin_id))
         logger.info('Starting bot')
-        await bot.send_message(ADMIN_ID, "Bot started!")
+        await bot.send_message(admin_id, "Bot started!")
     except Exception as e:
         logger.exception(f"An error occurred during bot startup: {e}")
 
 
-async def on_shutdown() -> None:
+async def on_shutdown(bot: Bot, admin_id) -> None:
     try:
+        await bot.delete_webhook(drop_pending_updates = True)
         logger.info('Stopping bot')
-        await bot.send_message(ADMIN_ID, "Bot stopped!")
+        await bot.send_message(admin_id, "Bot stopped!")
     except Exception as e:
         logger.exception(f"An error occurred during bot shutdown: {e}")
 
 
-async def main() -> None:
+def main() -> None:
+    config = load_config()
+    api_token = config.tg_bot.token
+    admin_id = config.tg_bot.admin_id
+    channel_id = config.tg_bot.channel_id
+
+    bot = Bot(token = api_token, default = DefaultBotProperties(parse_mode = ParseMode.HTML))
+    dp = Dispatcher()
+
     logging.basicConfig(
         level = logging.INFO,
         format = '%(filename)s:%(lineno)d #%(levelname)-8s '
                  '[%(asctime)s] - %(name)s - %(message)s')
     logger.setLevel(logging.DEBUG)
 
-    from handlers.tarot import getCard, getDeck, getDops
-    from events import addedToGroup, bannedByUser
-    # from middlewares.baseMiddleware import CheckingSubscription
-    from handlers.tarot import getMeaning, getMeaningCb
-    from handlers.tarot.spreads import getWeekMonthSpread, getDaySpread, getSpreads, experimentalSpreads
-    from handlers.numerology import getDateArcanes
-    # Include routers for different functionalities
+    router = setup_routers()
+    dp.include_router(router)
 
-    from handlers.tarot.questions import getQuestions
-    dp.include_routers(getCard.router, addedToGroup.router, bannedByUser.router, getDeck.router, getMeaning.router,
-                       getMeaningCb.router, experimentalSpreads.router, getWeekMonthSpread.router, getDaySpread.router,
-                       getQuestions.router, getDateArcanes.router, getSpreads.router, getDops.router)
+    dp.message.middleware(CheckingSubscription())
+    dp.callback_query.middleware(CheckingSubscription())
 
-    # Add middleware to handle callback queries
-    # dp.callback_query.outer_middleware(CheckingSubscription())
-    from middlewares.throttling import ThrottlingMiddleware
-    dp.update.middleware(ThrottlingMiddleware())
-    # Register functions to run on startup and shutdown
-    dp.startup.register(on_startup)
-    dp.shutdown.register(on_shutdown)
+    dp.message.middleware(ThrottlingMiddleware())
+    dp.callback_query.middleware(ThrottlingMiddleware())
 
-    # Start polling the bot
-    await bot.delete_webhook(drop_pending_updates = True)
-    await dp.start_polling(bot, skip_updates = True)
+    dp.message.middleware(UserStatisticsMiddleware())
+    dp.callback_query.middleware(UserStatisticsMiddleware())
+
+    dp.message.middleware(HandlerStatisticsMiddleware())
+    dp.callback_query.middleware(HandlerStatisticsMiddleware())
+
+    dp.update.outer_middleware(CouponMiddleware())
+
+    dp.update.outer_middleware(LoggingMiddleware())
+
+    dp.workflow_data.update({'admin_id': admin_id, 'channel_id': channel_id, 'api_token': api_token})
+
+    if config.webhook.webhook_path:
+
+        webhook_path = config.webhook.webhook_path
+        base_webhook_url = config.webhook.base_webhook_url
+        webhook_url = f"{base_webhook_url}{webhook_path}"
+        host, port = config.webhook.webhook_host, config.webhook.webhook_port
+
+        # https://habr.com/ru/articles/655965/
+
+        @asynccontextmanager
+        async def lifespan(app: FastAPI):
+            await on_startup(bot, admin_id, channel_id)
+            await bot.set_webhook(url = webhook_url,
+                                  allowed_updates = dp.resolve_used_update_types(),
+                                  drop_pending_updates = True)
+            yield
+            await on_shutdown(bot, admin_id)
+
+            # await bot.session.close()
+
+        app = FastAPI(lifespan = lifespan)
+
+        @app.post(webhook_path)
+        async def bot_webhook(request: Request):
+            update = Update.model_validate(await request.json(), context = {"bot": bot})
+            await dp.feed_update(bot, update)
+
+        uvicorn.run(app, host = host, port = port)
+
+    else:
+        dp.startup.register(on_startup)
+        dp.shutdown.register(on_shutdown)
+
+        asyncio.run(dp.start_polling(bot, skip_updates = True,
+                                     allowed_updates = dp.resolve_used_update_types()))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -19,7 +19,7 @@ from constants import FONT_L
 from chatGPT.getGPT import time_spread
 from constants import ADMIN_ID, CHANNEL_ID
 
-FONT = ImageFont.truetype("./images/tech/fonts/1246-font.otf", 90)
+FONT = ImageFont.truetype("./cards/tech/fonts/1246-font.otf", 90)
 import time
 from aiogram.utils.exceptions import BotBlocked
 
@@ -122,24 +122,6 @@ async def process_callback_get_contest_ticket(call: types.CallbackQuery):
         pass
 
 
-@dp.callback_query_handler(lambda c: c.data.startswith('get_contest_url'))
-async def process_callback_get_contest_url(call: types.CallbackQuery):
-    await call.answer()
-
-    user_id = call.from_user.id
-    referral_link = f'https://t.me/ForestSpiritLi_bot?start=ref_{user_id}'
-
-    cursor.execute("SELECT invited FROM users_contest WHERE user_id = %s", (str(user_id),))
-    try:
-        invited = cursor.fetchone()[0]
-        invited = len(invited)
-    except:
-        invited = 0
-
-    await bot.send_message(user_id,
-                           f'Ваша ссылка для приглашений друзей: {referral_link} \n\nТы пригласил уже {invited}, чтобы получить подарок надо пригласить ТРОИХ.')
-
-
 @dp.callback_query_handler(lambda c: c.data.startswith('check_contest_follow'))
 async def process_callback_check_contest_follow(call: types.CallbackQuery):
     await call.answer()
@@ -148,28 +130,6 @@ async def process_callback_check_contest_follow(call: types.CallbackQuery):
         await join_contest(call)
     else:
         await bot.send_message(call.from_user.id, "Ты не подписался на все каналы.")
-
-
-@dp.callback_query_handler(lambda c: c.data.startswith('check_invited'))
-async def process_callback_check_invited(call: types.CallbackQuery):
-    await call.answer()
-
-    cursor.execute("SELECT invited FROM users_contest WHERE user_id = %s", (str(call.from_user.id),))
-    invited = cursor.fetchone()[0]
-
-    count = 0
-    for user in invited:
-        check = await check_subscription_contest(user)
-        if check:
-            count += 1
-
-    if count >= 3:
-        await bot.delete_message(call.from_user.id, call.message.message_id)
-        await get_year_spread(call.from_user.id)
-        pass
-    else:
-        await bot.send_message(call.from_user.id,
-                               f"Не все твои приглашенные друзья подписаны на каналы. Количество подписанных - {count}")
 
 
 # @dp.message_handler(lambda message: message.text.lower() == "тест")

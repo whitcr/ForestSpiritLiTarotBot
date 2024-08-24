@@ -1,66 +1,63 @@
 import logging
-import psycopg2
-from psycopg2 import DatabaseError
+import asyncpg
+from asyncpg import PostgresError
+from contextlib import asynccontextmanager
+from config import load_config
 
-from contextlib import contextmanager, closing
+config = load_config()
+NAME_DB = config.db.database
+HOST_DB = config.db.db_host
+USER_DB = config.db.db_user
+PASSWORD_DB = config.db.db_password
 
 
-@contextmanager
-def connect():
+@asynccontextmanager
+async def connect():
     try:
-        db = psycopg2.connect(
-            host = "ec2-52-211-109-211.eu-west-1.compute.amazonaws.com",
-            user = "mqrnhmqfzcolwf",
-            password = "23abfe9adc4e4b3ee9354b6ff4683564a31e621422d23d722c757450c60e66bd",
-            dbname = "df2olk8dol9q7l",
-            port = "5432"
+        conn = await asyncpg.connect(
+            host = HOST_DB,
+            user = USER_DB,
+            password = PASSWORD_DB,
+            database = NAME_DB,
+            port = 5432
         )
         try:
-            yield db
+            yield conn
         finally:
-            db.close()
-    except psycopg2.OperationalError as e:
-        logging.error(e)
+            await conn.close()
+    except PostgresError as e:
+        logging.error(f"Database error: {e}")
+        raise
 
 
-def execute_query(query: str, params: tuple = None):
+async def execute_query(query: str, params: tuple = None):
     try:
-        with connect() as db:
-            with closing(db.cursor()) as cursor:
+        async with connect() as conn:
+            async with conn.transaction():
                 if params:
-                    cursor.execute(query, params)
+                    await conn.execute(query, *params)
                 else:
-                    cursor.execute(query)
-            db.commit()
-    except DatabaseError as e:
-        logging.error(e)
-        try:
-            db.rollback()
-        except DatabaseError as e:
-            logging.error(f"Ошибка при откате транзакции: {e}")
+                    await conn.execute(query)
+    except PostgresError as e:
+        logging.error(f"Executing query execution error: {e}")
+        raise
 
 
-def execute_select(query: str, params: tuple = None):
+async def execute_select(query: str, params: tuple = None):
     try:
-        with connect() as db:
-            with closing(db.cursor()) as cursor:
-                if params:
-                    cursor.execute(query, params)
-                else:
-                    cursor.execute(query)
-                return cursor.fetchone()[0]
-    except DatabaseError as e:
-        logging.error(e)
+        async with connect() as conn:
+            result = await conn.fetchval(query, *params if params else ())
+            return result if result is not None else False
+    except PostgresError as e:
+        logging.error(f"Select query execution error: {e}")
+        raise
 
 
-def execute_select_all(query: str, params: tuple = None):
+async def execute_select_all(query: str, params: tuple = None):
     try:
-        with connect() as db:
-            with closing(db.cursor()) as cursor:
-                if params:
-                    cursor.execute(query, params)
-                else:
-                    cursor.execute(query)
-                return cursor.fetchall()
-    except DatabaseError as e:
-        logging.error(e)
+        async with connect() as conn:
+            result = await conn.fetch(query, *params if params else ())
+            return result if result is not None else False
+    except PostgresError as e:
+        logging.error(f"Select all query execution error: {e}")
+        raise

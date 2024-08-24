@@ -1,5 +1,14 @@
 from PIL import ImageFont
 
+SUBS_TYPE = {
+    0: "Без подписки",
+    1: "Шут",
+    2: "Маг",
+    3: "Жрица"
+}
+
+DAILY_LIMIT = 200
+
 DECK_MAP = {
     'raider': 'Райдер-Уэйт',
     'wildwood': 'Дикий Лес',

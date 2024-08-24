@@ -1,0 +1,102 @@
+import time
+from aiogram import types, F, Router, Bot
+from aiogram.types import Message
+
+from database import execute_select_all, execute_query, execute_select
+from filters.baseFilters import IsAdmin
+
+router = Router()
+
+
+@router.message(IsAdmin(), F.text.startswith("кто"))
+async def get_user(message: types.Message):
+    user_id = message.text.split()[1]
+    user = f"<a href='tg://user?id={user_id}'>чел</a>"
+    text = f"Вот этот вот {user}"
+    await message.reply(text)
+
+
+@router.message(IsAdmin(), F.text.startswith("!всем"))
+async def mailing(message: types.Message, bot: Bot, admin_id):
+    parts = message.text.split()
+    if len(parts) < 4:
+        await message.reply("Usage: !всем <link> <wordlink> <message>")
+        return
+
+    link = parts[1]
+    wordlink = parts[2]
+    text_parts = parts[3:]
+    llink = f"<a href='{link}'>{wordlink}</a>"
+    post = f"— {llink} {' '.join(text_parts)}"
+
+    ids = await execute_select_all("SELECT user_id FROM users")
+
+    count_sent = 0
+    count_blocked = 0
+
+    for id_tuple in ids:
+        user_id = id_tuple[0]
+        try:
+            await bot.send_message(user_id, post)
+            count_sent += 1
+            time.sleep(1)
+        except Exception as e:
+            count_blocked += 1
+            await execute_query("DELETE FROM users WHERE user_id = $1", (user_id,))
+
+    await bot.send_message(admin_id, f"Сообщение получили {count_sent} пользователя. {count_blocked} заблокировали Ли.")
+
+
+@router.message(IsAdmin(), F.text.startswith("!!всем"))
+async def mailing_1(message: types.Message, bot: Bot, admin_id):
+    text_parts = message.text.split()[1:]
+    post = f"— {' '.join(text_parts)}"
+
+    ids = await execute_select_all("SELECT user_id FROM users LIMIT 20")
+
+    count_sent = 0
+    count_blocked = 0
+
+    for id_tuple in ids:
+        user_id = id_tuple[0]
+        try:
+            await bot.send_message(user_id, post)
+            count_sent += 1
+            time.sleep(1)
+        except Exception as e:
+            count_blocked += 1
+            await execute_query("DELETE FROM users WHERE user_id = $1", (user_id,))
+
+    await bot.send_message(admin_id,
+                           f"Сообщение было отослано {count_sent} пользователям. {count_blocked} заблокировали Ли.")
+
+
+@router.message(IsAdmin(), F.text.lower() == "пока, дружок")
+async def get_ban(message: types.Message, bot: Bot):
+    if message.chat.type in ['group', 'supergroup']:
+        if not message.reply_to_message:
+            await message.reply("Отправь эту команду ответом на сообщение нарушителя.")
+        else:
+            try:
+                replied_user = message.reply_to_message.from_user.id
+                name_user = message.reply_to_message.from_user.first_name
+                await bot.ban_chat_member(chat_id = message.chat.id, user_id = replied_user)
+                await bot.send_message(chat_id = message.chat.id, text = f"Дружок {name_user} забанен, радуемся.")
+            except Exception as e:
+                await message.reply(f"Не удалось забанить пользователя: {e}")
+
+
+@router.message(IsAdmin(), F.text.startswith("статистика"))
+async def cmd_stats(message: Message):
+    stats = await execute_select(
+        "SELECT command, daily_count, weekly_count, monthly_count, total_count FROM handler_statistics"
+    )
+    if stats:
+        response = "Статистика использования команд:\n\n"
+        for stat in stats:
+            response += (f"Команда: {stat[0]}\n"
+                         f"За день: {stat[1]}, За неделю: {stat[2]}, "
+                         f"За месяц: {stat[3]}, Всего: {stat[4]}\n\n")
+    else:
+        response = "Статистика пока не собрана."
+    await message.answer(response)

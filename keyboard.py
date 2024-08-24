@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
-from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 # КНОПКИ ДЛЯ ВОЗВРАЩЕНИЯ В МЕНЮ
 menu_return_buttons = [
@@ -91,6 +91,18 @@ practice_general_menu_practices_buttons = [
 ]
 practice_general_menu_practices_keyboard = InlineKeyboardMarkup(
     inline_keyboard = practice_general_menu_practices_buttons)
+
+# КНОПКИ ДЛЯ ПОКУПКИ ПОДПИСКИ
+
+sub_keyboard_buttons = [
+    [
+        InlineKeyboardButton(text = 'Хочу Шута!', callback_data = "get_sub_1_75"),
+        InlineKeyboardButton(text = 'Хочу Мага!', callback_data = "get_sub_2_150"),
+        InlineKeyboardButton(text = 'Хочу Жрицу!', callback_data = "get_sub_3_250")
+    ],
+]
+
+sub_keyboard = InlineKeyboardMarkup(inline_keyboard = sub_keyboard_buttons)
 
 # КНОПКИ ДЛЯ РАССЫЛКИ
 follow_daily_mailing_buttons = [
@@ -188,23 +200,37 @@ follow_contest_buttons = [
 follow_contest_keyboard = InlineKeyboardMarkup(inline_keyboard = follow_contest_buttons)
 
 # ПРИВАТНОЕ МЕНЮ
-# menu_private_buttons = [
-#     [ReplyKeyboardMarkup(text = 'Карта', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Триплет', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Расклад', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Расклад дня', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Узнать значение', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Колода', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Луна', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Совет Луны', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Практика', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Узнать аркан', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Рассылка', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Запись', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Медитация', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Мантра', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Аффирмация', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Заказать расклад', resize_keyboard = True)],
-#     [ReplyKeyboardMarkup(text = 'Помощь', resize_keyboard = True)]
-# ]
-# menu_private_keyboard = ReplyKeyboardMarkup(keyboard = menu_private_buttons, resize_keyboard = True)
+builder = ReplyKeyboardBuilder()
+
+buttons = [
+    "Карта", "Триплет", "Расклад", "Расклад дня", "Узнать значение",
+    "Колода", "Луна", "Совет Луны", "Практика", "Узнать аркан",
+    "Рассылка", "Запись", "Медитация", "Мантра", "Аффирмация",
+    "Заказать расклад", "Помощь"
+]
+
+for button_text in buttons:
+    builder.button(text = button_text)
+
+builder.adjust(3)
+
+menu_private_keyboard = builder.as_markup(resize_keyboard = True)
+
+# КНОПКИ ДЛЯ ПРОФИЛЯ
+profile_buttons = [
+    [
+        InlineKeyboardButton(text = "Расклад на день", callback_data = "today_spread"),
+        InlineKeyboardButton(text = "Расклад на завтра", callback_data = "tomorrow_spread")
+    ],
+    [
+        InlineKeyboardButton(text = "Расклад на неделю", callback_data = "create_week_spread"),
+        InlineKeyboardButton(text = "Расклад на месяц", callback_data = "create_month_spread")
+    ],
+    [
+        InlineKeyboardButton(text = "Ссылка для приглашения", callback_data = "get_referral_url"),
+    ],
+    [
+        InlineKeyboardButton(text = "Статистика", callback_data = "get_user_statistics"),
+    ]
+]
+profile_keyboard = InlineKeyboardMarkup(inline_keyboard = profile_buttons)

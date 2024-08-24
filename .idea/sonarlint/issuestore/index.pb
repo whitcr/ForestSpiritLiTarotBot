@@ -7,8 +7,6 @@ F
 events/addedToGroup.py,d\4\d43fcc52895fb8f9e75c2a62ec0a0c051adf8a88
 ;
 database.py,1\2\12d0bfc8adac6eee15262b728a538821e35c98c9
-J
-functions/techFunctions.py,7\a\7ae1ecdf565d48d6a1b6cc2946294455bc716306
 B
 filters/filters.py,a\0\a03a839acc7fd9f55865ab08c4abb3fe0e85d9bd
 ;
@@ -21,15 +19,11 @@ I
 gptApi/gpt.py,2\0\209663b616545ca01b7dbe5cd21e5c3028d8df28
 M
 middlewares/baseMiddleware.py,4\2\42f5f74e1a4ca9f266541a88a6e23c4fb3bb2a9d
-F
-functions/tempStore.py,6\f\6f3ee62dd6f131d5893858e6954c01cd65a1354e
-Q
-!functions/createCardsFunctions.py,d\7\d7500ea6c0eb529d7838827f61de0410be3cb4c0
 U
 %handlers/numerology/getDateArcanes.py,b\9\b9e764f8c82e10328afeca16d3c1cc6001de3afa
-9
-	config.py,1\a\1a1b9769344cb239f2e540e1e6ee1efa2d3034ea
 @
 requirements.txt,1\9\19359a61ae2446b51b549167b014da2fcf265768
+9
+	config.py,1\a\1a1b9769344cb239f2e540e1e6ee1efa2d3034ea
 7
 main.py,f\1\f1bdda93d9a278e358509d498e17d97764c1fb29
