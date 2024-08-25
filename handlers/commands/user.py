@@ -130,20 +130,13 @@ async def services(message: types.Message, bot: Bot):
         self_spread = hlink("Понимая себя, мы открываем совершенно иной мир", link)
         link = f"https://t.me/forestspiritoo/57"
         money_spread = hlink("Как улучшть свои финансы и что принесет мне этот путь?", link)
-        link = f"https://t.me/forestspiritoo/59?comment=39"
-        animal_spread = hlink("Узнать своих тотемных животных и облегчить свою жизнь", link)
-        link = f"https://t.me/forestspiritoo/59?comment=38"
-        energy_spread = hlink("Диагностика энергополя и чакр", link)
         await bot.send_message(message.chat.id,
                                text = f"— Вы можете ознакомиться с раскладами и иными услугами в этой {group} или напрямую обратиться "
                                       f"к {wanderer}\n\n"
                                       f"<b>ПОПУЛЯРНЫЕ РАСКЛАДЫ:</b>\n\n"
                                       f"{love_spread}\n\n"
                                       f"{self_spread}\n\n"
-                                      f"{money_spread}\n\n"
-                                      f"<b>ВАЖНЫЕ ДИАГНОСТИКИ: </b>\n\n"
-                                      f"{animal_spread}\n\n"
-                                      f"{energy_spread}\n\n")
+                                      f"{money_spread}\n\n")
     else:
         pass
 

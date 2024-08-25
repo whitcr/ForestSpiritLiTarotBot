@@ -67,7 +67,7 @@ async def get_meaning(message: types.Message, bot: Bot):
                     f"Значение есть только для Уэйта, Безумной Луны, Чеколли и Манары.")
                 return
         except Exception as e:
-            await message.reply(f"— Такой карты нет, попробуйте снова. ")
+            await message.reply(f"— Такой карты нет, попробуйте снова. ", reply_markup = kb.menu_private_keyboard)
 
 
 class MeaningClass(StatesGroup):
@@ -114,5 +114,5 @@ async def get_meaning_text(message: types.Message, state: FSMContext, bot: Bot):
                 f"Значение есть только для Уэйта, Безумной Луны, Чеколли и Манары.")
             await state.clear()
     except Exception as e:
-        await message.reply(f"— Такой карты нет, попробуйте снова. ")
+        await message.reply(f"— Такой карты нет, попробуйте снова. ", reply_markup = kb.menu_private_keyboard)
         await state.clear()
