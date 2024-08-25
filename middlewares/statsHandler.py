@@ -7,9 +7,9 @@ from database import execute_query, execute_select_all
 
 
 async def process_callback_data_to_name(callback_data: str) -> str:
-    if callback_data.startswith('get_dop_'):
+    if 'get_dop_' in callback_data:
         return 'Допы'
-    elif callback_data.startswith('get_default_meaning_gpt_'):
+    elif 'get_default_meaning_gpt_' in callback_data:
         return 'Обычная трактовка'
     return callback_data
 

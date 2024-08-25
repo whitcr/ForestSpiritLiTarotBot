@@ -35,12 +35,10 @@ class CouponMiddleware:
         else:
             return result
 
-        user_id = event.from_user.id
-        username = event.from_user.username if event.from_user.username else "No username"
-        full_name = event.from_user.full_name
-
+        user = data.get('event_from_user')
+ 
         logging.info(
-            f"{card} карта была выдана пользователю {user_id}, ник: {username}, имя: {full_name}")
+            f"{card} карта была выдана пользователю {user.id}, ник: {user.username}, имя: {user.full_name}")
 
         await event.answer(f"Вам выдана {card} карта!")
 
