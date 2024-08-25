@@ -4,6 +4,7 @@ from aiogram.filters import BaseFilter
 
 from constants import SUBS_TYPE
 from database import execute_select
+from keyboard import sub_keyboard
 
 
 class SubscriptionLevel(BaseFilter):
@@ -21,10 +22,12 @@ class SubscriptionLevel(BaseFilter):
             if isinstance(event, Message):
                 chat_id = event.chat.id
             elif isinstance(event, CallbackQuery):
+                await event.answer()
                 chat_id = event.message.chat.id
 
-            await bot.send_message(chat_id,
-                                   f"У вас нет доступа к этой функции, но вы можете приобрести ее по подписке {required_sub}"
+            await bot.send_message(user_id,
+                                   f"У вас нет доступа к этой функции, но вы можете приобрести ее по подписке {required_sub}",
+                                   reply_markup = sub_keyboard
                                    )
             return False
 

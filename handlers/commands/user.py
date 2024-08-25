@@ -7,7 +7,7 @@ import pendulum
 from database import execute_query, execute_select_all
 from events.user.referrals import get_referrals
 from functions.cards.create import get_buffered_image
-from functions.messages.messages import get_reply_message, get_chat_id
+from functions.messages.messages import get_reply_message, get_chat_id, typing_animation_decorator
 from functions.statistics.getUserStats import get_user_statistics
 from keyboard import menu_private_keyboard, profile_keyboard
 
@@ -47,6 +47,7 @@ async def get_user_profile(user_id: int):
 
 
 @router.callback_query(F.data == "get_user_statistics")
+@typing_animation_decorator(initial_message = "Вычисляю статистику")
 async def get_formatted_card_statistics(callback_query: types.CallbackQuery, bot):
     image = await get_user_statistics(callback_query.from_user.id)
 
@@ -73,18 +74,32 @@ async def generate_profile_summary(message: types.Message):
     booster = profile_data[8]
     referrals = profile_data[9]
 
+    deck_type = deck_type if deck_type else "Не указано"
+    subscription = subscription if subscription else "Без подписки"
+    subscription_date = subscription_date if subscription_date else "Без подписки"
+    interactions = interactions if interactions else "Не указано"
+    booster = 'Да' if booster else 'Нет'
+    referrals = referrals if referrals else "Нет приглашенных"
+
+    # Проверка на наличие значений для day_follow и установка текстов по умолчанию
+    moon_follow = day_follow.get('moon_follow', 'Без подписки')
+    day_card_follow = day_follow.get('day_card_follow', 'Без подписки')
+    week_card_follow = day_follow.get('week_card_follow', 'Без подписки')
+    month_card_follow = day_follow.get('month_card_follow', 'Без подписки')
+
+    # Формирование текста профиля
     profile_text = (
         f"📋 <b>Ваш профиль</b>\n\n"
         f"<b>Колода:</b> {deck_type}\n"
         f"<b>Подписка:</b> {subscription}\n"
         f"<b>Конец подписки:</b> {subscription_date}\n"
         f"<b>Рассылка:</b>\n"
-        f"    🌙 Луна: {day_follow['moon_follow']}\n"
-        f"    🌞 Расклад дня: {day_follow['day_card_follow']}\n"
-        f"    📅 Расклад недели: {day_follow['week_card_follow']}\n"
-        f"    📆 Расклад месяца: {day_follow['month_card_follow']}\n"
+        f"    🌙 Луна: {moon_follow}\n"
+        f"    🌞 Расклад дня: {day_card_follow}\n"
+        f"    📅 Расклад недели: {week_card_follow}\n"
+        f"    📆 Расклад месяца: {month_card_follow}\n"
         f"<b>Взаимодействий:</b> {interactions}\n"
-        f"<b>Буст:</b> {'Yes' if booster else 'No'}\n"
+        f"<b>Буст:</b> {booster}\n"
         f"<b>Приглашенные:</b>  {referrals}\n"
     )
 
