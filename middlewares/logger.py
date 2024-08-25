@@ -7,6 +7,8 @@ import logging
 from aiogram.dispatcher.event.bases import UNHANDLED
 from aiogram.utils.markdown import hlink
 
+from middlewares.statsHandler import process_callback_data_to_name
+
 logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -29,12 +31,15 @@ class LoggingMiddleware(BaseMiddleware):
             chat_id = chat.id if chat else 'Неизвестный чат'
             chat_title = chat.title if chat.title else 'Личка'
             chat_us = chat.username if chat.username else ''
-            command = getattr(event.message, 'text', 'Неизвестная команда')
+
+            command_name = event.message if event.message is not None else event.callback_query.data
+
+            command_name = await process_callback_data_to_name(command_name)
 
             message = f"Получен запрос #{event.update_id}:\n"\
                       f"Пользователь: {hlink(f'{user_id}', user_link)}\n"\
                       f"Чат: {chat_id} - {chat_title} - {chat_us}\n"\
-                      f"Команда: {command}\n"
+                      f"Команда: {command_name}\n"
 
             logging.info(message)
 

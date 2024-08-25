@@ -85,30 +85,34 @@ async def get_meaning_command(message: types.Message, state: FSMContext):
 
 @router.message(MeaningClass.card)
 async def get_meaning_text(message: types.Message, state: FSMContext, bot: Bot):
-    name = await replace_synonyms(" ".join(message.text.split()))
-    num = await execute_select("select number from meaning_raider where name = $1;", (name.lower(),))
+    try:
+        name = await replace_synonyms(" ".join(message.text.split()))
+        num = await execute_select("select number from meaning_raider where name = $1;", (name.lower(),))
 
-    choice = await get_choice_spread(message.from_user.id)
-    card_paths = await get_path_cards(choice, num)
-    table = f"meaning_{choice}"
-    print(table, num)
-    if choice in ['raider', "manara", 'deviantmoon', 'ceccoli']:
-        meaning_text = await execute_select(f"select general from {table} where number = $1;", (num,))
+        choice = await get_choice_spread(message.from_user.id)
+        card_paths = await get_path_cards(choice, num)
+        table = f"meaning_{choice}"
+        print(table, num)
+        if choice in ['raider', "manara", 'deviantmoon', 'ceccoli']:
+            meaning_text = await execute_select(f"select general from {table} where number = $1;", (num,))
 
-        text = meaning_text + f"\n\n<a href = '{MEANINGS_BUTTONS[choice]['source']}'>Источник</a>"
+            text = meaning_text + f"\n\n<a href = '{MEANINGS_BUTTONS[choice]['source']}'>Источник</a>"
 
-        keyboard = await generate_meaning_keyboard(choice, f'meaning_{choice}_general')
-        await bot.send_photo(message.chat.id, photo = FSInputFile(card_paths, 'rb'),
-                             reply_to_message_id = message.message_id)
-        msg = await bot.send_message(message.chat.id, text, reply_markup = keyboard,
-                                     reply_to_message_id = message.message_id)
-        if message.chat.type == "private":
-            await message.answer("— Вернуть удобное меню с командами?", reply_markup = kb.menu_return_keyboard)
+            keyboard = await generate_meaning_keyboard(choice, f'meaning_{choice}_general')
+            await bot.send_photo(message.chat.id, photo = FSInputFile(card_paths, 'rb'),
+                                 reply_to_message_id = message.message_id)
+            msg = await bot.send_message(message.chat.id, text, reply_markup = keyboard,
+                                         reply_to_message_id = message.message_id)
+            if message.chat.type == "private":
+                await message.answer("— Вернуть удобное меню с командами?", reply_markup = kb.menu_return_keyboard)
 
-        await store_data(msg, num)
-        await state.clear()
-    else:
-        await message.reply(
-            f"— К сожалению, пока что у меня нет значений на выбранную колоду."
-            f"Значение есть только для Уэйта, Безумной Луны, Чеколли и Манары.")
+            await store_data(msg, num)
+            await state.clear()
+        else:
+            await message.reply(
+                f"— К сожалению, пока что у меня нет значений на выбранную колоду."
+                f"Значение есть только для Уэйта, Безумной Луны, Чеколли и Манары.")
+            await state.clear()
+    except Exception as e:
+        await message.reply(f"— Такой карты нет, попробуйте снова", reply_markup = kb.menu_private_keyboard)
         await state.clear()
