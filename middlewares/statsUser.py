@@ -21,7 +21,7 @@ class UserStatisticsMiddleware(BaseMiddleware):
         else:
             bot = data.get("bot")
             user_id = event.from_user.id
-            chat_id = event.from_user.chat.id
+            chat_id = event.chat.id
             await bot.send_message(chat_id, user_id, "Limit exceeded")
 
     async def update_user_statistics(self, event: Message) -> bool:

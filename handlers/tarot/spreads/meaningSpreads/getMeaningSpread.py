@@ -113,57 +113,75 @@ async def create_gpt_keyboard(buttons, nums, prev_callback_data=None, card_posit
     return buttons
 
 
-@router.callback_query(IsReply(), GptCallbackMeaning.filter(), SubscriptionLevel(2))
+async def format_callback_data(call, data):
+    get_question, get_theme = None, None
+    get_cards = []
+
+    question = call.message.reply_to_message.text.replace("триплет", "")
+    if question.strip():
+        get_question = question
+
+    spread_name = data.get('spread_name')
+    if spread_name:
+        get_theme = spread_name
+
+    for i in range(1, 4):
+        card = data.get(f'card_{i}')
+        if card is not None:
+            card_name = await execute_select("SELECT name FROM cards WHERE number = $1", (card,))
+            line = f"Карта {i}: {card_name}."
+            additional_cards = []
+            for j in range(1, 3):
+                d = data.get(f'd{str(j)}card_{i}')
+                if d is not None:
+                    card_name_d = await execute_select("SELECT name FROM cards WHERE number = $2", (d,))
+                    additional_cards.append(card_name_d)
+            if additional_cards:
+                line += f" Дополнительные карты: {', '.join(additional_cards)}"
+            get_cards.append(line)
+    return "\n".join(get_cards), get_question, get_theme
+
+
+@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == True), SubscriptionLevel(3))
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning,
                                          state: FSMContext):
     await call.answer()
 
     data_dict = callback_data.model_dump()
 
-    async def format_callback_data(data):
-        get_question, get_theme = None, None
-        get_cards = []
+    get_cards, get_question, get_theme = await format_callback_data(call, data_dict)
 
-        question = call.message.reply_to_message.text.replace("триплет", "")
-        if question.strip():
-            get_question = question
+    text = ""
+    if get_theme:
+        text += f"Тема: {get_theme}. \n\n"
+    if get_question:
+        text += f"Вопрос: {get_question}. \n\n"
+    if get_cards:
+        text += f"{get_cards}"
 
-        spread_name = data.get('spread_name')
-        if spread_name:
-            get_theme = spread_name
+    await state.update_data(get_cards = get_cards, get_question = get_question, get_theme = get_theme)
+    await get_cards_meanings_premium(call, state)
 
-        for i in range(1, 4):
-            card = data.get(f'card_{i}')
-            if card is not None:
-                card_name = await execute_select("SELECT name FROM cards WHERE number = $1", (card,))
-                line = f"Карта {i}: {card_name}."
-                additional_cards = []
-                for j in range(1, 3):
-                    d = data.get(f'd{str(j)}card_{i}')
-                    if d is not None:
-                        card_name_d = await execute_select("SELECT name FROM cards WHERE number = $2", (d,))
-                        additional_cards.append(card_name_d)
-                if additional_cards:
-                    line += f" Дополнительные карты: {', '.join(additional_cards)}"
-                get_cards.append(line)
-        return "\n".join(get_cards), get_question, get_theme
 
-    get_cards, get_question, get_theme = await format_callback_data(data_dict)
+@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(2))
+async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning,
+                                         state: FSMContext):
+    await call.answer()
 
-    if data_dict.get('premium'):
-        await state.update_data(get_cards = get_cards, get_question = get_question, get_theme = get_theme)
-        await get_cards_meanings_premium(call, state)
-    else:
-        text = ""
-        if get_theme:
-            text += f"Тема: {get_theme}. \n\n"
-        if get_question:
-            text += f"Вопрос: {get_question}. \n\n"
-        if get_cards:
-            text += f"{get_cards}"
+    data_dict = callback_data.model_dump()
 
-        message = await get_cards_meanings(text)
-        await call.message.answer(message)
+    get_cards, get_question, get_theme = await format_callback_data(call, data_dict)
+
+    text = ""
+    if get_theme:
+        text += f"Тема: {get_theme}. \n\n"
+    if get_question:
+        text += f"Вопрос: {get_question}. \n\n"
+    if get_cards:
+        text += f"{get_cards}"
+
+    message = await get_cards_meanings(text)
+    await call.message.answer(message)
 
 
 async def get_text_for_meaning(data):
@@ -291,7 +309,7 @@ async def process_new_details(message: types.Message, state: FSMContext):
     await get_cards_meanings_premium(call = message, state = state)
 
 
-@router.callback_query(IsReply(), F.data == "get_meaning_premium", SubscriptionLevel(3))
+@router.callback_query(IsReply(), F.data == "get_meaning_premium")
 @typing_animation_decorator(initial_message = "Трактую")
 async def get_meaning_premium(call: types.CallbackQuery, state: FSMContext):
     await call.answer()
