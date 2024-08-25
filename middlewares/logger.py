@@ -39,7 +39,7 @@ class LoggingMiddleware(BaseMiddleware):
             message = f"Получен запрос #{event.update_id}:\n"\
                       f"Пользователь: {hlink(f'{user_id}', user_link)}\n"\
                       f"Чат: {chat_id} - {chat_title} - {chat_us}\n"\
-                      f"Команда: {command_name}\n"
+                      f"Команда:  {command_name}\n"
 
             logging.info(message)
 
