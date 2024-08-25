@@ -15,6 +15,7 @@ async def get_chat_id(obj):
     if isinstance(obj, Message):
         return getattr(obj.chat, 'id', None) or obj.message_id
     elif isinstance(obj, CallbackQuery):
+        await obj.answer()
         return getattr(obj.message.chat, 'id', None) or obj.message.message_id
     return None
 
@@ -25,7 +26,7 @@ def typing_animation_decorator(initial_message):
         async def wrapper(*args, **kwargs):
             message = args[0]
             bot = message.bot
-            chat_id = message.chat.id
+            chat_id = await get_chat_id(message)
 
             typing_animation_task = asyncio.create_task(
                 animate_typing(chat_id, initial_message, bot)
