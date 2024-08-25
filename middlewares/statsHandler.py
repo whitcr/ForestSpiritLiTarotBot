@@ -6,7 +6,7 @@ from typing import Dict, Any, Callable, Awaitable
 from database import execute_query, execute_select_all
 
 
-async def process_callback_data_to_name(callback_data: str) -> str:
+async def process_callback_data_to_name(callback_data):
     if 'get_dop_' in callback_data:
         return 'Допы'
     elif 'get_default_meaning_gpt_' in callback_data:

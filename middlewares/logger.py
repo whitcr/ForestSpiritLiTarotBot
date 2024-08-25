@@ -2,7 +2,7 @@ from typing import Callable, Dict
 
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 
-from aiogram.types import Update
+from aiogram.types import Update, CallbackQuery
 import logging
 from aiogram.dispatcher.event.bases import UNHANDLED
 from aiogram.utils.markdown import hlink
@@ -34,7 +34,8 @@ class LoggingMiddleware(BaseMiddleware):
 
             command_name = event.message if event.message is not None else event.callback_query.data
 
-            command_name = await process_callback_data_to_name(command_name)
+            if isinstance(event, CallbackQuery):
+                command_name = await process_callback_data_to_name(command_name)
 
             message = f"Получен запрос #{event.update_id}:\n"\
                       f"Пользователь: {hlink(f'{user_id}', user_link)}\n"\
