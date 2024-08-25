@@ -82,10 +82,10 @@ async def generate_profile_summary(message: types.Message):
     referrals = referrals if referrals else "Нет приглашенных"
 
     # Проверка на наличие значений для day_follow и установка текстов по умолчанию
-    moon_follow = day_follow.get('moon_follow', 'Без подписки')
-    day_card_follow = day_follow.get('day_card_follow', 'Без подписки')
-    week_card_follow = day_follow.get('week_card_follow', 'Без подписки')
-    month_card_follow = day_follow.get('month_card_follow', 'Без подписки')
+    moon_follow = day_follow['moon_follow'] if day_follow['moon_follow'] else 'Без подписки'
+    day_card_follow = day_follow['day_card_follow'] if day_follow['day_card_follow'] else 'Без подписки'
+    week_card_follow = day_follow['week_card_follow'] if day_follow['week_card_follow'] else 'Без подписки'
+    month_card_follow = day_follow['month_card_follow'] if day_follow['month_card_follow'] else 'Без подписки'
 
     # Формирование текста профиля
     profile_text = (

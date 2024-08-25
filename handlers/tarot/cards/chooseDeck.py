@@ -1,20 +1,21 @@
 from aiogram import types, Router, F, Bot
 from constants import DECK_MAP
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database import execute_query
 from filters.subscriptions import SubscriptionLevel
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import InlineKeyboardButton
 
 router = Router()
 
 
 async def generate_decks_keyboard():
-    buttons = []
-    for key, value in DECK_MAP.items():
-        button = InlineKeyboardButton(text = value, callback_data = key)
-        buttons.append(button)
+    builder = InlineKeyboardBuilder()
 
-    choose_cards_keyboard = InlineKeyboardMarkup(resize_keyboard = True, row_width = 3).add(*buttons)
-    return choose_cards_keyboard
+    for key, value in DECK_MAP.items():
+        builder.button(text = value, callback_data = key)
+
+    builder.adjust(3)
+    return builder.as_markup()
 
 
 @router.message(F.text.lower() == "колода")
