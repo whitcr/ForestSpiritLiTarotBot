@@ -36,10 +36,13 @@ class CouponMiddleware:
             return result
 
         user = data.get('event_from_user')
- 
+        bot = data.get('bot')
+        chat = data.get('event_chat')
+
         logging.info(
             f"{card} карта была выдана пользователю {user.id}, ник: {user.username}, имя: {user.full_name}")
 
-        await event.answer(f"Вам выдана {card} карта!")
+        await bot.send_message(chat.id,
+                               f" @{user.username if user.username else user.full_name}, Вам выдана {card} карта!")
 
         return result

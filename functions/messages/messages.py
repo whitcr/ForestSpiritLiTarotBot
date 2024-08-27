@@ -24,8 +24,14 @@ def typing_animation_decorator(initial_message):
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            message = args[0]
-            bot = message.bot
+
+            try:
+                message = args[0]
+                bot = message.bot
+            except AttributeError:
+                message = args[1]
+                bot = message.bot
+                
             chat_id = await get_chat_id(message)
 
             typing_animation_task = asyncio.create_task(
