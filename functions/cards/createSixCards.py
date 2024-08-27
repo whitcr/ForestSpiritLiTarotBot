@@ -20,8 +20,14 @@ async def send_image_six_cards(bot, message, username, image, theme):
 
     reply_to_message_id = message.reply_to_message.message_id if message.reply_to_message else message.message_id
     msg = await bot.send_photo(message.chat.id, photo = await get_buffered_image(image),
-                               reply_to_message_id = reply_to_message_id)
+                               reply_to_message_id = reply_to_message_id, reply_markup = None)
     file_id = msg.photo[-1].file_id
+
+    if theme == 'недели':
+        theme = "week"
+    elif theme == 'месяца':
+        theme = "month"
+
     table = f"spreads_{theme}"
     await execute_query(
         f"insert into {table} (user_id, file_id) values ($1, $2)", (message.reply_to_message.from_user.id,

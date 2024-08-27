@@ -10,7 +10,7 @@ import itertools
 import numpy as np
 from PIL import Image
 
-from functions.statistics.cards import get_user_card_statistics
+from functions.statistics.cards import get_user_card_statistics, get_statistic_card
 
 
 async def get_choice_spread(user_id):
@@ -36,7 +36,7 @@ async def get_random_num(choice, count, user_id=None):
         num = random.randint(min_num, max_num)
         if user_id:
             await get_user_card_statistics(user_id = user_id, num = num)
-            # await get_statistic_card(num)
+            await get_statistic_card(num)
 
         return num
     else:
@@ -45,7 +45,7 @@ async def get_random_num(choice, count, user_id=None):
         if user_id:
             for num in nums:
                 await get_user_card_statistics(user_id = user_id, num = num)
-            # await get_statistic_card(num)
+                await get_statistic_card(num)
         return nums
 
 

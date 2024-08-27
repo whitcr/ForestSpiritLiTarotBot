@@ -72,7 +72,7 @@ async def create_spread_image(bot, call: CallbackQuery, spread_type: str):
     draw_text.text((115, 245), f'Совет {spread_type}', font = FONT_M, fill = 'white')
     draw_text.text((810, 10), 'Позитивные события', font = FONT_M, fill = 'white')
     draw_text.text((1574, 245), f'Угроза {spread_type}', font = FONT_M, fill = 'white')
-    draw_text.text((820, 514), f'Расклад на {spread_type}', font = FONT_M, fill = 'white')
+    draw_text.text((820, 514), f'Расклад {spread_type}', font = FONT_M, fill = 'white')
     draw_text.text((805, 1010), 'Негативные события', font = FONT_M, fill = 'white')
     draw_text.text((1295, 1025), 'from ForestSpiritLi', font = FONT_M, fill = 'white')
 
