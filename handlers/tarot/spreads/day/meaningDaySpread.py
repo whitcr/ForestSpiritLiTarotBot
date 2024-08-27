@@ -20,8 +20,8 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
         )
 
         cards = []
-        for i in nums:
-            name = await execute_select("SELECT name FROM cards WHERE number = $1", (i[0],))
+        for i in nums[0]:
+            name = await execute_select("SELECT name FROM cards WHERE number = $1", (i,))
             cards.append(name)
 
         day_card = cards[0]

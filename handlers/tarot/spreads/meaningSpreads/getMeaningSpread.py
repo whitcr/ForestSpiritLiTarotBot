@@ -164,6 +164,7 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
 
 
 @router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(2))
+@typing_animation_decorator(initial_message = "Трактую")
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning,
                                          state: FSMContext):
     await call.answer()
