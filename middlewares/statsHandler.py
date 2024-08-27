@@ -11,6 +11,10 @@ async def process_callback_data_to_name(callback_data):
         return 'Допы'
     elif 'get_default_meaning_gpt_' in callback_data:
         return 'Обычная трактовка'
+    elif 'get_day_spread_meaning_' in callback_data:
+        return 'Трактовка расклада дня'
+    elif 'day_meaning_day_' in callback_data:
+        return 'Трактовка карт дня'
     return callback_data
 
 
