@@ -32,10 +32,10 @@ class LoggingMiddleware(BaseMiddleware):
             chat_title = chat.title if chat.title else 'Личка'
             chat_us = chat.username if chat.username else ''
 
-            command_name = event.message if event.message is not None else event.callback_query.data
+            command_name = event.message.text if event and event.message and event.message.text else 'Неизвестная комманда'
 
-            if isinstance(event, CallbackQuery):
-                command_name = await process_callback_data_to_name(command_name)
+            if event.callback_query is not None and event.callback_query.data is not None:
+                command_name = await process_callback_data_to_name(event.callback_query.data)
 
             message = f"Получен запрос #{event.update_id}:\n"\
                       f"Пользователь: {hlink(f'{user_id}', user_link)}\n"\
