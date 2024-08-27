@@ -30,7 +30,7 @@ async def on_startup(bot: Bot, admin_id, channel_id) -> None:
         _delete_data_task = asyncio.create_task(delete_expired_data())
         _schedule_task = asyncio.create_task(schedule(bot, channel_id, admin_id))
         logger.info('Starting bot')
-        await bot.send_message(admin_id, "Bot started!")
+        await bot.send_message(admin_id, "Bot started !")
     except Exception as e:
         logger.exception(f"An error occurred during bot startup: {e}")
 
