@@ -10,14 +10,23 @@ async def get_statistic_card(num: Union[int, str]):
     week_start = today - timedelta(days = today.weekday())
     month_start = today.replace(day = 1)
 
-    result = await execute_select(
+    name = await execute_select(
+        """
+        SELECT name
+        FROM cards
+        WHERE number = $1
+        """,
+        (num,)
+    )
+
+    result = await execute_select_all(
         """
         SELECT daily_count, weekly_count, monthly_count, total_count, 
                last_daily_update, last_weekly_update, last_monthly_update
-        FROM statistic_cards 
+        FROM statistics_cards 
         WHERE card = $1
         """,
-        (num,)
+        (name,)
     )
 
     if result:
@@ -33,23 +42,23 @@ async def get_statistic_card(num: Union[int, str]):
 
         await execute_query(
             """
-            UPDATE statistic_cards 
+            UPDATE statistics_cards 
             SET daily_count = $1, weekly_count = $2, monthly_count = $3, total_count = $4,
                 last_daily_update =$5, last_weekly_update = $6, last_monthly_update =$7
             WHERE card = $8
             """,
             (daily_count + 1, weekly_count + 1, monthly_count + 1, total_count + 1,
-             today, week_start, month_start, num)
+             today, week_start, month_start, name)
         )
     else:
         await execute_query(
             """
-            INSERT INTO statistic_cards 
+            INSERT INTO statistics_cards 
             (card, daily_count, weekly_count, monthly_count, total_count,
              last_daily_update, last_weekly_update, last_monthly_update)
             VALUES ($1, 1, 1, 1, 1, $2, $3, $4)
             """,
-            (num, today, week_start, month_start)
+            (name, today, week_start, month_start)
         )
 
 

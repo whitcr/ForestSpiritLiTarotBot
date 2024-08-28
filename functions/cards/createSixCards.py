@@ -1,3 +1,5 @@
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 from database import execute_query
 
 from PIL import Image, ImageDraw, ImageFilter
@@ -9,7 +11,17 @@ from functions.cards.create import get_path_cards, get_path_background, get_grad
 from constants import FONT_S
 
 
-async def send_image_six_cards(bot, message, username, image, theme):
+async def create_meaning_keyboard(theme):
+    buttons = [
+        [InlineKeyboardButton(text = "Трактовка", callback_data = f"get_day_spread_meaning_{theme}")]
+    ]
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard = buttons)
+
+    return keyboard
+
+
+async def send_image_six_cards(bot, message, username, image, theme=None):
     para = textwrap.wrap(f"for {username}", width = 30)
     current_h, pad = 1050, 10
     draw_text = ImageDraw.Draw(image)
@@ -19,22 +31,25 @@ async def send_image_six_cards(bot, message, username, image, theme):
         current_h += h + 110
 
     reply_to_message_id = message.reply_to_message.message_id if message.reply_to_message else message.message_id
+    keyboard = await create_meaning_keyboard(theme)
+
     msg = await bot.send_photo(message.chat.id, photo = await get_buffered_image(image),
-                               reply_to_message_id = reply_to_message_id, reply_markup = None)
+                               reply_to_message_id = reply_to_message_id, reply_markup = keyboard)
     file_id = msg.photo[-1].file_id
 
-    if theme == 'недели':
-        theme = "week"
-    elif theme == 'месяца':
-        theme = "month"
+    if theme is not None:
+        if theme == 'недели':
+            theme = "week"
+        elif theme == 'месяца':
+            theme = "month"
 
-    table = f"spreads_{theme}"
-    await execute_query(
-        f"insert into {table} (user_id, file_id) values ($1, $2)", (message.reply_to_message.from_user.id,
-                                                                    file_id))
+        table = f"spreads_{theme}"
+        await execute_query(f"UPDATE {table} SET file_id = $1 WHERE user_id = $2",
+                            (file_id, message.reply_to_message.from_user.id,
+                             ))
 
 
-async def create_image_six_cards(user_id):
+async def create_image_six_cards(user_id, theme=None):
     choice = await get_choice_spread(user_id)
     num = await get_random_num(choice, 8, user_id)
     card_paths = [await get_path_cards(choice, num[i]) for i in range(8)]
@@ -61,15 +76,30 @@ async def create_image_six_cards(user_id):
     background = background.filter(ImageFilter.GaussianBlur(radius = 3))
     image = Image.blend(image, background, alpha = .3)
 
+    if theme is not None:
+        if theme == 'недели':
+            theme = "week"
+        elif theme == 'месяца':
+            theme = "month"
+
+        table = f"spreads_{theme}"
+        await execute_query(
+            f"insert into {table} (p1, p2, p3, n1, n2, n3, threat, advice, user_id) "
+            f"values ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+            (num[0], num[1], num[2], num[3], num[4], num[5], num[6], num[7], user_id))
+
     # if choice in ['deviantoom', 'manara']:
-    card_positions = [(card_paths[0], 4 * p + 3 * w, x),
-                      (card_paths[1], 2 * p + w, x),
-                      (card_paths[2], 3 * p + 2 * w, x),
-                      (card_paths[3], 4 * p + 3 * w, 560),
-                      (card_paths[4], 3 * p + 2 * w, 560),
-                      (card_paths[5], 2 * p + w, 560),
-                      (card_paths[6], 5 * p + 4 * w + ll, 300),
-                      (card_paths[7], 100, 300)]
+    card_positions = [
+        (card_paths[0], 2 * p + w, x),
+        (card_paths[1], 3 * p + 2 * w, x),
+        (card_paths[2], 4 * p + 3 * w, x),
+
+        (card_paths[3], 2 * p + w, 560),
+        (card_paths[4], 3 * p + 2 * w, 560),
+        (card_paths[5], 4 * p + 3 * w, 560),
+
+        (card_paths[6], 5 * p + 4 * w + ll, 300),  # threat
+        (card_paths[7], 100, 300)]  # advice
 
     for i, (card_path, x_coord, y_coord) in enumerate(card_positions):
         card = Image.open(card_path)

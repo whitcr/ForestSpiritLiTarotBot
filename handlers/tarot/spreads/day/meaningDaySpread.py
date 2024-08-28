@@ -39,3 +39,36 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     message = await get_cards_day_meanings(text)
 
     await call.message.answer(message)
+
+
+@router.callback_query(IsReply(), F.data.startswith("get_time_spread_meaning_"), SubscriptionLevel(1))
+@typing_animation_decorator(initial_message = "Трактую")
+async def process_callback_day_spread_meaning(call: types.CallbackQuery):
+    await call.answer()
+    theme = call.data.split('_')[-1]
+    table = f"spreads_{theme}"
+
+    nums = await execute_select_all(
+        f"SELECT p1, p2, p3, n1, n2, n3, advice, threat "
+        f"FROM {table} WHERE  user_id = $2",
+        (call.from_user.id,)
+    )
+
+    cards = []
+    for i in nums[0]:
+        name = await execute_select("SELECT name FROM cards WHERE number = $1", (i,))
+        cards.append(name)
+
+    if theme == 'week':
+        theme = "недели"
+    elif theme == 'month':
+        theme = "месяца"
+
+    text = (f"Позитивные события {theme}: {cards[0]},{cards[1]}, {cards[2]}\n"
+            f"Негативные события {theme}: {cards[3]},{cards[4]}, {cards[5]}\n"
+            f"Угроза {theme}: {cards[6]}\n"
+            f"Совет {theme}: {cards[7]}\n")
+
+    message = await get_cards_day_meanings(text)
+
+    await call.message.answer(message)
