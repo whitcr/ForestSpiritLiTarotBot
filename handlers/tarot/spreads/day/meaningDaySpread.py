@@ -46,11 +46,6 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
 async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     await call.answer()
     theme = call.data.split('_')[-1]
-    if theme == 'week':
-        theme = "недели"
-    elif theme == 'month':
-        theme = "месяца"
-
     table = f"spreads_{theme}"
 
     nums = await execute_select_all(
@@ -63,6 +58,11 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     for i in nums[0]:
         name = await execute_select("SELECT name FROM cards WHERE number = $1", (i,))
         cards.append(name)
+
+    if theme == 'week':
+        theme = "недели"
+    elif theme == 'month':
+        theme = "месяца"
 
     text = (f"Позитивные события {theme}: {cards[0]},{cards[1]}, {cards[2]}\n"
             f"Негативные события {theme}: {cards[3]},{cards[4]}, {cards[5]}\n"

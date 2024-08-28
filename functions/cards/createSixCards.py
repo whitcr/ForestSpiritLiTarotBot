@@ -12,6 +12,11 @@ from constants import FONT_S
 
 
 async def create_meaning_keyboard(theme):
+    if theme == 'недели':
+        theme = "week"
+    elif theme == 'месяца':
+        theme = "month"
+
     buttons = [
         [InlineKeyboardButton(text = "Трактовка", callback_data = f"get_time_spread_meaning_{theme}")]
     ]
