@@ -50,7 +50,7 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
 
     nums = await execute_select_all(
         f"SELECT p1, p2, p3, n1, n2, n3, advice, threat "
-        f"FROM {table} WHERE  user_id = $2",
+        f"FROM {table} WHERE  user_id = $1",
         (call.from_user.id,)
     )
 
