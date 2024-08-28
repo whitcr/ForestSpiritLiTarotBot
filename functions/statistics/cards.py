@@ -31,7 +31,7 @@ async def get_statistic_card(num: Union[int, str]):
 
     if result:
         (daily_count, weekly_count, monthly_count, total_count,
-         last_daily_update, last_weekly_update, last_monthly_update) = result
+         last_daily_update, last_weekly_update, last_monthly_update) = result[0]
 
         if last_daily_update != today:
             daily_count = 0
