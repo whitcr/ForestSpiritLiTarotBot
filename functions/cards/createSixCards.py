@@ -13,7 +13,7 @@ from constants import FONT_S
 
 async def create_meaning_keyboard(theme):
     buttons = [
-        [InlineKeyboardButton(text = "Трактовка", callback_data = f"get_day_spread_meaning_{theme}")]
+        [InlineKeyboardButton(text = "Трактовка", callback_data = f"get_time_spread_meaning_{theme}")]
     ]
 
     keyboard = InlineKeyboardMarkup(inline_keyboard = buttons)
