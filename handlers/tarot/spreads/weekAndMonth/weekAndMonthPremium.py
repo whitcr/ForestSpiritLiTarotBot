@@ -16,6 +16,8 @@ router = Router()
 # @router.message(F.text.lower().startswith("тест"))
 # @typing_animation_decorator(initial_message = "Раскладываю")
 async def get_week_spread_premium(user_id, bot, spread_name):
+    spread_name = "месяца" if spread_name == "month" else "недели"
+
     THEME_MAP = ["Финансы", "Личная Жизнь", "Эмоции"]
     texts = []
     images = []
