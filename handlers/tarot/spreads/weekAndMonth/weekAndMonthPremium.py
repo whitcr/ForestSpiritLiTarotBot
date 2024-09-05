@@ -1,5 +1,6 @@
 from aiogram.types import BufferedInputFile
 
+from database import execute_query
 from functions.cards.createThreeCards import get_image_three_cards_wb
 from functions.messages.messages import typing_animation_decorator
 from aiogram import Router, F
@@ -55,7 +56,11 @@ async def get_week_spread_premium(user_id, bot, spread_name):
 
     create_pdf(pdf_buffer, texts, images, background_image = background_image)
 
-    await bot.send_document(user_id, BufferedInputFile(pdf_buffer.getvalue(), filename = f"Расклад {spread_name}.pdf"))
+    message = await bot.send_document(user_id,
+                                      BufferedInputFile(pdf_buffer.getvalue(), filename = f"Расклад {spread_name}.pdf"))
+    file_id = message.document.file_id
+    table = f"spreads_{spread_name}"
+    await execute_query(f"INSERT INTO {table} (user_id, file_id) VALUES (&1, &2)", (user_id, file_id))
 
     for img in images:
         img.close()
