@@ -1,4 +1,4 @@
-from aiogram.types import CallbackQuery, BufferedInputFile
+from aiogram.types import CallbackQuery, BufferedInputFile, InputFile
 from database import execute_query, execute_select
 from filters.baseFilters import IsReply
 from filters.subscriptions import get_subscription
@@ -32,7 +32,7 @@ async def get_month_week_spread(bot, message, spread_name):
         else:
 
             await bot.send_message(message.chat.id, text = "Вот твой расклад.")
-            await bot.send_document(user_id, result)
+            await bot.send_document(user_id, InputFile(result))
 
         return
 
