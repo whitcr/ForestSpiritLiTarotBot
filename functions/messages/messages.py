@@ -28,10 +28,10 @@ def typing_animation_decorator(initial_message):
             try:
                 message = args[0]
                 bot = message.bot
-            except AttributeError:
+            except:
                 message = args[1]
                 bot = message.bot
-                
+
             chat_id = await get_chat_id(message)
 
             typing_animation_task = asyncio.create_task(
