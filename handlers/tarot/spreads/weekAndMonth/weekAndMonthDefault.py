@@ -22,7 +22,7 @@ async def get_month_week_spread(bot, message, spread_name):
     spread_name = spread_name.split('_')[0]
 
     is_booster = await execute_select("SELECT boosted FROM users WHERE user_id = $1", (user_id,))
-    subscription = await get_subscription(is_booster, '2')
+    subscription = await get_subscription(user_id, '2')
 
     if subscription:
         result = await execute_select("SELECT file_id FROM spreads_week WHERE user_id = $1", (user_id,))
