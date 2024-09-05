@@ -32,7 +32,7 @@ async def get_month_week_spread(bot, message, spread_name):
         else:
             file_id = result[0]
             await bot.send_message(message.chat.id, text = "Вот твой расклад.")
-            await bot.send_document(user_id, file_id, filename = "Расклад.pdf")
+            await bot.send_document(user_id, file_id)
 
         return
 
