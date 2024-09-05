@@ -14,7 +14,7 @@ router = Router()
 
 
 # @router.message(F.text.lower().startswith("тест"))
-@typing_animation_decorator(initial_message = "Раскладываю")
+# @typing_animation_decorator(initial_message = "Раскладываю")
 async def get_week_spread_premium(user_id, bot, spread_name):
     THEME_MAP = ["Финансы", "Личная Жизнь", "Эмоции"]
     texts = []
@@ -49,7 +49,7 @@ async def get_week_spread_premium(user_id, bot, spread_name):
 
     pdf_buffer = BytesIO()
 
-    background_image = "./cards/tech/pdf/bg_pdf.png"
+    background_image = "./images/tech/pdf/bg_pdf.png"
 
     create_pdf(pdf_buffer, texts, images, background_image = background_image)
 
