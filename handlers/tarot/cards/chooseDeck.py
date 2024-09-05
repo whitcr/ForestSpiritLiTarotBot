@@ -25,6 +25,13 @@ async def choose_deck_menu(message: types.Message):
                         reply_markup = keyboard)
 
 
+@router.callback_query(F.data.startswith("change_deck"))
+async def choose_deck_menu_cb(call: types.CallbackQuery, bot: Bot):
+    keyboard = await generate_decks_keyboard()
+    await bot.send_message(chat_id = call.message.chat.id, text = "— Выберите колоду, на которой хотите гадать: ",
+                           reply_markup = keyboard)
+
+
 async def set_user_cards_type(bot: Bot, call: types.CallbackQuery, cards_type, cards_name):
     user_id = call.from_user.id
     await execute_query(

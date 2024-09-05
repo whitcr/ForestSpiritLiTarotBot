@@ -1,5 +1,6 @@
 from aiogram import Router
 from database import execute_select, execute_select_all, execute_query
+from filters.subscriptions import get_subscription
 from functions.cards.create import text_size, get_buffered_image
 from handlers.tarot.spreads.weekAndMonth.weekAndMonthDefault import create_image_six_cards
 from constants import FONT_S, FONT_M
@@ -18,11 +19,11 @@ async def month_card_follow_schedule(bot):
         user_id = user_id_tuple[0]
         try:
             username = await execute_select("select username from users where user_id=$1;", (user_id,))
-            sub = await execute_select("select sunscription from users where user_id=$1;", (user_id,))
+            subscription = await get_subscription(user_id, '2')
             is_booster = await execute_select("SELECT boosted FROM users WHERE user_id = $1", (user_id,))
 
-            if is_booster or sub >= 2:
-                await get_week_spread_premium(user_id, bot)
+            if is_booster or subscription:
+                await get_week_spread_premium(user_id, bot, "месяца")
             else:
                 image, cards = await create_image_six_cards(user_id)
                 draw_text = ImageDraw.Draw(image)

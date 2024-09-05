@@ -15,24 +15,24 @@ router = Router()
 
 # @router.message(F.text.lower().startswith("тест"))
 @typing_animation_decorator(initial_message = "Раскладываю")
-async def get_week_spread_premium(user_id, bot):
+async def get_week_spread_premium(user_id, bot, spread_name):
     THEME_MAP = ["Финансы", "Личная Жизнь", "Эмоции"]
     texts = []
     images = []
 
     image, num = await get_image_three_cards_wb(user_id)
     draw_text = ImageDraw.Draw(image)
-    draw_text.text((220, 80), f"Карта недели", fill = '#1A1A1A', font = P_FONT_L)
-    draw_text.text((810, 80), f"Угроза недели", fill = '#1A1A1A', font = P_FONT_L)
-    draw_text.text((1440, 80), f"Совет недели", fill = '#1A1A1A', font = P_FONT_L)
+    draw_text.text((220, 80), f"Карта {spread_name}", fill = '#1A1A1A', font = P_FONT_L)
+    draw_text.text((810, 80), f"Угроза {spread_name}", fill = '#1A1A1A', font = P_FONT_L)
+    draw_text.text((1440, 80), f"Совет {spread_name}", fill = '#1A1A1A', font = P_FONT_L)
 
     temp_img = BytesIO()
     image.save(temp_img, format = 'PNG')
     temp_img.seek(0)
     images.append(temp_img)
 
-    text = await time_spread(num, "неделю")
-    text = f"<b>РАСКЛАД НА НЕДЕЛЮ</b>\n\n{text}"
+    text = await time_spread(num, f"{spread_name}")
+    text = f"<b>РАСКЛАД {spread_name}</b>\n\n{text}"
     texts.append(text)
 
     for THEME in THEME_MAP:
@@ -43,8 +43,8 @@ async def get_week_spread_premium(user_id, bot):
         temp_img.seek(0)
         images.append(temp_img)
 
-        text = await time_spread(num, "неделю")
-        text = f"<b>{THEME.upper()} на неделю</b>\n\n{text}"
+        text = await time_spread(num, f"{spread_name}")
+        text = f"<b>{THEME.upper()} {spread_name.upper()}</b>\n\n{text}"
         texts.append(text)
 
     pdf_buffer = BytesIO()
@@ -53,7 +53,7 @@ async def get_week_spread_premium(user_id, bot):
 
     create_pdf(pdf_buffer, texts, images, background_image = background_image)
 
-    await bot.send_document(user_id, BufferedInputFile(pdf_buffer.getvalue(), filename = "spread.pdf"))
+    await bot.send_document(user_id, BufferedInputFile(pdf_buffer.getvalue(), filename = f"Расклад {spread_name}.pdf"))
 
     for img in images:
         img.close()

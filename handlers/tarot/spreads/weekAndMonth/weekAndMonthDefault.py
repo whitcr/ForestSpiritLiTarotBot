@@ -1,6 +1,7 @@
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, BufferedInputFile
 from database import execute_query, execute_select
 from filters.baseFilters import IsReply
+from filters.subscriptions import get_subscription
 from functions.cards.createSixCards import send_image_six_cards, create_image_six_cards
 from functions.messages.messages import get_reply_message, typing_animation_decorator
 from handlers.tarot.spreads.weekAndMonth.weekAndMonthPremium import get_week_spread_premium
@@ -21,25 +22,19 @@ async def get_month_week_spread(bot, message, spread_name):
     spread_name = spread_name.split('_')[0]
 
     is_booster = await execute_select("SELECT boosted FROM users WHERE user_id = $1", (user_id,))
-    subscription = await execute_select("SELECT subscription FROM users WHERE user_id = $1", (user_id,))
+    subscription = await get_subscription(is_booster, '2')
 
-    if is_booster >= 1 or subscription == 'premium' or 'premiumPlus':
-        if spread_name == "week" and is_booster >= 1:
-            if message.chat.type == 'private':
-                result = await execute_select("SELECT boosted FROM spreads_week WHERE user_id = $1", (user_id,))
+    if subscription:
+        result = await execute_select("SELECT file_id FROM spreads_week WHERE user_id = $1", (user_id,))
 
-                if result == 0:
-                    await execute_query("INSERT INTO spreads_week (user_id, boosted) VALUES ($1, $2)", (user_id, True))
-                    await get_week_spread_premium(bot, user_id)
-                else:
-                    await bot.send_message(message.chat.id,
-                                           text = "На этой неделе ты уже сделал свой премиум "
-                                                  "расклад на неделю, жди следующей.")
-            else:
-                await bot.send_message(message.chat.id,
-                                       text = "Так как твой расклад премиальный, используй команду у меня в ЛС",
-                                       reply_to_message_id = await get_reply_message(message))
-            return
+        if result is None:
+            await get_week_spread_premium(bot, user_id, spread_name)
+        else:
+            file_id = result[0]
+            await bot.send_message(message.chat.id, text = "Вот твой расклад.")
+            await bot.send_document(user_id, file_id, filename = "Расклад.pdf")
+
+        return
 
     table = f"spreads_{spread_name}"
     file_id = await execute_select(f"SELECT file_id FROM {table} WHERE user_id = '{user_id}'")
