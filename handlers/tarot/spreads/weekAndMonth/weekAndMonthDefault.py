@@ -26,13 +26,12 @@ async def get_month_week_spread(bot, message, spread_name):
 
     if subscription:
         result = await execute_select("SELECT file_id FROM spreads_week WHERE user_id = $1", (user_id,))
-        print(result)
         if result is None:
             await get_week_spread_premium(bot, user_id, spread_name)
         else:
-
-            await bot.send_message(message.chat.id, text = "Вот твой расклад.")
-            await bot.send_document(user_id, InputFile(result))
+            file_id = await execute_select("SELECT file_id FROM spreads_week WHERE user_id = $1", (user_id,))
+            await bot.send_document(user_id, document = file_id, caption = "Вот твой расклад.",
+                                    reply_to_message_id = message.message_id)
 
         return
 
