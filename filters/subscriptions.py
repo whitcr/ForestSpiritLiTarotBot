@@ -31,4 +31,4 @@ class SubscriptionLevel(BaseFilter):
 
 async def get_subscription(user_id, subscription):
     result = await execute_select("SELECT subscription FROM users WHERE user_id = $1", (user_id,))
-    return result >= subscription
+    return result >= int(subscription)
