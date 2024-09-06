@@ -21,12 +21,13 @@ router = Router()
 async def get_month_week_spread(bot, message, spread_name):
     user_id = message.from_user.id
     reply_to_message_id = message.message_id
-    table = f"spreads_{spread_name}"
+
     if user_id == bot.id:
         reply_to_message_id = message.reply_to_message.message_id
         user_id = message.reply_to_message.from_user.id
 
     spread_name = spread_name.split('_')[0]
+    table = f"spreads_{spread_name}"
 
     is_booster = await execute_select("SELECT boosted FROM users WHERE user_id = $1", (user_id,))
     subscription = await get_subscription(user_id, '2')
