@@ -2,7 +2,7 @@ from aiogram.types import BufferedInputFile
 
 from database import execute_query
 from functions.cards.createThreeCards import get_image_three_cards_wb
-from functions.messages.messages import typing_animation_decorator
+from functions.messages.messages import typing_animation_decorator, delete_message
 from aiogram import Router, F
 from constants import P_FONT_L
 from functions.gpt.requests import time_spread
@@ -16,7 +16,13 @@ router = Router()
 
 # @router.message(F.text.lower().startswith("тест"))
 # @typing_animation_decorator(initial_message = "Раскладываю")
-async def get_week_spread_premium(user_id, bot, spread_name):
+async def get_week_spread_premium(user_id, bot, message, spread_name):
+    if message:
+        msg = await bot.send_message(user_id, "Раскладываю, это займет некоторое время.",
+                                     reply_to_message_id = message.message_id)
+        await delete_message(msg, 30)
+
+    table = f"spreads_{spread_name}"
     spread_name = "месяца" if spread_name == "month" else "недели"
 
     THEME_MAP = ["Финансы", "Личная Жизнь", "Эмоции"]
@@ -59,7 +65,7 @@ async def get_week_spread_premium(user_id, bot, spread_name):
     message = await bot.send_document(user_id,
                                       BufferedInputFile(pdf_buffer.getvalue(), filename = f"Расклад {spread_name}.pdf"))
     file_id = message.document.file_id
-    table = f"spreads_{spread_name}"
+
     await execute_query(f"INSERT INTO {table} (user_id, file_id) VALUES (&1, &2)", (user_id, file_id))
 
     for img in images:

@@ -23,7 +23,7 @@ async def month_card_follow_schedule(bot):
             is_booster = await execute_select("SELECT boosted FROM users WHERE user_id = $1", (user_id,))
 
             if is_booster or subscription:
-                await get_week_spread_premium(user_id, bot, "месяца")
+                await get_week_spread_premium(user_id, bot, False, "месяца")
             else:
                 image, cards = await create_image_six_cards(user_id)
                 draw_text = ImageDraw.Draw(image)
