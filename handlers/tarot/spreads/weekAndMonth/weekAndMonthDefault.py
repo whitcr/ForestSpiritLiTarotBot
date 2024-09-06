@@ -21,7 +21,7 @@ router = Router()
 async def get_month_week_spread(bot, message, spread_name):
     user_id = message.from_user.id
     reply_to_message_id = message.message_id
-
+    table = f"spreads_{spread_name}"
     if user_id == bot.id:
         reply_to_message_id = message.reply_to_message.message_id
         user_id = message.reply_to_message.from_user.id
@@ -32,7 +32,7 @@ async def get_month_week_spread(bot, message, spread_name):
     subscription = await get_subscription(user_id, '2')
 
     if subscription:
-        result = await execute_select("SELECT file_id FROM spreads_week WHERE user_id = $1", (user_id,))
+        result = await execute_select(f"SELECT file_id FROM {table} WHERE user_id = $1", (user_id,))
         if result is False:
             await get_week_spread_premium(user_id, bot, message, spread_name)
         else:
@@ -41,7 +41,6 @@ async def get_month_week_spread(bot, message, spread_name):
 
         return
 
-    table = f"spreads_{spread_name}"
     file_id = await execute_select(f"SELECT file_id FROM {table} WHERE user_id = '{user_id}'")
 
     if file_id:

@@ -4,7 +4,7 @@ from aiogram import Router
 from database import execute_select
 from functions.gpt.prompts import TAROT_READING_PROMPT, TAROT_ASSISTANT_SYSTEM_PROMPT, TAROT_DAY_READING_PROMPT,\
     TAROT_READING_DETAILS_PROMPT, DAILY_QUESTION_PROMPT, RANDOM_CARD_PROMPT, THEMED_TIME_SPREAD_PROMPT,\
-    TAROT_ENERGY_DAY_PROMPT
+    TAROT_ENERGY_DAY_PROMPT, TIME_SPREAD_PROMPT_THEME
 
 from openai import AsyncOpenAI
 
@@ -85,7 +85,7 @@ async def time_spread(card_numbers, time_period, theme=None):
     ]
 
     if theme is None:
-        text = THEMED_TIME_SPREAD_PROMPT.format(
+        text = TIME_SPREAD_PROMPT_THEME.format(
             time = time_period, cards = cards
         )
     else:

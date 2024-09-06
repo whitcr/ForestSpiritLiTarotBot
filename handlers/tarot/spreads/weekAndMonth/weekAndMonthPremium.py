@@ -47,7 +47,7 @@ async def get_week_spread_premium(user_id, bot, message, spread_name):
         temp_img.seek(0)
         images.append(temp_img)
 
-        text = await time_spread(num, f"{spread_name}")
+        text = await time_spread(num, f"{spread_name}", THEME)
         text = f"<b>{THEME.upper()} {spread_name.upper()}</b>\n\n{text}"
         texts.append(text)
 
