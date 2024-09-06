@@ -17,8 +17,15 @@ from keyboard import create_week_spread_keyboard, create_month_spread_keyboard
 router = Router()
 
 
+@typing_animation_decorator(initial_message = "Раскладываю")
 async def get_month_week_spread(bot, message, spread_name):
     user_id = message.from_user.id
+    reply_to_message_id = message.message_id
+
+    if user_id == bot.id:
+        reply_to_message_id = message.reply_to_message.message_id
+        user_id = message.reply_to_message.from_user.id
+
     spread_name = spread_name.split('_')[0]
 
     is_booster = await execute_select("SELECT boosted FROM users WHERE user_id = $1", (user_id,))
@@ -30,7 +37,7 @@ async def get_month_week_spread(bot, message, spread_name):
             await get_week_spread_premium(user_id, bot, message, spread_name)
         else:
             await bot.send_document(user_id, document = result, caption = "Вот твой расклад.",
-                                    reply_to_message_id = message.message_id)
+                                    reply_to_message_id = reply_to_message_id)
 
         return
 
@@ -56,7 +63,6 @@ async def get_month_week_spread_cb(bot, call: types.CallbackQuery):
     await get_month_week_spread(bot, call.message, f"{spread_name}_callback")
 
 
-@typing_animation_decorator(initial_message = "Раскладываю")
 async def create_spread_image(bot, call: CallbackQuery, spread_type: str):
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
     image, cards = await create_image_six_cards(call.from_user.id, spread_type)
