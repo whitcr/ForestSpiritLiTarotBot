@@ -26,6 +26,7 @@ spreads_keyboard = builder.as_markup()
 router = Router()
 
 
+@typing_animation_decorator(initial_message = "Раскладываю")
 async def draw_spread(image, spread_name):
     draw_text = ImageDraw.Draw(image)
     current_h, pad = 80, 715
@@ -104,7 +105,6 @@ async def get_spread(message: types.Message, bot: Bot):
 
 
 @router.callback_query(IsReply(), lambda call: call.data in SPREADS.keys())
-@typing_animation_decorator(initial_message = "Раскладываю")
 async def spreads_callback(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     try:
