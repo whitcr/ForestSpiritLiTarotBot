@@ -17,11 +17,6 @@ router = Router()
 # @router.message(F.text.lower().startswith("тест"))
 # @typing_animation_decorator(initial_message = "Раскладываю")
 async def get_week_spread_premium(user_id, bot, message, spread_name):
-    if message:
-        msg = await bot.send_message(user_id, "Раскладываю, это займет некоторое время.",
-                                     reply_to_message_id = message.message_id)
-        await delete_message(msg, 60)
-
     table = f"spreads_{spread_name}"
     spread_name = "месяца" if spread_name == "month" else "недели"
 
