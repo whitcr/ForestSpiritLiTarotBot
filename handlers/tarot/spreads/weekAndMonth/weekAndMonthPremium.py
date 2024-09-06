@@ -20,7 +20,7 @@ async def get_week_spread_premium(user_id, bot, message, spread_name):
     if message:
         msg = await bot.send_message(user_id, "Раскладываю, это займет некоторое время.",
                                      reply_to_message_id = message.message_id)
-        await delete_message(msg, 30)
+        await delete_message(msg, 60)
 
     table = f"spreads_{spread_name}"
     spread_name = "месяца" if spread_name == "month" else "недели"
@@ -66,7 +66,7 @@ async def get_week_spread_premium(user_id, bot, message, spread_name):
                                       BufferedInputFile(pdf_buffer.getvalue(), filename = f"Расклад {spread_name}.pdf"))
     file_id = message.document.file_id
 
-    await execute_query(f"INSERT INTO {table} (user_id, file_id) VALUES (&1, &2)", (user_id, file_id))
+    await execute_query(f"INSERT INTO {table} (user_id, file_id) VALUES ($1, $2)", (user_id, file_id))
 
     for img in images:
         img.close()
