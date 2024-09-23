@@ -70,9 +70,10 @@ async def get_week_spread_premium(user_id, bot, message, spread_name):
     pdf_buffer.close()
 
 
-@router.callback_query(IsReply(), F.data == 'create_month_premium_spread' or F.data == 'create_week_premium_spread',
+@router.callback_query(IsReply(), F.data.in_({'create_week_premium_spread', 'create_month_premium_spread'}),
                        SubscriptionLevel(3))
-async def get_month_premium_spread_image(call: CallbackQuery, bot: Bot):
+@typing_animation_decorator(initial_message = "Раскладываю и трактую, ждите")
+async def get_premium_spread_image(call: CallbackQuery, bot: Bot):
     spread_name = call.data.split("_")[1]
 
     spread_name = spread_name.split('_')[0]
@@ -85,15 +86,10 @@ async def get_month_premium_spread_image(call: CallbackQuery, bot: Bot):
         reply_to_message_id = call.message.reply_to_message.message_id
         user_id = call.message.reply_to_message.from_user.id
 
-    is_booster = await execute_select("SELECT boosted FROM users WHERE user_id = $1", (user_id,))
-    subscription = await get_subscription(user_id, '2')
-
-    if subscription or is_booster:
-        result = await execute_select(f"SELECT file_id FROM {table} WHERE user_id = $1", (user_id,))
-        if result is False:
-            await get_week_spread_premium(user_id, bot, call.message, spread_name)
-        else:
-            await bot.send_document(user_id, document = result, caption = "Вот твой расклад.",
-                                    reply_to_message_id = reply_to_message_id)
-
-        return
+    result = await execute_select(f"SELECT file_id FROM {table} WHERE user_id = $1", (user_id,))
+    if result is False:
+        await get_week_spread_premium(user_id, bot, call.message, spread_name)
+    else:
+        await bot.send_document(user_id, document = result, caption = "Вот твой расклад.",
+                                reply_to_message_id = reply_to_message_id)
+    return
