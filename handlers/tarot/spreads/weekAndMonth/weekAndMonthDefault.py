@@ -1,7 +1,7 @@
 from aiogram.types import CallbackQuery, BufferedInputFile, InputFile
 from database import execute_query, execute_select
 from filters.baseFilters import IsReply
-from filters.subscriptions import get_subscription
+from filters.subscriptions import get_subscription, SubscriptionLevel
 from functions.cards.createSixCards import send_image_six_cards, create_image_six_cards
 from functions.messages.messages import get_reply_message, typing_animation_decorator
 from handlers.tarot.spreads.weekAndMonth.weekAndMonthPremium import get_week_spread_premium
@@ -20,27 +20,12 @@ router = Router()
 @typing_animation_decorator(initial_message = "Раскладываю")
 async def get_month_week_spread(bot, message, spread_name):
     user_id = message.from_user.id
-    reply_to_message_id = message.message_id
 
     if user_id == bot.id:
-        reply_to_message_id = message.reply_to_message.message_id
         user_id = message.reply_to_message.from_user.id
 
     spread_name = spread_name.split('_')[0]
     table = f"spreads_{spread_name}"
-
-    is_booster = await execute_select("SELECT boosted FROM users WHERE user_id = $1", (user_id,))
-    subscription = await get_subscription(user_id, '2')
-
-    if subscription:
-        result = await execute_select(f"SELECT file_id FROM {table} WHERE user_id = $1", (user_id,))
-        if result is False:
-            await get_week_spread_premium(user_id, bot, message, spread_name)
-        else:
-            await bot.send_document(user_id, document = result, caption = "Вот твой расклад.",
-                                    reply_to_message_id = reply_to_message_id)
-
-        return
 
     file_id = await execute_select(f"SELECT file_id FROM {table} WHERE user_id = '{user_id}'")
 
@@ -78,7 +63,7 @@ async def create_spread_image(bot, call: CallbackQuery, spread_type: str):
     await send_image_six_cards(bot, call.message, call.from_user.first_name, image, spread_type)
 
 
-@router.callback_query(IsReply(), F.data == 'create_month_spread')
+@router.callback_query(IsReply(), F.data == 'create_month_spread', SubscriptionLevel(3))
 async def get_month_spread_image(call: CallbackQuery, bot: Bot):
     await create_spread_image(bot, call, 'месяца')
 

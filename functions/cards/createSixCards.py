@@ -9,6 +9,7 @@ from functions.cards.create import get_path_cards, get_path_background, get_grad
     get_random_num,\
     get_colors_background, text_size, get_buffered_image
 from constants import FONT_S
+from functions.messages.messages import get_reply_message
 
 
 async def create_meaning_keyboard(theme):
@@ -35,11 +36,10 @@ async def send_image_six_cards(bot, message, username, image, theme=None):
         draw_text.text(((1910 - w) / 2, current_h), line, font = FONT_S)
         current_h += h + 110
 
-    reply_to_message_id = message.reply_to_message.message_id if message.reply_to_message else message.message_id
-    keyboard = await create_meaning_keyboard(theme)
-
     msg = await bot.send_photo(message.chat.id, photo = await get_buffered_image(image),
-                               reply_to_message_id = reply_to_message_id, reply_markup = keyboard)
+                               reply_to_message_id = await get_reply_message(message),
+                               reply_markup = await create_meaning_keyboard(theme) if await get_choice_spread(
+                                   message.reply_to_message.from_user.id) is 'raider' else None)
     file_id = msg.photo[-1].file_id
 
     if theme is not None:

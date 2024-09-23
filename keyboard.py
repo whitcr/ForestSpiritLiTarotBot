@@ -21,13 +21,15 @@ dop_card_keyboard = InlineKeyboardMarkup(inline_keyboard = dop_card_keyboard_but
 # КНОПКИ ДЛЯ РАСКЛАДА НА МЕСЯЦ И НЕДЕЛЮ
 create_month_spread_buttons = [
     [InlineKeyboardButton(text = "Сделать расклад!", callback_data = "create_month_spread")],
-    [InlineKeyboardButton(text = "Сменить колоду", callback_data = "change_deck")]
+    [InlineKeyboardButton(text = "Сменить колоду", callback_data = "change_deck")],
+    [InlineKeyboardButton(text = "Премиум расклад", callback_data = "create_month_premium_spread")]
 ]
 create_month_spread_keyboard = InlineKeyboardMarkup(inline_keyboard = create_month_spread_buttons)
 
 create_week_spread_buttons = [
     [InlineKeyboardButton(text = "Сделать расклад!", callback_data = "create_week_spread")],
-    [InlineKeyboardButton(text = "Сменить колоду", callback_data = "change_deck")]
+    [InlineKeyboardButton(text = "Сменить колоду", callback_data = "change_deck")],
+    [InlineKeyboardButton(text = "Премиум расклад", callback_data = "create_week_premium_spread")]
 ]
 create_week_spread_keyboard = InlineKeyboardMarkup(inline_keyboard = create_week_spread_buttons)
 
