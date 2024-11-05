@@ -30,7 +30,12 @@ async def get_month_week_spread(bot, message, spread_name):
     file_id = await execute_select(f"SELECT file_id FROM {table} WHERE user_id = '{user_id}'")
 
     if file_id:
-        await bot.send_photo(message.chat.id, photo = file_id, reply_to_message_id = message.message_id)
+        try:
+            await bot.send_photo(message.chat.id, photo = file_id, caption = "Вот твой расклад.",
+                                 reply_to_message_id = message.message_id)
+        except:
+            await bot.send_document(user_id, document = file_id, caption = "Вот твой расклад.",
+                                    reply_to_message_id = message.message_id)
 
     else:
         choice = await get_choice_spread(message.from_user.id)
