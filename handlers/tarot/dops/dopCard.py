@@ -54,7 +54,7 @@ async def create_keyboard_dops(nums, position, spread_name=None):
                                pcard_3 = position[2], spread_name = spread_name if spread_name else None).pack()
         for i in range(3)
     ]
-
+    print(position)
     empty_button = []
     for i, element in enumerate(position):
         if element > 3:
@@ -197,27 +197,33 @@ async def get_image_with_dops(api_token, user_id, nums, card_position, dop_posit
                         w, h = text_size(line, FONT_L)
                         draw_text.text(((pad - w) / 2, current_h), line, font = FONT_L)
 
-    positions_map = {
-        (2, 1): (220, 730),
-        (3, 1): (410, 730),
-        (1, 1): (30, 730),
-        (2, 2): (640 + 220, 730),
-        (3, 2): (640 + 410, 730),
-        (1, 2): (640 + 30, 730),
-        (2, 3): (640 * 2 + 230, 730),
-        (3, 3): (640 * 2 + 420, 730),
-        (1, 3): (640 * 2 + 40, 730),
-    }
-
-    if (dop_positions[0], card_position) in positions_map:
-        image.paste(dop, positions_map[(dop_positions[0], card_position)])
+    if dop_positions[0] == 1 and card_position == 1:
         dop_positions[0] += 1
-    elif (dop_positions[1], card_position) in positions_map:
-        image.paste(dop, positions_map[(dop_positions[1], card_position)])
+        image.paste(dop, (220, 730))
+    elif dop_positions[0] == 2 and card_position == 1:
+        dop_positions[0] += 1
+        image.paste(dop, (410, 730))
+    elif dop_positions[0] == 3 and card_position == 1:
+        dop_positions[0] += 1
+        image.paste(dop, (30, 730))
+    elif dop_positions[1] == 1 and card_position == 2:
         dop_positions[1] += 1
-    elif (dop_positions[2], card_position) in positions_map:
-        image.paste(dop, positions_map[(dop_positions[2], card_position)])
+        image.paste(dop, (640 + 220, 730))
+    elif dop_positions[1] == 2 and card_position == 2:
+        dop_positions[1] += 1
+        image.paste(dop, (640 + 410, 730))
+    elif dop_positions[1] == 3 and card_position == 2:
+        dop_positions[1] += 1
+        image.paste(dop, (640 + 30, 730))
+    elif dop_positions[2] == 1 and card_position == 3:
         dop_positions[2] += 1
+        image.paste(dop, (640 * 2 + 230, 730))
+    elif dop_positions[2] == 2 and card_position == 3:
+        dop_positions[2] += 1
+        image.paste(dop, (640 * 2 + 420, 730))
+    elif dop_positions[2] == 3 and card_position == 3:
+        dop_positions[2] += 1
+        image.paste(dop, (640 * 2 + 40, 730))
 
     return image, dop_positions, dop_num, card_position
 
