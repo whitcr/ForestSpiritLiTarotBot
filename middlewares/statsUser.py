@@ -3,7 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from typing import Dict, Any, Callable, Awaitable, Union
 import keyboard as kb
 from constants import DAILY_LIMIT
-from database import execute_query, execute_select_all
+from database import execute_query, execute_select_all, execute_select
 from filters.subscriptions import get_subscription
 from datetime import datetime, timedelta
 
@@ -38,8 +38,8 @@ async def update_user_statistics(event: Message) -> bool:
 
         # Check subscription and daily limit
         if daily_count >= DAILY_LIMIT:
-            subscription = await get_subscription(user_id, 0)
-            if subscription:
+            result = await execute_select("SELECT subscription FROM users WHERE user_id = $1", (user_id,))
+            if result == 0:
                 return False  # User exceeded daily limit
 
         # Update counts
