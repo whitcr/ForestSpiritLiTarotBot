@@ -100,9 +100,9 @@ practice_general_menu_practices_keyboard = InlineKeyboardMarkup(
 
 sub_keyboard_buttons = [
     [
-        InlineKeyboardButton(text = 'Хочу Шута!', callback_data = "get_sub_1_75"),
-        InlineKeyboardButton(text = 'Хочу Мага!', callback_data = "get_sub_2_150"),
-        InlineKeyboardButton(text = 'Хочу Жрицу!', callback_data = "get_sub_3_250")
+        InlineKeyboardButton(text = 'Хочу подписку "Шут"', callback_data = "get_sub_1_75"),
+        InlineKeyboardButton(text = 'Хочу подписку "Маг"', callback_data = "get_sub_2_150"),
+        InlineKeyboardButton(text = 'Хочу подписку "Жрица"', callback_data = "get_sub_3_250")
     ],
 ]
 

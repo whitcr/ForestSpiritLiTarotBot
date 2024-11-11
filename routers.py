@@ -17,12 +17,20 @@ from handlers.tarot.dops import dopCard
 from handlers.tarot.meaningCards import meaning, meaningCb
 from handlers.tarot.questions import questions
 from handlers.tarot.spreads.experimental import experimental
+from middlewares.statsUser import UserStatisticsMiddleware
 from tech.mailing import settings
 from tech.creating import menuCreate
 
 
 def setup_routers():
     router = Router()
+
+    card.router.message.middleware(UserStatisticsMiddleware())
+    experimental.router.message.middleware(UserStatisticsMiddleware())
+    weekAndMonthDefault.router.message.middleware(UserStatisticsMiddleware())
+    daySpread.router.message.middleware(UserStatisticsMiddleware())
+    getSpreads.router.message.middleware(UserStatisticsMiddleware())
+    dopCard.router.message.middleware(UserStatisticsMiddleware())
 
     router.include_routers(card.router, addedToGroup.router, bannedByUser.router, chooseDeck.router, meaning.router,
                            meaningCb.router, experimental.router, weekAndMonthDefault.router, daySpread.router,

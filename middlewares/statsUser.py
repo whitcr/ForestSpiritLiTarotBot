@@ -4,12 +4,8 @@ from typing import Dict, Any, Callable, Awaitable, Union
 import keyboard as kb
 from constants import DAILY_LIMIT
 from database import execute_query, execute_select_all
-from datetime import datetime, timedelta
-
 from filters.subscriptions import get_subscription
-
 from datetime import datetime, timedelta
-from typing import Optional
 
 
 async def update_user_statistics(event: Message) -> bool:
@@ -95,5 +91,6 @@ class UserStatisticsMiddleware(BaseMiddleware):
             bot = data.get("bot")
             user_id = event.from_user.id
             await bot.send_message(user_id,
-                                   text = "Ваш дневной лимит раскладов окончен. Возвращайтесь завтра или приобретите подписку с неограниченными раскладами",
+                                   text = "Ваш дневной лимит раскладов окончен. Возвращайтесь завтра или приобретите "
+                                          "подписку с неограниченными раскладами",
                                    reply_markup = kb.sub_keyboard)

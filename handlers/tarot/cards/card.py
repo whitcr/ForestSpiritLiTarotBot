@@ -68,8 +68,3 @@ async def get_card(message: types.Message, bot: Bot):
 
     if not card_found:
         await get_one_card(bot, message, message.from_user.id, True)
-
-
-@router.message(F.text.lower() == "доп")
-async def one_dop_card_text(message: types.Message, bot: Bot):
-    await get_one_card(bot, message, message.from_user.id)

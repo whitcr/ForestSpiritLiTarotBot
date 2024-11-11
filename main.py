@@ -68,9 +68,6 @@ def main() -> None:
     dp.message.middleware(ThrottlingMiddleware())
     dp.callback_query.middleware(ThrottlingMiddleware())
 
-    dp.message.middleware(UserStatisticsMiddleware())
-    dp.callback_query.middleware(UserStatisticsMiddleware())
-
     dp.message.middleware(HandlerStatisticsMiddleware())
     dp.callback_query.middleware(HandlerStatisticsMiddleware())
 
