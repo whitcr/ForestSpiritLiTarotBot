@@ -94,6 +94,6 @@ class UserStatisticsMiddleware(BaseMiddleware):
         else:
             bot = data.get("bot")
             user_id = event.from_user.id
-            await bot.send_message(user_id = user_id,
+            await bot.send_message(user_id,
                                    text = "Ваш дневной лимит раскладов окончен. Возвращайтесь завтра или приобретите подписку с неограниченными раскладами",
                                    reply_markup = kb.sub_keyboard)
