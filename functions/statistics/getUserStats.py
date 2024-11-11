@@ -168,48 +168,48 @@ async def format_card_statistics(daily_stats, weekly_stats, monthly_stats, total
 
     draw_text.text((844, 554), 'За месяц', fill = 'white', font = FONT_M)
 
-    image.paste(images[6], (671, 643))
-    image.paste(images[7], ((671 + 128 + 40), 643))
-    image.paste(images[8], ((671 + 2 * 128 + 2 * 40), 643))
+    image.paste(images[12], (671, 643))
+    image.paste(images[13], ((671 + 128 + 40), 643))
+    image.paste(images[14], ((671 + 2 * 128 + 2 * 40), 643))
 
-    draw_text.text((710, 604), str(card_counts[6]), fill = 'white', font = FONT_S)
-    draw_text.text((883, 604), str(card_counts[7]), fill = 'white', font = FONT_S)
-    draw_text.text((1060, 604), str(card_counts[8]), fill = 'white', font = FONT_S)
+    draw_text.text((710, 604), str(card_counts[12]), fill = 'white', font = FONT_S)
+    draw_text.text((883, 604), str(card_counts[13]), fill = 'white', font = FONT_S)
+    draw_text.text((1060, 604), str(card_counts[14]), fill = 'white', font = FONT_S)
 
-    image.paste(images[9].resize((102, 166)), (713, 892))
-    image.paste(images[10].resize((102, 166)), ((713 + 102 + 40), 892))
-    image.paste(images[11].resize((102, 166)), ((713 + 2 * 102 + 2 * 40), 892))
+    image.paste(images[15].resize((102, 166)), (713, 892))
+    image.paste(images[16].resize((102, 166)), ((713 + 102 + 40), 892))
+    image.paste(images[17].resize((102, 166)), ((713 + 2 * 102 + 2 * 40), 892))
 
-    draw_text.text((750, 856), str(card_counts[9]), fill = 'white', font = FONT_S)
-    draw_text.text((895, 856), str(card_counts[10]), fill = 'white', font = FONT_S)
-    draw_text.text((1035, 856), str(card_counts[11]), fill = 'white', font = FONT_S)
+    draw_text.text((750, 856), str(card_counts[15]), fill = 'white', font = FONT_S)
+    draw_text.text((895, 856), str(card_counts[16]), fill = 'white', font = FONT_S)
+    draw_text.text((1035, 856), str(card_counts[17]), fill = 'white', font = FONT_S)
 
     draw_text.text((1408, 25), 'За все время', fill = 'white', font = FONT_M)
 
     draw_text.text((1344, 98), 'Самые популярные', fill = 'white', font = FONT_L)
 
-    rotated_card1 = images[12].convert("RGBA").resize((226, 382)).rotate(25, expand = True)
-    rotated_card2 = images[13].convert("RGBA").resize((226, 382)).rotate(-25, expand = True)
+    rotated_card1 = images[18].convert("RGBA").resize((226, 382)).rotate(25, expand = True)
+    rotated_card2 = images[19].convert("RGBA").resize((226, 382)).rotate(-25, expand = True)
     image.paste(rotated_card1, (1156, 200), rotated_card1)
     image.paste(rotated_card2, (1524, 200), rotated_card2)
-    image.paste(images[14].resize((226, 382)), (1400, 200))
+    image.paste(images[20].resize((226, 382)), (1400, 200))
 
-    draw_text.text((1218, 205), str(card_counts[12]), fill = 'white', font = FONT_M)
-    draw_text.text((1490, 160), str(card_counts[13]), fill = 'white', font = FONT_M)
-    draw_text.text((1780, 205), str(card_counts[14]), fill = 'white', font = FONT_M)
+    draw_text.text((1218, 205), str(card_counts[18]), fill = 'white', font = FONT_M)
+    draw_text.text((1490, 160), str(card_counts[19]), fill = 'white', font = FONT_M)
+    draw_text.text((1780, 205), str(card_counts[20]), fill = 'white', font = FONT_M)
 
     draw_text.text((1450, 640), 'Самые', fill = 'white', font = FONT_L)
     draw_text.text((1395, 700), 'непопулярные', fill = 'white', font = FONT_L)
 
-    rotated_card1 = images[15].convert("RGBA").resize((140, 235)).rotate(25, expand = True)
-    rotated_card2 = images[16].convert("RGBA").resize((140, 235)).rotate(-25, expand = True)
+    rotated_card1 = images[21].convert("RGBA").resize((140, 235)).rotate(25, expand = True)
+    rotated_card2 = images[22].convert("RGBA").resize((140, 235)).rotate(-25, expand = True)
     image.paste(rotated_card1, (1307, 786), rotated_card1)
     image.paste(rotated_card2, (1535, 786), rotated_card2)
-    image.paste(images[17].resize((140, 235)), (1460, 786))
+    image.paste(images[23].resize((140, 235)), (1460, 786))
 
-    draw_text.text((1340, 786), str(card_counts[15]), fill = 'white', font = FONT_S)
-    draw_text.text((1520, 750), str(card_counts[16]), fill = 'white', font = FONT_S)
-    draw_text.text((1700, 786), str(card_counts[17]), fill = 'white', font = FONT_S)
+    draw_text.text((1340, 786), str(card_counts[21]), fill = 'white', font = FONT_S)
+    draw_text.text((1520, 750), str(card_counts[22]), fill = 'white', font = FONT_S)
+    draw_text.text((1700, 786), str(card_counts[23]), fill = 'white', font = FONT_S)
 
     draw_text.text((675, 25), "Статистика раскладов", fill = 'white', font = FONT_L)
     draw_text.text((735, 150), f"За все время: {stats_count['total_count']}", fill = 'white', font = FONT_L)

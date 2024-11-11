@@ -134,7 +134,7 @@ async def format_callback_data(call, data):
             for j in range(1, 3):
                 d = data.get(f'd{str(j)}card_{i}')
                 if d is not None:
-                    card_name_d = await execute_select("SELECT name FROM cards WHERE number = $2", (d,))
+                    card_name_d = await execute_select("SELECT name FROM cards WHERE number = $1", (d,))
                     additional_cards.append(card_name_d)
             if additional_cards:
                 line += f" Дополнительные карты: {', '.join(additional_cards)}"

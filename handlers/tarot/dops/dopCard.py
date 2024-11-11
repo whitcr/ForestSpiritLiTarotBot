@@ -54,7 +54,7 @@ async def create_keyboard_dops(nums, position, spread_name=None):
                                pcard_3 = position[2], spread_name = spread_name if spread_name else None).pack()
         for i in range(3)
     ]
-    print(position)
+
     empty_button = []
     for i, element in enumerate(position):
         if element > 3:

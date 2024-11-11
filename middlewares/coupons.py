@@ -9,9 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class CouponMiddleware:
-    GOLD_CARD_CHANCE = 0.01
-    SILVER_CARD_CHANCE = 0.02
-    IRON_CARD_CHANCE = 0.03
+    GOLD_CARD_CHANCE = 0.001
+    SILVER_CARD_CHANCE = 0.002
+    IRON_CARD_CHANCE = 0.003
 
     async def __call__(
             self,
