@@ -11,6 +11,8 @@ DAILY_LIMIT = 7
 
 DECK_MAP = {
     'raider': 'Райдер-Уэйт',
+    'joytarot': 'Жизнерадостное Таро',
+    'lenorman': 'Ленорман',
     'wildwood': 'Дикий Лес',
     'saintdeath': 'Святая Смерть',
     'manara': 'Манара',
@@ -20,13 +22,11 @@ DECK_MAP = {
     'ceccoli': 'Чекколи',
     'darkwood': 'Темный Лес',
     'decameron': 'Декамерон',
-    'lenorman': 'Ленорман',
     'wildunknown': 'Дикое Неизвестное',
     'animalspirit': 'ДН Оракул',
     'vikaoracul': 'Викканский Оракул',
     'vikanimaloracul': 'Оракул Животных',
     'thothtarot': 'Таро Тота',
-    'joytarot': 'Жизнерадостное Таро',
     # 'nightmare': 'Кошмар перед Рождеством' ,
 }
 

@@ -55,7 +55,10 @@ async def create_keyboard_dops(nums, position, spread_name=None):
         for i in range(3)
     ]
 
-    empty_button = [i for i, element in enumerate(position) if element > 3]
+    empty_button = []
+    for i, element in enumerate(position):
+        if element > 3:
+            empty_button.append(i)
 
     for index in empty_button:
         text[index] = ""
