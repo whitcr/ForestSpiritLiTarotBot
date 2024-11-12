@@ -125,20 +125,20 @@ async def format_callback_data(call, data):
     if spread_name:
         get_theme = spread_name
 
-    for i in range(0, 3):
+    for i in range(0, 4):
         card = data.get(f'card_{i}')
         if card is not None:
             card_name = await execute_select("SELECT name FROM cards WHERE number = $1", (card,))
             line = f"Карта {i}: {card_name}."
             additional_cards = []
-            for j in range(1, 3):
+            for j in range(1, 4):
                 d = data.get(f'd{str(j)}card_{i}')
+                print(d)
                 if d is not None:
                     card_name_d = await execute_select("SELECT name FROM cards WHERE number = $1", (d,))
                     additional_cards.append(card_name_d)
             if additional_cards:
                 line += f" Дополнительные карты: {', '.join(additional_cards)}"
-                print(line)
             get_cards.append(line)
     return "\n".join(get_cards), get_question, get_theme
 
