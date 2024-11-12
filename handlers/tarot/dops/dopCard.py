@@ -197,31 +197,31 @@ async def get_image_with_dops(api_token, user_id, nums, card_position, dop_posit
                         w, h = text_size(line, FONT_L)
                         draw_text.text(((pad - w) / 2, current_h), line, font = FONT_L)
 
-    if dop_positions[0] == 2 and card_position == 1:
+    if dop_positions[0] == 3 and card_position == 1:
         dop_positions[0] += 1
         image.paste(dop, (220, 730))
-    elif dop_positions[0] == 1 and card_position == 1:
+    elif dop_positions[0] == 2 and card_position == 1:
         dop_positions[0] += 1
         image.paste(dop, (410, 730))
-    elif dop_positions[0] == 3 and card_position == 1:
+    elif dop_positions[0] == 1 and card_position == 1:
         dop_positions[0] += 1
         image.paste(dop, (30, 730))
-    elif dop_positions[1] == 2 and card_position == 2:
-        dop_positions[1] += 1
-        image.paste(dop, (640 + 220, 730))
-    elif dop_positions[1] == 1 and card_position == 2:
-        dop_positions[1] += 1
-        image.paste(dop, (640 + 410, 730))
     elif dop_positions[1] == 3 and card_position == 2:
         dop_positions[1] += 1
+        image.paste(dop, (640 + 220, 730))
+    elif dop_positions[1] == 2 and card_position == 2:
+        dop_positions[1] += 1
+        image.paste(dop, (640 + 410, 730))
+    elif dop_positions[1] == 1 and card_position == 2:
+        dop_positions[1] += 1
         image.paste(dop, (640 + 30, 730))
-    elif dop_positions[2] == 2 and card_position == 3:
+    elif dop_positions[2] == 3 and card_position == 3:
         dop_positions[2] += 1
         image.paste(dop, (640 * 2 + 230, 730))
-    elif dop_positions[2] == 1 and card_position == 3:
+    elif dop_positions[2] == 2 and card_position == 3:
         dop_positions[2] += 1
         image.paste(dop, (640 * 2 + 420, 730))
-    elif dop_positions[2] == 3 and card_position == 3:
+    elif dop_positions[2] == 1 and card_position == 3:
         dop_positions[2] += 1
         image.paste(dop, (640 * 2 + 40, 730))
 
