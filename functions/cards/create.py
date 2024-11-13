@@ -9,7 +9,6 @@ from random import randint
 import itertools
 import numpy as np
 from PIL import Image
-import asyncio
 
 from functions.statistics.cards import get_user_card_statistics, get_statistic_card
 
@@ -84,24 +83,12 @@ def text_size(text, font):
 
 async def get_buffered_image(image):
     bio = BytesIO()
-    try:
-        save_params = {
-            'format': format,
-            'optimize': True
-        }
-
-        await asyncio.get_event_loop().run_in_executor(
-            None,
-            lambda: image.save(bio, **save_params)
-        )
-
-        buffer_value = bio.getvalue()
-        filename = f"image.png"
-
-    finally:
-        bio.close()
-
-    return BufferedInputFile(buffer_value, filename)
+    bio.name = 'image.jpeg'
+    with bio:
+        image.save(bio, 'PNG')
+        bio.seek(0)
+        image_to_send = BufferedInputFile(bio.getvalue(), "image.png")
+    return image_to_send
 
 
 def get_gradient_2d(start, stop, width, height, is_horizontal):
