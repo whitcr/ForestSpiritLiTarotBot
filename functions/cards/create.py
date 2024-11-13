@@ -10,7 +10,10 @@ import itertools
 import asyncio
 import numpy as np
 from PIL import Image
-
+import asyncio
+import time
+import logging
+from contextlib import contextmanager
 from functions.statistics.cards import get_user_card_statistics, get_statistic_card
 
 
@@ -23,36 +26,56 @@ async def get_choice_spread(user_id):
         return "raider"
 
 
-async def get_random_num(choice, count, user_id=None):
-    min_max_map = {
-        "vikaoracul": (0, 47),
-        "vikanimaloracul": (0, 47),
-        "lenorman": (1, 35),
-        "animalspirit": (0, 63),
-        "tarot": (1, 77),
-    }
-    min_num, max_num = min_max_map.get(choice, (1, 77))
+logging.basicConfig(level = logging.INFO, format = '%(asctime)s %(message)s')
+logger = logging.getLogger(__name__)
 
-    if count == 1:
-        num = random.randint(min_num, max_num)
-        if user_id:
-            asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
-            asyncio.create_task(get_statistic_card(num))
-        return num
-    else:
-        nums = random.sample(range(min_num, max_num + 1), count) if min_num == 1 else list(
-            itertools.islice(random.randint(0, max_num), count))
-        if user_id:
-            tasks = [
-                asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
-                for num in nums
-            ]
-            tasks.extend([
-                asyncio.create_task(get_statistic_card(num))
-                for num in nums
-            ])
-            await asyncio.gather(*tasks)
-        return nums
+
+@contextmanager
+def timing(operation):
+    start = time.perf_counter()
+    yield
+    elapsed = time.perf_counter() - start
+    logger.info(f"{operation}: {elapsed:.3f} seconds")
+
+
+async def get_random_num(choice, count, user_id=None):
+    with timing("get_random_num"):
+        min_max_map = {
+            "vikaoracul": (0, 47),
+            "vikanimaloracul": (0, 47),
+            "lenorman": (1, 35),
+            "animalspirit": (0, 63),
+            "tarot": (1, 77),
+        }
+        min_num, max_num = min_max_map.get(choice, (1, 77))
+
+        if count == 1:
+            num = random.randint(min_num, max_num)
+            logger.info(f"Generated random number: {num}")
+
+            if user_id:
+                with timing("get_user_card_statistics and get_statistic_card"):
+                    task1 = asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
+                    task2 = asyncio.create_task(get_statistic_card(num))
+                    await asyncio.gather(task1, task2)
+            return num
+        else:
+            nums = random.sample(range(min_num, max_num + 1), count) if min_num == 1 else list(
+                itertools.islice(random.randint(0, max_num), count))
+            logger.info(f"Generated {len(nums)} random numbers: {nums}")
+
+            if user_id:
+                with timing("all get_user_card_statistics and get_statistic_card calls"):
+                    tasks = [
+                        asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
+                        for num in nums
+                    ]
+                    tasks.extend([
+                        asyncio.create_task(get_statistic_card(num))
+                        for num in nums
+                    ])
+                    await asyncio.gather(*tasks)
+            return nums
 
 
 async def get_path_background():
