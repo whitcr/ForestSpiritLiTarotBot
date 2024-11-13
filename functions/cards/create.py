@@ -82,22 +82,13 @@ def text_size(text, font):
     return width, height
 
 
-async def get_buffered_image(image, format='JPG', quality=85):
+async def get_buffered_image(image):
     bio = BytesIO()
     try:
         save_params = {
             'format': format,
             'optimize': True
         }
-        if format.upper() == 'JPG':
-            save_params.update({
-                'quality': quality,
-                'subsampling': 0
-            })
-        elif format.upper() == 'PNG':
-            save_params.update({
-                'compress_level': 6
-            })
 
         await asyncio.get_event_loop().run_in_executor(
             None,
@@ -105,7 +96,7 @@ async def get_buffered_image(image, format='JPG', quality=85):
         )
 
         buffer_value = bio.getvalue()
-        filename = f"image.{format.lower()}"
+        filename = f"image.png"
 
     finally:
         bio.close()
