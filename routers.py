@@ -4,7 +4,7 @@ from events.group import addedToGroup
 from events.user import bannedByUser, referrals
 from handlers.audio import audio
 from handlers.commands import owner, user
-from handlers.tarot.spreads import getSpreads, triplet
+from handlers.tarot.spreads import getSpreads
 from handlers.tarot.spreads.meaningSpreads import getMeaningSpread
 from handlers.tarot.spreads.weekAndMonth import weekAndMonthDefault, weekAndMonthPremium
 from handlers.tarot.spreads.day import daySpread
@@ -32,7 +32,7 @@ def setup_routers():
     getSpreads.router.message.middleware(UserStatisticsMiddleware())
     dopCard.router.message.middleware(UserStatisticsMiddleware())
 
-    router.include_routers(card.router, triplet.router, addedToGroup.router, bannedByUser.router, chooseDeck.router, meaning.router,
+    router.include_routers(card.router, addedToGroup.router, bannedByUser.router, chooseDeck.router, meaning.router,
                            meaningCb.router, experimental.router, weekAndMonthDefault.router, daySpread.router,
                            questions.router, date.router, getSpreads.router, dopCard.router,
                            getMeaningSpread.router, meaningDaySpread.router, givedBoost.router,
