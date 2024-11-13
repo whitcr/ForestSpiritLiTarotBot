@@ -6,6 +6,7 @@ from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
 from database import execute_query, execute_select_all
 
+
 class StatisticsCache:
     def __init__(self, flush_interval: int = 60):
         self.cache = defaultdict(lambda: {
@@ -17,28 +18,28 @@ class StatisticsCache:
         self.flush_interval = flush_interval
         self.last_flush = datetime.utcnow()
         self._lock = asyncio.Lock()
-        
+
     async def increment(self, command: str):
         async with self._lock:
             self.cache[command]['daily_count'] += 1
             self.cache[command]['weekly_count'] += 1
             self.cache[command]['monthly_count'] += 1
             self.cache[command]['total_count'] += 1
-            
+
             now = datetime.utcnow()
             if (now - self.last_flush).seconds >= self.flush_interval:
                 await self.flush()
-                
+
     async def flush(self):
         async with self._lock:
             if not self.cache:
                 return
-                
+
             now = datetime.utcnow()
             today = now.date()
-            week_start = today - timedelta(days=today.weekday())
-            month_start = today.replace(day=1)
-            
+            week_start = today - timedelta(days = today.weekday())
+            month_start = today.replace(day = 1)
+
             for command, counts in self.cache.items():
                 # Получаем текущие значения из БД
                 result = await execute_select_all(
@@ -50,7 +51,7 @@ class StatisticsCache:
                     """,
                     (command,)
                 )
-                
+
                 if result:
                     record = result[0]
                     # Проверяем, нужно ли сбросить счетчики
@@ -58,19 +59,19 @@ class StatisticsCache:
                         counts['daily_count'] = counts['daily_count']
                     else:
                         counts['daily_count'] += record['daily_count']
-                        
+
                     if record['last_weekly_update'] != week_start:
                         counts['weekly_count'] = counts['weekly_count']
                     else:
                         counts['weekly_count'] += record['weekly_count']
-                        
+
                     if record['last_monthly_update'] != month_start:
                         counts['monthly_count'] = counts['monthly_count']
                     else:
                         counts['monthly_count'] += record['monthly_count']
-                        
+
                     counts['total_count'] += record['total_count']
-                    
+
                     await execute_query(
                         """
                         UPDATE statistics_handler 
@@ -79,7 +80,7 @@ class StatisticsCache:
                             last_weekly_update = $6, last_monthly_update = $7
                         WHERE command = $8
                         """,
-                        (counts['daily_count'], counts['weekly_count'], 
+                        (counts['daily_count'], counts['weekly_count'],
                          counts['monthly_count'], counts['total_count'],
                          today, week_start, month_start, command)
                     )
@@ -95,9 +96,10 @@ class StatisticsCache:
                          counts['monthly_count'], counts['total_count'],
                          today, week_start, month_start)
                     )
-            
+
             self.cache.clear()
             self.last_flush = now
+
 
 CALLBACK_COMMAND_MAPPING = {
     'get_dop_': 'Допы',
@@ -106,16 +108,18 @@ CALLBACK_COMMAND_MAPPING = {
     'day_meaning_day_': 'Трактовка карт дня'
 }
 
+
 def get_command_name(callback_data: str) -> str:
     for prefix, command in CALLBACK_COMMAND_MAPPING.items():
         if prefix in callback_data:
             return command
     return callback_data
 
+
 class HandlerStatisticsMiddleware(BaseMiddleware):
     def __init__(self, flush_interval: int = 60):
         self.stats_cache = StatisticsCache(flush_interval)
-        
+
     async def __call__(
             self,
             handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
@@ -129,9 +133,9 @@ class HandlerStatisticsMiddleware(BaseMiddleware):
             command = get_command_name(event.data)
         else:
             command = 'unknown_event'
-            
+
         # Запускаем обновление статистики асинхронно
         asyncio.create_task(self.stats_cache.increment(command.lower()))
-        
+
         # Выполняем основной обработчик
         return await handler(event, data)

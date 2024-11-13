@@ -44,7 +44,7 @@ async def draw_spread(image, spread_name):
 
 
 @router.message(F.text.lower().startswith("триплет"))
-# @typing_animation_decorator(initial_message = "Раскладываю")
+@typing_animation_decorator(initial_message = "Раскладываю")
 async def get_image_triplet(message: types.Message, bot: Bot):
     image, num = await get_image_three_cards(message.from_user.id)
     text = message.text.split(" ")[1:]

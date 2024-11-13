@@ -11,74 +11,44 @@ import textwrap
 import pendulum
 from constants import FONT_S, FONT_L
 from PIL import ImageDraw
-import time
-import logging
-from contextlib import contextmanager
-import functools
-
-logging.basicConfig(level = logging.INFO)
-logger = logging.getLogger('tarot_timing')
-
-
-@contextmanager
-def timing(operation):
-    start = time.perf_counter()
-    yield
-    elapsed = time.perf_counter() - start
-    logger.info(f"{operation}: {elapsed:.3f} seconds")
 
 
 async def get_image_three_cards(user_id):
-    total_start = time.perf_counter()
+    choice = await get_choice_spread(user_id)
 
-    with timing("Getting choice spread"):
-        choice = await get_choice_spread(user_id)
+    col1, col2 = await get_colors_background(choice)
 
-    with timing("Getting colors background"):
-        col1, col2 = await get_colors_background(choice)
+    if choice == 'deviantmoon' or choice == 'manara' or choice == 'aftertarot':
+        x = 140
+    elif choice == "vikaoracul" or choice == "vikanimaloracul":
+        x = 80
+    else:
+        x = 105
+    y = 140
 
-    with timing("Setting coordinates"):
-        if choice == 'deviantmoon' or choice == 'manara' or choice == 'aftertarot':
-            x = 140
-        elif choice == "vikaoracul" or choice == "vikanimaloracul":
-            x = 80
-        else:
-            x = 105
-        y = 140
+    cards = np.random.randint(col1, col2, size = 6)
+    array = get_gradient_3d(1920, 1080, (cards[0], cards[1], cards[2]), (cards[3], cards[4], cards[5]),
+                            (True, False, True))
+    color = Image.fromarray(np.uint8(array))
 
-    with timing("Generating gradient"):
-        cards = np.random.randint(col1, col2, size = 6)
-        array = get_gradient_3d(1920, 1080, (cards[0], cards[1], cards[2]),
-                                (cards[3], cards[4], cards[5]), (True, False, True))
-        color = Image.fromarray(np.uint8(array))
+    num = await get_random_num(choice, 3, user_id)
+    card_paths = [await get_path_cards(choice, num[i]) for i in range(3)]
 
-    with timing("Getting random numbers"):
-        num = await get_random_num(choice, 3, user_id)
+    images = []
+    for i, path in enumerate(card_paths):
+        card = Image.open(path)
+        w, h = card.size
+        images.append(card)
 
-    with timing("Getting card paths"):
-        card_paths = [await get_path_cards(choice, num[i]) for i in range(3)]
+    background_path = await get_path_background()
+    background = Image.open(background_path)
+    background = background.resize((1920, 1080))
+    background = background.filter(ImageFilter.GaussianBlur(radius = 3))
+    image = Image.blend(color, background, alpha = .4)
 
-    with timing("Loading card images"):
-        images = []
-        for i, path in enumerate(card_paths):
-            card = Image.open(path)
-            w, h = card.size
-            images.append(card)
-
-    with timing("Processing background"):
-        background_path = await get_path_background()
-        background = Image.open(background_path)
-        background = background.resize((1920, 1080))
-        background = background.filter(ImageFilter.GaussianBlur(radius = 3))
-        image = Image.blend(color, background, alpha = .4)
-
-    with timing("Pasting cards"):
-        image.paste(images[2], ((3 * x + 2 * w), y))
-        image.paste(images[1], ((2 * x + w), y))
-        image.paste(images[0], (x, y))
-
-    total_time = time.perf_counter() - total_start
-    logger.info(f"Total execution time: {total_time:.3f} seconds")
+    image.paste(images[2], ((3 * x + 2 * w), y))
+    image.paste(images[1], ((2 * x + w), y))
+    image.paste(images[0], (x, y))
 
     return image, num
 
@@ -87,33 +57,27 @@ async def send_image_three_cards(bot, message, username, image, nums, spread_nam
     from handlers.tarot.dops.dopCard import create_keyboard_dops
     from handlers.tarot.dops.dopCard import create_gpt_keyboard
 
-    with timing("Drawing text"):
-        date = pendulum.today('Europe/Kiev').format('DD.MM')
-        draw_text = ImageDraw.Draw(image)
-        draw_text.text((759, 990), 'from @ForestSpiritLi', fill = 'white', font = FONT_L)
-        draw_text.text((895, 10), date, fill = 'white', font = FONT_L)
-        para = textwrap.wrap(f"for {username}", width = 30)
-        current_h, pad = 1040, 10
-        for line in para:
-            w, h = text_size(line, FONT_S)
-            draw_text.text(((1910 - w) / 2, current_h), line, font = FONT_S)
-            current_h += h + pad
+    date = pendulum.today('Europe/Kiev').format('DD.MM')
 
-    with timing("Creating keyboard"):
-        buttons = await create_keyboard_dops(nums, [1, 1, 1], spread_name = spread_name)
-        keyboard = InlineKeyboardMarkup(inline_keyboard = buttons)
+    draw_text = ImageDraw.Draw(image)
+    draw_text.text((759, 990), 'from @ForestSpiritLi', fill = 'white', font = FONT_L)
+    draw_text.text((895, 10), date, fill = 'white', font = FONT_L)
+    para = textwrap.wrap(f"for {username}", width = 30)
+    current_h, pad = 1040, 10
+    for line in para:
+        w, h = text_size(line, FONT_S)
 
-    with timing("Sending photo"):
-        with timing("Sending photo1"):
-            buffered_image = await get_buffered_image(image)
-            reply_id = await get_reply_message(message)
-        with timing("Sending photo2"):
-            await bot.send_photo(
-                message.chat.id,
-                photo = buffered_image,
-                reply_markup = keyboard,
-                reply_to_message_id = reply_id
-            )
+        draw_text.text(((1910 - w) / 2, current_h), line, font = FONT_S)
+        current_h += h + pad
+
+    buttons = await create_keyboard_dops(nums, [1, 1, 1], spread_name = spread_name)
+    # buttons = await create_gpt_keyboard(buttons, nums)
+    keyboard = InlineKeyboardMarkup(inline_keyboard = buttons)
+
+    await bot.send_photo(message.chat.id,
+                         photo = await get_buffered_image(image),
+                         reply_markup = keyboard,
+                         reply_to_message_id = await get_reply_message(message))
 
 
 async def get_image_three_cards_wb(user_id):
