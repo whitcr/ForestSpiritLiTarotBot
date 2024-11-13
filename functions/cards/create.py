@@ -54,27 +54,23 @@ async def get_random_num(choice, count, user_id=None):
             logger.info(f"Generated random number: {num}")
 
             if user_id:
-                with timing("get_user_card_statistics and get_statistic_card"):
-                    task1 = asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
-                    task2 = asyncio.create_task(get_statistic_card(num))
-                    await asyncio.gather(task1, task2)
+                with timing("start background tasks for get_user_card_statistics and get_statistic_card"):
+                    # Запуск задач в фоновом режиме
+                    asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
+                    asyncio.create_task(get_statistic_card(num))
             return num
+
         else:
             nums = random.sample(range(min_num, max_num + 1), count) if min_num == 1 else list(
                 itertools.islice(random.randint(0, max_num), count))
             logger.info(f"Generated {len(nums)} random numbers: {nums}")
 
             if user_id:
-                with timing("all get_user_card_statistics and get_statistic_card calls"):
-                    tasks = [
+                with timing("start background tasks for all get_user_card_statistics and get_statistic_card calls"):
+                    # Создание и запуск фоновых задач для всех номеров
+                    for num in nums:
                         asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
-                        for num in nums
-                    ]
-                    tasks.extend([
                         asyncio.create_task(get_statistic_card(num))
-                        for num in nums
-                    ])
-                    await asyncio.gather(*tasks)
             return nums
 
 
