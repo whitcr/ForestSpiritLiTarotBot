@@ -104,14 +104,16 @@ async def send_image_three_cards(bot, message, username, image, nums, spread_nam
         keyboard = InlineKeyboardMarkup(inline_keyboard = buttons)
 
     with timing("Sending photo"):
-        buffered_image = await get_buffered_image(image)
-        reply_id = await get_reply_message(message)
-        await bot.send_photo(
-            message.chat.id,
-            photo = buffered_image,
-            reply_markup = keyboard,
-            reply_to_message_id = reply_id
-        )
+        with timing("Sending photo1"):
+            buffered_image = await get_buffered_image(image)
+            reply_id = await get_reply_message(message)
+        with timing("Sending photo2"):
+            await bot.send_photo(
+                message.chat.id,
+                photo = buffered_image,
+                reply_markup = keyboard,
+                reply_to_message_id = reply_id
+            )
 
 
 async def get_image_three_cards_wb(user_id):
