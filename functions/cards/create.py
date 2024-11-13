@@ -36,15 +36,22 @@ async def get_random_num(choice, count, user_id=None):
     if count == 1:
         num = random.randint(min_num, max_num)
         if user_id:
-            await get_user_card_statistics(user_id = user_id, num = num)
-            await get_statistic_card(num)
+            asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
+            asyncio.create_task(get_statistic_card(num))
         return num
     else:
         nums = random.sample(range(min_num, max_num + 1), count) if min_num == 1 else list(
             itertools.islice(random.randint(0, max_num), count))
         if user_id:
-            await asyncio.gather(*[get_user_card_statistics(user_id = user_id, num = num) for num in nums])
-            await asyncio.gather(*[get_statistic_card(num) for num in nums])
+            tasks = [
+                asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
+                for num in nums
+            ]
+            tasks.extend([
+                asyncio.create_task(get_statistic_card(num))
+                for num in nums
+            ])
+            await asyncio.gather(*tasks)
         return nums
 
 
