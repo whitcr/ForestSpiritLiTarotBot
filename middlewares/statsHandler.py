@@ -1,89 +1,137 @@
 from datetime import timedelta, datetime
-
+from collections import defaultdict
+import asyncio
+from typing import Dict, Any, Callable, Awaitable
 from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
-from typing import Dict, Any, Callable, Awaitable
 from database import execute_query, execute_select_all
 
+class StatisticsCache:
+    def __init__(self, flush_interval: int = 60):
+        self.cache = defaultdict(lambda: {
+            'daily_count': 0,
+            'weekly_count': 0,
+            'monthly_count': 0,
+            'total_count': 0
+        })
+        self.flush_interval = flush_interval
+        self.last_flush = datetime.utcnow()
+        self._lock = asyncio.Lock()
+        
+    async def increment(self, command: str):
+        async with self._lock:
+            self.cache[command]['daily_count'] += 1
+            self.cache[command]['weekly_count'] += 1
+            self.cache[command]['monthly_count'] += 1
+            self.cache[command]['total_count'] += 1
+            
+            now = datetime.utcnow()
+            if (now - self.last_flush).seconds >= self.flush_interval:
+                await self.flush()
+                
+    async def flush(self):
+        async with self._lock:
+            if not self.cache:
+                return
+                
+            now = datetime.utcnow()
+            today = now.date()
+            week_start = today - timedelta(days=today.weekday())
+            month_start = today.replace(day=1)
+            
+            for command, counts in self.cache.items():
+                # Получаем текущие значения из БД
+                result = await execute_select_all(
+                    """
+                    SELECT daily_count, weekly_count, monthly_count, total_count,
+                           last_daily_update, last_weekly_update, last_monthly_update
+                    FROM statistics_handler 
+                    WHERE command = $1
+                    """,
+                    (command,)
+                )
+                
+                if result:
+                    record = result[0]
+                    # Проверяем, нужно ли сбросить счетчики
+                    if record['last_daily_update'] != today:
+                        counts['daily_count'] = counts['daily_count']
+                    else:
+                        counts['daily_count'] += record['daily_count']
+                        
+                    if record['last_weekly_update'] != week_start:
+                        counts['weekly_count'] = counts['weekly_count']
+                    else:
+                        counts['weekly_count'] += record['weekly_count']
+                        
+                    if record['last_monthly_update'] != month_start:
+                        counts['monthly_count'] = counts['monthly_count']
+                    else:
+                        counts['monthly_count'] += record['monthly_count']
+                        
+                    counts['total_count'] += record['total_count']
+                    
+                    await execute_query(
+                        """
+                        UPDATE statistics_handler 
+                        SET daily_count = $1, weekly_count = $2, monthly_count = $3, 
+                            total_count = $4, last_daily_update = $5, 
+                            last_weekly_update = $6, last_monthly_update = $7
+                        WHERE command = $8
+                        """,
+                        (counts['daily_count'], counts['weekly_count'], 
+                         counts['monthly_count'], counts['total_count'],
+                         today, week_start, month_start, command)
+                    )
+                else:
+                    await execute_query(
+                        """
+                        INSERT INTO statistics_handler 
+                        (command, daily_count, weekly_count, monthly_count, total_count,
+                         last_daily_update, last_weekly_update, last_monthly_update)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                        """,
+                        (command, counts['daily_count'], counts['weekly_count'],
+                         counts['monthly_count'], counts['total_count'],
+                         today, week_start, month_start)
+                    )
+            
+            self.cache.clear()
+            self.last_flush = now
 
-async def process_callback_data_to_name(callback_data):
-    if 'get_dop_' in callback_data:
-        return 'Допы'
-    elif 'get_default_meaning_gpt_' in callback_data:
-        return 'Обычная трактовка'
-    elif 'get_day_spread_meaning_' in callback_data:
-        return 'Трактовка расклада дня'
-    elif 'day_meaning_day_' in callback_data:
-        return 'Трактовка карт дня'
+CALLBACK_COMMAND_MAPPING = {
+    'get_dop_': 'Допы',
+    'get_default_meaning_gpt_': 'Обычная трактовка',
+    'get_day_spread_meaning_': 'Трактовка расклада дня',
+    'day_meaning_day_': 'Трактовка карт дня'
+}
+
+def get_command_name(callback_data: str) -> str:
+    for prefix, command in CALLBACK_COMMAND_MAPPING.items():
+        if prefix in callback_data:
+            return command
     return callback_data
 
-
-async def update_statistics(command: str):
-    now = datetime.utcnow()
-    today = now.date()
-    week_start = today - timedelta(days = today.weekday())
-    month_start = today.replace(day = 1)
-    command = command.lower()
-    # Проверяем существование записи и получаем текущие значения
-    result = await execute_select_all(
-        """
-        SELECT daily_count, weekly_count, monthly_count, total_count, 
-               last_daily_update, last_weekly_update, last_monthly_update
-        FROM statistics_handler 
-        WHERE command = $1
-        """,
-        (command,)
-    )
-
-    if result and any(record for record in result if any(value is not None for value in record.values())):
-        (daily_count, weekly_count, monthly_count, total_count,
-         last_daily_update, last_weekly_update, last_monthly_update) = result[0]
-
-        # Сбрасываем счетчики, если начался новый период
-        if last_daily_update != today:
-            daily_count = 0
-        if last_weekly_update != week_start:
-            weekly_count = 0
-        if last_monthly_update != month_start:
-            monthly_count = 0
-
-        # Увеличиваем счетчики
-        await execute_query(
-            """
-            UPDATE statistics_handler 
-            SET daily_count = $1, weekly_count = $2, monthly_count = $3, total_count = $4,
-                last_daily_update = $5, last_weekly_update = $6, last_monthly_update = $7
-            WHERE command = $8
-            """,
-            (daily_count + 1, weekly_count + 1, monthly_count + 1, total_count + 1,
-             today, week_start, month_start, command)
-        )
-    else:
-        # Создаем новую запись
-        await execute_query(
-            """
-            INSERT INTO statistics_handler 
-            (command, daily_count, weekly_count, monthly_count, total_count,
-             last_daily_update, last_weekly_update, last_monthly_update)
-            VALUES ($1, 1, 1, 1, 1, $2, $3, $4)
-            """,
-            (command, today, week_start, month_start)
-        )
-
-
 class HandlerStatisticsMiddleware(BaseMiddleware):
+    def __init__(self, flush_interval: int = 60):
+        self.stats_cache = StatisticsCache(flush_interval)
+        
     async def __call__(
             self,
             handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
             event: Message | CallbackQuery,
             data: Dict[str, Any]
     ) -> Any:
+        # Определяем команду
         if isinstance(event, Message):
             command = event.text.split()[0] if event.text else 'unknown_message'
         elif isinstance(event, CallbackQuery):
-            command = await process_callback_data_to_name(event.data)
+            command = get_command_name(event.data)
         else:
             command = 'unknown_event'
-
-        await update_statistics(command)
+            
+        # Запускаем обновление статистики асинхронно
+        asyncio.create_task(self.stats_cache.increment(command.lower()))
+        
+        # Выполняем основной обработчик
         return await handler(event, data)

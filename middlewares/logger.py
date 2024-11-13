@@ -7,7 +7,7 @@ import logging
 from aiogram.dispatcher.event.bases import UNHANDLED
 from aiogram.utils.markdown import hlink
 
-from middlewares.statsHandler import process_callback_data_to_name
+from middlewares.statsHandler import get_command_name
 
 logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class LoggingMiddleware(BaseMiddleware):
             command_name = event.message.text if event and event.message and event.message.text else 'Неизвестная комманда'
 
             if event.callback_query is not None and event.callback_query.data is not None:
-                command_name = await process_callback_data_to_name(event.callback_query.data)
+                command_name = await get_command_name(event.callback_query.data)
 
             message = f"Получен запрос #{event.update_id}:\n"\
                       f"Пользователь: {hlink(f'{user_id}', user_link)}\n"\

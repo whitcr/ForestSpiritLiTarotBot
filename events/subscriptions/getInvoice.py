@@ -27,16 +27,18 @@ sub_keyboard.button(text = "Маг", callback_data = SubscriptionCallback(sub = 
 sub_keyboard.button(text = "Жрица", callback_data = SubscriptionCallback(sub = 3, amount = 250))
 
 
-@router.message(F.text.lower().startswith("подписка"))
-async def process_subscription(message: types.Message):
-    logger.info(f"User {message.from_user.id} ({message.from_user.full_name}) requested subscription options.")
-    await message.reply(
-        "Типы подписок\n\n"
-        "Шут - 150 рублей (75 звезд)\n\n"
-        "Маг - 280 рублей (150 звезд)\n\n"
-        "Жрица - 450 рублей (250 звезд)",
-        reply_markup = sub_keyboard.as_markup()
-    )
+@router.callback_query(F.data.startswith("get_sub_menu"))
+async def process_subscription(call: types.CallbackQuery, bot: Bot):
+    logger.info(
+        f"User {call.message.from_user.id} ({call.message.from_user.full_name}) requested subscription options.")
+    await bot.send_message(chat_id = call.message.chat.id,
+                           text =
+                           "Типы подписок\n\n"
+                           "Шут - 150 рублей (75 звезд)\n\n"
+                           "Маг - 280 рублей (150 звезд)\n\n"
+                           "Жрица - 450 рублей (250 звезд)",
+                           reply_markup = sub_keyboard.as_markup()
+                           )
 
 
 @router.callback_query(SubscriptionCallback.filter())

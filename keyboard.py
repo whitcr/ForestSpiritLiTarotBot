@@ -209,9 +209,7 @@ builder = ReplyKeyboardBuilder()
 buttons = [
     "Карта", "Триплет", "Расклад",
     "Расклад дня", "Узнать значение", "Колода",
-    "Практика", "Рассылка", "Заказать расклад",
-    "Медитация", "Мантра", "Аффирмация",
-    "Поддержка", "Мой профиль", "Подписка"
+    "Помощь", "Мой профиль", "Заказать расклад"
 ]
 
 for button_text in buttons:
@@ -236,6 +234,9 @@ profile_buttons = [
     ],
     [
         InlineKeyboardButton(text = "Статистика", callback_data = "get_user_statistics"),
+    ],
+    [
+        InlineKeyboardButton(text = "Подписка", callback_data = "get_sub_menu"),
     ]
 ]
 profile_keyboard = InlineKeyboardMarkup(inline_keyboard = profile_buttons)
