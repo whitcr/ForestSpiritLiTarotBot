@@ -11,8 +11,6 @@ import textwrap
 import pendulum
 from constants import FONT_S, FONT_L
 from PIL import ImageDraw
-from handlers.tarot.dops.dopCard import create_keyboard_dops
-from handlers.tarot.dops.dopCard import create_gpt_keyboard
 
 
 async def get_image_three_cards(user_id):
@@ -56,6 +54,9 @@ async def get_image_three_cards(user_id):
 
 
 async def send_image_three_cards(bot, message, username, image, nums, spread_name=None):
+    from handlers.tarot.dops.dopCard import create_keyboard_dops
+    from handlers.tarot.dops.dopCard import create_gpt_keyboard
+
     date = pendulum.today('Europe/Kiev').format('DD.MM')
 
     draw_text = ImageDraw.Draw(image)
