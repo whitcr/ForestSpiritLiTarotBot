@@ -24,7 +24,6 @@ def typing_animation_decorator(initial_message):
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-
             try:
                 message = args[0]
                 bot = message.bot

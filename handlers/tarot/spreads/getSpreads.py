@@ -26,7 +26,6 @@ spreads_keyboard = builder.as_markup()
 router = Router()
 
 
-# @typing_animation_decorator(initial_message = "Раскладываю")
 async def draw_spread(image, spread_name):
     draw_text = ImageDraw.Draw(image)
     current_h, pad = 80, 715
@@ -77,6 +76,7 @@ async def get_image_triplet(message: types.Message, bot: Bot):
     await send_image_three_cards(bot, message, message.from_user.first_name, image, num)
 
 
+@typing_animation_decorator(initial_message = "Раскладываю")
 @router.message(F.text.lower().startswith("расклад"))
 async def get_spread(message: types.Message, bot: Bot):
     if re.search(r'\bрасклад\Z', message.text.lower()):
@@ -105,6 +105,7 @@ async def get_spread(message: types.Message, bot: Bot):
         pass
 
 
+@typing_animation_decorator(initial_message = "Раскладываю")
 @router.callback_query(IsReply(), lambda call: call.data in SPREADS.keys())
 async def spreads_callback(call: types.CallbackQuery, bot: Bot):
     await call.answer()
