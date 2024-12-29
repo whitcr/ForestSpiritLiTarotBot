@@ -35,7 +35,8 @@ async def draw_spread(image, spread_name):
         count += 1
         para = textwrap.wrap(text, width = 30)
         for line in para:
-            w, h = draw_text.textbbox((0, 0), line, font = font)
+            left, top, right, bottom = draw_text.textbbox((0, 0), line, font = font)
+            w = right - left
             draw_text.text(((pad - w) / 2, current_h), line, font = font)
         pad += 1200
         if count == 2:
