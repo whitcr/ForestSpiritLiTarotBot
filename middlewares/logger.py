@@ -35,7 +35,7 @@ class LoggingMiddleware(BaseMiddleware):
             command_name = event.message.text if event and event.message and event.message.text else 'Неизвестная комманда'
 
             if event.callback_query is not None and event.callback_query.data is not None:
-                command_name = await get_command_name(event.callback_query.data)
+                command_name = get_command_name(event.callback_query.data)
 
             message = f"Получен запрос #{event.update_id}:\n"\
                       f"Пользователь: {hlink(f'{user_id}', user_link)}\n"\
