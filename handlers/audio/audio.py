@@ -15,7 +15,7 @@ AUDIO_MAP = {
 router = Router()
 
 
-@router.message(F.text.lower().startswith(tuple(AUDIO_MAP.keys())), SubscriptionLevel(1))
+@router.message(F.text.lower().startswith(tuple(AUDIO_MAP.keys())), SubscriptionLevel(2))
 async def find_meditation(bot: Bot, message: types.Message):
     words = message.text.split()
     theme = AUDIO_MAP[words[0].lower()]
