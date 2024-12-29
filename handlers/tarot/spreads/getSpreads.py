@@ -26,7 +26,7 @@ spreads_keyboard = builder.as_markup()
 router = Router()
 
 
-@typing_animation_decorator(initial_message = "Раскладываю")
+# @typing_animation_decorator(initial_message = "Раскладываю")
 async def draw_spread(image, spread_name):
     draw_text = ImageDraw.Draw(image)
     current_h, pad = 80, 715
