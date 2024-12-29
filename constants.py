@@ -7,7 +7,7 @@ SUBS_TYPE = {
     3: "Жрица"
 }
 
-DAILY_LIMIT = 7
+DAILY_LIMIT = 10
 
 DECK_MAP = {
     'raider': 'Райдер-Уэйт',

@@ -27,7 +27,7 @@ async def update_user_statistics(event: Message) -> bool:
         )
 
         # Initialize user data if record is found
-        if result:
+        if result and all(value is not None for value in result[0].values()):
             data = result[0]
             daily_count = data['daily_count'] if data['last_daily_update'] == today else 0
             weekly_count = data['weekly_count'] if data['last_weekly_update'] == week_start else 0

@@ -59,7 +59,6 @@ async def send_image_three_cards(bot, message, username, image, nums, spread_nam
 
     date = pendulum.today('Europe/Kiev').format('DD.MM')
 
-    print("image:", image)
     draw_text = ImageDraw.Draw(image)
     draw_text.text((759, 990), 'from @ForestSpiritLi', fill = 'white', font = FONT_L)
     draw_text.text((895, 10), date, fill = 'white', font = FONT_L)

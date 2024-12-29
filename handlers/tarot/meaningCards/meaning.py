@@ -92,7 +92,7 @@ async def get_meaning_text(message: types.Message, state: FSMContext, bot: Bot):
         choice = await get_choice_spread(message.from_user.id)
         card_paths = await get_path_cards(choice, num)
         table = f"meaning_{choice}"
-        print(table, num)
+
         if choice in ['raider', "manara", 'deviantmoon', 'ceccoli']:
             meaning_text = await execute_select(f"select general from {table} where number = $1;", (num,))
 
