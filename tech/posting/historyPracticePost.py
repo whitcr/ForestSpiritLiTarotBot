@@ -30,7 +30,7 @@ async def history_image(bot, channel_id):
            f"После — карты, описывающие саму историю, их связывает некая белая полоса, которая показывает хронологический порядок событий."\
            f" И последние три карты описывают главное событие истории.\n\n"\
            f"Жду ваших замечательных историй в комментариях!"
-    msg = await bot.send_photo(CHANNEL_ID, photo = bio, caption = text)
+    msg = await bot.send_photo(channel_id, photo = bio, caption = text)
     file_id = msg.photo[-1].file_id
     await execute_query("UPDATE posting SET file_id ='{}' where post = 'history'", (file_id,))
 

@@ -24,6 +24,9 @@ async def process_callback_get_referral_url(callback_query: CallbackQuery, bot: 
 async def get_referral_count(user_id, bot, channel_id):
     invited_result = await execute_select("SELECT referrals FROM users WHERE user_id = $1", (user_id,))
 
+    if invited_result is False:
+        return 0
+
     count = 0
     for user in invited_result:
         if await check_subscription(user, bot, channel_id):
@@ -32,6 +35,12 @@ async def get_referral_count(user_id, bot, channel_id):
             invited_result.remove(user)
             await execute_query("UPDATE users SET invited = $1 WHERE user_id = $2", (invited_result, user_id))
             pass
+
+    return count
+
+
+async def get_referral_count_text(user_id, bot, channel_id):
+    count = await get_referral_count(user_id, bot, channel_id)
 
     text = f"Количество приглашенных и подписанных на канал - {count}"
     return text
@@ -57,7 +66,7 @@ async def get_referrals(bot, message, command_params):
         await bot.send_message(user_id,
                                'Тебя пригласил друг, рады видеть, чтобы приглашение было засчитано - подпишитесь на '
                                'наш канал :)', reply_markup = follow_channel_keyboard)
-    elif check is not None:
+    elif check is False:
         await bot.send_message(referrer_id,
                                f"Друг, которого ты пригласил, уже есть в канале.")
         await bot.send_message(user_id,

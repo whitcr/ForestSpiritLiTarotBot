@@ -1,8 +1,18 @@
+import io
 from PIL import Image, ImageDraw, ImageFont
-import os
+from aiogram import types, Router, F, Bot
+
+from constants import P_FONT_L
+from database import execute_select, execute_select_all
+from aiogram.types import BufferedInputFile
+from aiogram.utils.media_group import MediaGroupBuilder
+
+from events.user.referrals import get_referral_count
+
+router = Router()
 
 
-def create_large_checkmark(draw, x, y, size=60, color="red", width=6):
+async def create_large_checkmark(draw, x, y, size=60, color="red", width=6):
     start_x = x - size // 2
     start_y = y
     middle_x = x - size // 6
@@ -19,30 +29,25 @@ def create_large_checkmark(draw, x, y, size=60, color="red", width=6):
         )
 
 
-def add_db_numbers(draw, width, height, personal_number, friend_number, font_size=40):
-    try:
-        font = ImageFont.truetype("arial.ttf", font_size)
-    except:
-        font = ImageFont.load_default()
-
-    text_personal = f"({personal_number})"
+async def add_db_numbers(draw, width, height, personal_number, friend_number):
+    text_personal = f"{personal_number}"
     draw.text(
-        (width * 0.85, height * 0.05),
+        (width * 0.74, height * 0.03),
         text_personal,
         fill = "white",
-        font = font
+        font = P_FONT_L
     )
 
-    text_friend = f"({friend_number})"
+    text_friend = f"{friend_number}"
     draw.text(
-        (width * 0.85, height * 0.65),
+        (width * 0.66, height * 0.655),
         text_friend,
         fill = "white",
-        font = font
+        font = P_FONT_L
     )
 
 
-def mark_bonuses(image_path, personal_bonus_number, friend_bonus_number, output_path):
+async def mark_bonuses(image_path, personal_bonus_number, friend_bonus_number):
     img = Image.open(image_path)
     width, height = img.size
     draw = ImageDraw.Draw(img)
@@ -70,21 +75,49 @@ def mark_bonuses(image_path, personal_bonus_number, friend_bonus_number, output_
 
     for number, position in personal_bonus_positions.items():
         if number <= personal_bonus_number:
-            create_large_checkmark(draw, position[0], position[1])
+            await create_large_checkmark(draw, position[0], position[1])
 
     for number, position in friend_bonus_positions.items():
         if number <= friend_bonus_number:
-            create_large_checkmark(draw, position[0], position[1])
+            await create_large_checkmark(draw, position[0], position[1])
 
-    add_db_numbers(draw, width, height, personal_bonus_number, friend_bonus_number)
+    await add_db_numbers(draw, width, height, personal_bonus_number, friend_bonus_number)
 
-    img.save(output_path)
+    return img
 
 
-if __name__ == "__main__":
-    mark_bonuses(
-        image_path = "../../images/tech/bonusCards/bonusCard1.png",
-        personal_bonus_number = 16,
-        friend_bonus_number = 5,
-        output_path = "marked_bonus_circles.png"
+@router.callback_query(F.data.startswith("get_bonus_card"))
+async def get_bonus_cards(call: types.CallbackQuery, bot: Bot, channel_id):
+    await call.answer()
+    result = await execute_select_all(
+        "SELECT total_count, paid_spreads, referrals_paid FROM users WHERE user_id = $1",
+        (call.from_user.id,))
+
+    spreads_count, paid_count, referrals_paid = result[0]
+
+    referrals_array = await get_referral_count(call.from_user.id, bot, channel_id)
+
+    img1 = await mark_bonuses(
+        image_path = "./images/tech/bonusCards/bonusCard1.png",
+        personal_bonus_number = paid_count,
+        friend_bonus_number = referrals_paid
     )
+
+    img2 = await mark_bonuses(
+        image_path = "./images/tech/bonusCards/bonusCard2.png",
+        personal_bonus_number = spreads_count,
+        friend_bonus_number = len(referrals_array) if referrals_array else 0
+    )
+
+    with io.BytesIO() as output1, io.BytesIO() as output2:
+        img1.save(output1, format = "PNG")
+        img2.save(output2, format = "PNG")
+        output1.seek(0)
+        output2.seek(0)
+
+        media_group = MediaGroupBuilder()
+
+        media_group.add_photo(media = BufferedInputFile(output1.getvalue(), "image.png"))
+        media_group.add_photo(media = BufferedInputFile(output2.getvalue(), "image1.png"))
+
+        await call.message.reply_media_group(media = media_group.build())

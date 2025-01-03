@@ -30,7 +30,7 @@ sub_keyboard.button(text = "Жрица", callback_data = SubscriptionCallback(su
 @router.callback_query(F.data.startswith("get_sub_menu"))
 async def process_subscription(call: types.CallbackQuery, bot: Bot):
     logger.info(
-        f"User {call.message.from_user.id} ({call.message.from_user.full_name}) requested subscription options.")
+        f"User {call.from_user.id} ({call.message.from_user.full_name}) requested subscription options.")
     await bot.send_message(chat_id = call.message.chat.id,
                            text =
                            "Типы подписок\n\n"
@@ -72,7 +72,7 @@ async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery,
 
 @router.message(F.successful_payment)
 async def process_successful_payment(message: types.Message, bot: Bot):
-    new_date = datetime.datetime.now(pytz.timezone('Europe/Kiev'))
+    new_date = datetime.datetime.now(pytz.timezone('Europe/Kiev')) + datetime.timedelta(days = 30)
     date = new_date.strftime("%d.%m")
 
     user_id = message.from_user.id
@@ -81,6 +81,13 @@ async def process_successful_payment(message: types.Message, bot: Bot):
     await execute_query("update users set subscription = $1 where user_id = $2", (sub, user_id,))
     await execute_query("update users set subscription_date = $1 where user_id = $2", (date, user_id,))
 
+    if sub == 1:
+        await execute_query("update users set paid_meanings = paid_meanings + 100 where user_id = $1", (user_id,))
+    elif sub == 2:
+        await execute_query("update users set paid_meanings = paid_meanings + 200 where user_id = $1", (user_id,))
+    elif sub == 3:
+        await execute_query("update users set paid_meanings = paid_meanings + 300 where user_id = $1", (user_id,))
+
     sub_name = SUBS_TYPE.get(sub, None)
 
     logger.info(
@@ -88,6 +95,7 @@ async def process_successful_payment(message: types.Message, bot: Bot):
 
     await bot.send_message(
         message.chat.id,
-        f'Ваш платеж принят! Спасибо за приобретение подписки {sub_name}. '
-        f'{message.successful_payment.total_amount} {message.successful_payment.currency}',
+        f'Ваш платеж принят! Спасибо за приобретение подписки {sub_name} за '
+        f'{message.successful_payment.total_amount} {message.successful_payment.currency}'
+        f'Ваша подписка закончится {date}.',
     )

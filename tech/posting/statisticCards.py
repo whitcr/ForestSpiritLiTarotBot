@@ -50,8 +50,8 @@ async def get_statistic_post(bot, channel_id):
            f"\n\n"\
            f"Также можете посмотреть, как пройдет ваш завтрашний день с помощью команды <b>'расклад на завтра'</b>."
 
-    post = await bot.send_photo(CHANNEL_ID, photo = await get_buffered_image(image), caption = text)
-    await bot.send_message(CHANNEL_ID, text = text_energy, reply_to_message_id = post.message_id)
+    post = await bot.send_photo(channel_id, photo = await get_buffered_image(image), caption = text)
+    await bot.send_message(channel_id, text = text_energy, reply_to_message_id = post.message_id)
 
 
 text_temp = []

@@ -1,6 +1,6 @@
 from aiogram import types, Router, F
 
-from database import execute_select
+from database import execute_select, execute_query
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
 from functions.messages.messages import get_reply_message, typing_animation_decorator, delete_message
@@ -147,6 +147,14 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
                                          state: FSMContext):
     await call.answer()
 
+    count = await  execute_select("select paid_meanings from users where user_id = $1", (call.from_user.id,))
+    if count > 0:
+        await execute_query("update users set paid_meanings = paid_meanings - 1 where user_id = $1",
+                            (call.from_user.id,))
+    else:
+        await call.message.answer("У вас закончились платные трактовки.")
+        return
+
     data_dict = callback_data.model_dump()
 
     get_cards, get_question, get_theme = await format_callback_data(call, data_dict)
@@ -165,9 +173,16 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
 
 @router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(2))
 @typing_animation_decorator(initial_message = "Трактую")
-async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning,
-                                         state: FSMContext):
+async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning):
     await call.answer()
+
+    count = await execute_select("select paid_meanings from users where user_id = $1", (call.from_user.id,))
+    if count > 0:
+        await execute_query("update users set paid_meanings = paid_meanings - 1 where user_id = $1",
+                            (call.from_user.id,))
+    else:
+        await call.message.answer("У вас закончились платные трактовки.")
+        return
 
     data_dict = callback_data.model_dump()
 
@@ -316,6 +331,7 @@ async def get_meaning_premium(call: types.CallbackQuery, state: FSMContext):
     await call.answer()
     await delete_message(call.message)
     await state.clear()
+
     message = await get_cards_meanings(call.message.text)
     await call.message.answer(message,
                               reply_to_message_id = await get_reply_message(call))

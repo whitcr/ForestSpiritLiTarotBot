@@ -20,6 +20,8 @@ from handlers.tarot.spreads.experimental import experimental
 from middlewares.statsUser import UserStatisticsMiddleware
 from tech.mailing import settings
 from tech.creating import menuCreate
+from functions.bonuses import createBonusCard
+from functions.bonuses import giveBonuses
 
 
 def setup_routers():
@@ -37,6 +39,7 @@ def setup_routers():
                            questions.router, date.router, getSpreads.router, dopCard.router,
                            getMeaningSpread.router, meaningDaySpread.router, givedBoost.router,
                            getInvoice.router, settings.router, menuCreate.router, weekAndMonthPremium.router,
-                           owner.router, user.router, referrals.router, audio.router)
+                           owner.router, user.router, referrals.router, audio.router, createBonusCard.router,
+                           giveBonuses.router)
 
     return router

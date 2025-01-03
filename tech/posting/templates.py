@@ -23,4 +23,4 @@ async def get_post_template():
 async def notify_week_spread(bot, channel_id):
     message = (f" — Пишем <b>'расклад на неделю'</b> в комментариях и узнаем, чего опасаться и чего ждать в следующие "
                f"семь дней. Чем больше реакций, тем лучше карты <3")
-    await bot.send_message(CHANNEL_ID, message)
+    await bot.send_message(channel_id, message)

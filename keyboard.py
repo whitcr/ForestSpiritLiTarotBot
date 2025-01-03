@@ -108,6 +108,16 @@ sub_keyboard_buttons = [
 
 sub_keyboard = InlineKeyboardMarkup(inline_keyboard = sub_keyboard_buttons)
 
+# КНОПКИ ДЛЯ ПОКУПКИ ПОДПИСКИ
+
+sub_buy_keyboard_buttons = [
+    [
+        InlineKeyboardButton(text = 'Купить подписки', callback_data = "get_sub_info"),
+    ],
+]
+
+sub_buy_keyboard = InlineKeyboardMarkup(inline_keyboard = sub_buy_keyboard_buttons)
+
 # КНОПКИ ДЛЯ РАССЫЛКИ
 follow_daily_mailing_buttons = [
     [
@@ -230,10 +240,12 @@ profile_buttons = [
         InlineKeyboardButton(text = "Расклад на месяц", callback_data = "create_month_spread")
     ],
     [
-        InlineKeyboardButton(text = "Ссылка для приглашения", callback_data = "get_referral_url"),
+        InlineKeyboardButton(text = "Рефералы", callback_data = "get_referral_url"),
+        InlineKeyboardButton(text = "Рассылки", callback_data = "get_referral_url"),
     ],
     [
         InlineKeyboardButton(text = "Статистика", callback_data = "get_user_statistics"),
+        InlineKeyboardButton(text = "Бонусы", callback_data = "get_bonus_card"),
     ],
     [
         InlineKeyboardButton(text = "Подписка", callback_data = "get_sub_menu"),
