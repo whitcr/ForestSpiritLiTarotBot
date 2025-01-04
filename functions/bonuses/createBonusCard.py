@@ -47,22 +47,35 @@ async def add_db_numbers(draw, width, height, personal_number, friend_number):
     )
 
 
-async def mark_bonuses(image_path, personal_bonus_number, friend_bonus_number):
+async def mark_bonuses(image_path, personal_bonus_number, friend_bonus_number, type):
     img = Image.open(image_path)
     width, height = img.size
     draw = ImageDraw.Draw(img)
 
-    personal_bonus_positions = {
-        4: (width * 0.2, height * 0.17),  # Расклад на неделю от ли
-        12: (width * 0.4, height * 0.17),  # Расклад на месяц от ли
-        20: (width * 0.6, height * 0.17),  # Week премиум
-        28: (width * 0.8, height * 0.17),  # Month премиум
+    if type == 1:
+        personal_bonus_positions = {
+            4: (width * 0.2, height * 0.17),  # Расклад на неделю от ли
+            12: (width * 0.4, height * 0.17),  # Расклад на месяц от ли
+            20: (width * 0.6, height * 0.17),  # Week премиум
+            28: (width * 0.8, height * 0.17),  # Month премиум
 
-        # Middle row
-        7: (width * 0.25, height * 0.45),  # 20% скидка
-        16: (width * 0.5, height * 0.45),  # Free вопрос
-        24: (width * 0.75, height * 0.45),  # 2 Free вопроса
-    }
+            # Middle row
+            7: (width * 0.25, height * 0.45),  # 20% скидка
+            16: (width * 0.5, height * 0.45),  # Free вопрос
+            24: (width * 0.75, height * 0.45),  # 2 Free вопроса
+        }
+    else:
+        personal_bonus_positions = {
+            1000: (width * 0.2, height * 0.17),  # Расклад на неделю от ли
+            4000: (width * 0.4, height * 0.17),  # Расклад на месяц от ли
+            8000: (width * 0.6, height * 0.17),  # Week премиум
+            15000: (width * 0.8, height * 0.17),  # Month премиум
+
+            # Middle row
+            2000: (width * 0.25, height * 0.45),  # 20% скидка
+            6000: (width * 0.5, height * 0.45),  # Free вопрос
+            10000: (width * 0.75, height * 0.45),  # 2 Free вопроса
+        }
 
     friend_bonus_positions = {
         1: (width * 0.15, height * 0.8),  # 20% скидка
@@ -100,13 +113,15 @@ async def get_bonus_cards(call: types.CallbackQuery, bot: Bot, channel_id):
     img1 = await mark_bonuses(
         image_path = "./images/tech/bonusCards/bonusCard1.png",
         personal_bonus_number = paid_count,
-        friend_bonus_number = referrals_paid
+        friend_bonus_number = referrals_paid,
+        type = 1
     )
 
     img2 = await mark_bonuses(
         image_path = "./images/tech/bonusCards/bonusCard2.png",
         personal_bonus_number = spreads_count,
-        friend_bonus_number = len(referrals_array) if referrals_array else 0
+        friend_bonus_number = len(referrals_array) if referrals_array else 0,
+        type = 2
     )
 
     with io.BytesIO() as output1, io.BytesIO() as output2:
