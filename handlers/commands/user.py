@@ -82,7 +82,9 @@ async def generate_profile_summary(message: types.Message):
     coupon_silver = profile_data[12]
     coupon_iron = profile_data[13]
 
-    coupons = f"{coupon_gold} золотых, {coupon_silver} серебряных, {coupon_iron} железных"
+    coupons = (f"{coupon_gold} золот{'ых' if coupon_gold != 1 else 'ой'}, "
+               f"{coupon_silver} серебрян{'ых' if coupon_silver != 1 else 'ый'}, "
+               f"{coupon_iron} железн{'ых' if coupon_iron != 1 else 'ый '}")
 
     deck_type = DECK_MAP[deck_type] if deck_type else "Не указано"
     subscription = SUBS_TYPE[subscription] if subscription else "Без подписки"

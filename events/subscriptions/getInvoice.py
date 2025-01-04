@@ -29,6 +29,7 @@ sub_keyboard.button(text = "Жрица", callback_data = SubscriptionCallback(su
 
 @router.callback_query(F.data.startswith("get_sub_menu"))
 async def process_subscription(call: types.CallbackQuery, bot: Bot):
+    await call.answer()
     logger.info(
         f"User {call.from_user.id} ({call.message.from_user.full_name}) requested subscription options.")
     await bot.send_message(chat_id = call.message.chat.id,
