@@ -15,7 +15,7 @@ client = AsyncOpenAI(api_key = os.environ.get("OPENAI_API_KEY"))
 
 async def get_gpt_response(messages):
     response = await client.chat.completions.create(
-        messages = messages, model = "gpt-3.5-turbo"
+        messages = messages, model = "gpt-4o-mini"
     )
     return response.choices[0].message.content
 
