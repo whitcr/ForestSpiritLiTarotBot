@@ -17,6 +17,8 @@ class LoggingMiddleware(BaseMiddleware):
 
     async def __call__(self, handler: Callable, event: Update, data: Dict):
 
+        logger_chat = -4718379490
+
         try:
             result = await handler(event, data)
             if result is UNHANDLED:
@@ -45,7 +47,7 @@ class LoggingMiddleware(BaseMiddleware):
             logging.info(message)
 
             if bot:
-                await bot.send_message(admin_id, message)
+                await bot.send_message(logger_chat, message)
 
             return result
         except Exception as e:
@@ -74,4 +76,4 @@ class LoggingMiddleware(BaseMiddleware):
             logging.exception(message)
 
             if bot:
-                await bot.send_message(admin_id, message)
+                await bot.send_message(logger_chat, message)
