@@ -1,11 +1,15 @@
+import os
 import time
 from aiogram import types, F, Router, Bot
-from aiogram.types import Message
+from aiogram.types import Message, InputFile
 
 from database import execute_select_all, execute_query, execute_select
 from filters.baseFilters import IsAdmin
 from aiogram import F, Bot
 from aiogram.types import Message
+
+from functions.cards.create import get_buffered_image
+from functions.statistics.globalStats import generate_stats_image
 
 router = Router()
 
@@ -88,20 +92,17 @@ async def get_ban(message: types.Message, bot: Bot):
                 await message.reply(f"Не удалось забанить пользователя: {e}")
 
 
-@router.message(IsAdmin(), F.text.startswith("статистика"))
+@router.message(F.text.startswith("!статистика"))
 async def cmd_stats(message: Message):
-    stats = await execute_select(
-        "SELECT command, daily_count, weekly_count, monthly_count, total_count FROM statistics_handler"
+    stats = await execute_select_all(
+        "SELECT command, daily_count, weekly_count, monthly_count, total_count FROM statistics_handler ORDER BY total_count DESC"
     )
+
     if stats:
-        response = "Статистика использования команд:\n\n"
-        for stat in stats:
-            response += (f"Команда: {stat[0]}\n"
-                         f"За день: {stat[1]}, За неделю: {stat[2]}, "
-                         f"За месяц: {stat[3]}, Всего: {stat[4]}\n\n")
+        image = await generate_stats_image(stats)
+        await message.answer_photo(photo = await get_buffered_image(image), caption = "Вот ваша статистика 📊")
     else:
-        response = "Статистика пока не собрана."
-    await message.answer(response)
+        await message.answer("Статистика пока не собрана.")
 
 
 @router.message(IsAdmin(), F.content_type.in_({'photo', 'video', 'document'}))
