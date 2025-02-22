@@ -91,7 +91,7 @@ async def get_ban(message: types.Message, bot: Bot):
 @router.message(IsAdmin(), F.text.startswith("статистика"))
 async def cmd_stats(message: Message):
     stats = await execute_select(
-        "SELECT command, daily_count, weekly_count, monthly_count, total_count FROM handler_statistics"
+        "SELECT command, daily_count, weekly_count, monthly_count, total_count FROM statistics_handler"
     )
     if stats:
         response = "Статистика использования команд:\n\n"
