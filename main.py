@@ -25,20 +25,24 @@ logger = logging.getLogger(__name__)
 
 
 async def on_startup(bot: Bot, admin_id, channel_id) -> None:
+    logger_chat = -4718379490
+
     try:
         _delete_data_task = asyncio.create_task(delete_expired_data())
         _schedule_task = asyncio.create_task(schedule(bot, channel_id, admin_id))
         logger.info('Starting bot')
-        await bot.send_message(admin_id, "Bot started!")
+        await bot.send_message(logger_chat, "Bot started!")
     except Exception as e:
         logger.exception(f"An error occurred during bot startup: {e}")
 
 
 async def on_shutdown(bot: Bot, admin_id) -> None:
+    logger_chat = -4718379490
+
     try:
         await bot.delete_webhook(drop_pending_updates = True)
         logger.info('Stopping bot')
-        await bot.send_message(admin_id, "Bot stopped!")
+        await bot.send_message(logger_chat, "Bot stopped!")
     except Exception as e:
         logger.exception(f"An error occurred during bot shutdown: {e}")
 

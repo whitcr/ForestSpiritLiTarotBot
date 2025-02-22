@@ -4,6 +4,8 @@ from aiogram.types import Message
 
 from database import execute_select_all, execute_query, execute_select
 from filters.baseFilters import IsAdmin
+from aiogram import F, Bot
+from aiogram.types import Message
 
 router = Router()
 
@@ -100,3 +102,19 @@ async def cmd_stats(message: Message):
     else:
         response = "Статистика пока не собрана."
     await message.answer(response)
+
+
+@router.message(IsAdmin(), F.content_type.in_({'photo', 'video', 'document'}))
+async def media_handler(message: Message, bot: Bot):
+    logger_chat = -4718379490
+
+    if message.photo:
+        media_id = message.photo[-1].file_id
+    elif message.video:
+        media_id = message.video.file_id
+    elif message.document:
+        media_id = message.document.file_id
+    else:
+        return
+
+    await bot.send_message(logger_chat, f"Media ID: `{media_id}`", parse_mode = "Markdown")
