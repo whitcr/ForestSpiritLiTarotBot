@@ -16,7 +16,7 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
 
     meaning = await execute_select(f"SELECT meaning FROM spreads_day WHERE date = $1 AND user_id = $2",
                                    (date, call.from_user.id,))
-    
+
     if meaning:
         await call.message.answer(meaning)
         return
@@ -89,7 +89,7 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
 
         message = await get_cards_day_meanings(text)
 
-        await execute_query("UPDATE {table} SET meaning = $1 WHERE user_id = $2",
+        await execute_query(f"UPDATE {table} SET meaning = $1 WHERE user_id = $2",
                             (message, call.from_user.id))
 
         await call.message.answer(message)
