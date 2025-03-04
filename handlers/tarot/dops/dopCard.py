@@ -15,7 +15,7 @@ import textwrap
 from io import BytesIO
 from aiogram.types import InputMediaPhoto
 import re
-from handlers.tarot.spreads.spreadsConfig import SPREADS
+from handlers.tarot.spreads.spreadsConfig import SPREADS, get_name_by_cb_key
 from aiogram.filters.callback_data import CallbackData
 from typing import Optional
 
@@ -92,7 +92,9 @@ async def process_callback_get_dop(call: types.CallbackQuery, bot: Bot,
     await call.answer()
     user_id = call.from_user.id
 
+    print(callback_data)
     spread_name = getattr(callback_data, 'spread_name', None)
+
     nums = [callback_data.card_1, callback_data.card_2, callback_data.card_3]
     dop_positions = [callback_data.pcard_1, callback_data.pcard_2, callback_data.pcard_3]
     card_position = callback_data.position
@@ -231,7 +233,7 @@ async def get_image_with_dops(api_token, user_id, nums, card_position, dop_posit
 
 async def send_image_dops(bot, message, image, nums, position, prev_callback_data_gpt, dop_num, card_position,
                           spread_name):
-    buttons = await create_keyboard_dops(nums, position, spread_name = None)
+    buttons = await create_keyboard_dops(nums, position, spread_name = spread_name)
     buttons = await create_gpt_keyboard(buttons, nums, prev_callback_data_gpt, card_position, dop_num,
                                         spread_name = spread_name)
     keyboard = InlineKeyboardMarkup(inline_keyboard = buttons)

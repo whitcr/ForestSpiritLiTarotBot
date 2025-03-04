@@ -212,9 +212,9 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
 
     print(text)
 
-    # message = await get_cards_meanings(text)
-    # await call.message.answer(message)
-    await call.message.answer(text)
+    message = await get_cards_meanings(text)
+    await call.message.answer(message)
+    # await call.message.answer(text)
 
 
 async def get_text_for_meaning(data):
