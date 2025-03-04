@@ -31,14 +31,10 @@ async def get_month_week_spread(bot, message, spread_name):
     deck = await execute_select(f"SELECT deck FROM {table} WHERE user_id = '{user_id}'")
 
     if file_id:
-        try:
-            await bot.send_photo(message.chat.id, photo = file_id, caption = "Вот твой расклад.",
-                                 reply_to_message_id = message.message_id,
-                                 reply_markup = await create_meaning_keyboard(
-                                     spread_name) if await deck == 'raider' else None)
-        except:
-            await bot.send_document(user_id, document = file_id, caption = "Вот твой расклад.",
-                                    reply_to_message_id = message.message_id)
+        await bot.send_photo(message.chat.id, photo = file_id, caption = "Вот твой расклад.",
+                             reply_to_message_id = message.message_id,
+                             reply_markup = await create_meaning_keyboard(
+                                 spread_name) if deck == 'raider' else None)
 
     else:
         choice = await get_choice_spread(message.from_user.id)
