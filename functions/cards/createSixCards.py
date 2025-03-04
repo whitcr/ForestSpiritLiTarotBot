@@ -89,7 +89,7 @@ async def create_image_six_cards(user_id, theme=None):
 
         table = f"spreads_{theme}"
         await execute_query(
-            f"insert into {table} (p1, p2, p3, n1, n2, n3, threat, advice, user_id) "
+            f"insert into {table} (p1, p2, p3, n1, n2, n3, threat, advice, user_id, deck) "
             f"values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
             (num[0], num[1], num[2], num[3], num[4], num[5], num[6], num[7], user_id, choice))
 
