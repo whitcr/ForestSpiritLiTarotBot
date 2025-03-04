@@ -18,17 +18,26 @@ class StatisticsCache:
         self.flush_interval = flush_interval
         self.last_flush = datetime.utcnow()
         self._lock = asyncio.Lock()
+        self._flush_task = None  # Инициализируем переменную для фоновой задачи
+
+    async def start_auto_flush(self):
+        """Запускает авто-флаш в фоне, если ещё не запущено."""
+        if self._flush_task is None or self._flush_task.done():
+            self._flush_task = asyncio.create_task(self.auto_flush())
 
     async def increment(self, command: str):
         async with self._lock:
-            self.cache[command]['daily_count'] += 1
-            self.cache[command]['weekly_count'] += 1
-            self.cache[command]['monthly_count'] += 1
-            self.cache[command]['total_count'] += 1
+            counts = self.cache[command]
+            counts['daily_count'] += 1
+            counts['weekly_count'] += 1
+            counts['monthly_count'] += 1
+            counts['total_count'] += 1
 
-            now = datetime.utcnow()
-            if (now - self.last_flush).seconds >= self.flush_interval:
-                await self.flush()
+    async def auto_flush(self):
+        """Периодически сбрасывает данные в БД."""
+        while True:
+            await asyncio.sleep(self.flush_interval)
+            await self.flush()
 
     async def flush(self):
         async with self._lock:
@@ -40,8 +49,7 @@ class StatisticsCache:
             week_start = today - timedelta(days = today.weekday())
             month_start = today.replace(day = 1)
 
-            for command, counts in self.cache.items():
-                # Получаем текущие значения из БД
+            for command, counts in list(self.cache.items()):
                 result = await execute_select_all(
                     """
                     SELECT daily_count, weekly_count, monthly_count, total_count,
@@ -49,27 +57,20 @@ class StatisticsCache:
                     FROM statistics_handler 
                     WHERE command = $1
                     """,
-                    (command,)
+                    (command,),
                 )
 
                 if result:
                     record = result[0]
-                    # Проверяем, нужно ли сбросить счетчики
-                    if record['last_daily_update'] != today:
-                        counts['daily_count'] = counts['daily_count']
-                    else:
-                        counts['daily_count'] += record['daily_count']
-
-                    if record['last_weekly_update'] != week_start:
-                        counts['weekly_count'] = counts['weekly_count']
-                    else:
-                        counts['weekly_count'] += record['weekly_count']
-
-                    if record['last_monthly_update'] != month_start:
-                        counts['monthly_count'] = counts['monthly_count']
-                    else:
-                        counts['monthly_count'] += record['monthly_count']
-
+                    counts['daily_count'] = 1 if record['last_daily_update'] != today else counts['daily_count'] +\
+                                                                                           record['daily_count']
+                    counts['weekly_count'] = 1 if record['last_weekly_update'] != week_start else counts[
+                                                                                                      'weekly_count'] +\
+                                                                                                  record['weekly_count']
+                    counts['monthly_count'] = 1 if record['last_monthly_update'] != month_start else counts[
+                                                                                                         'monthly_count'] +\
+                                                                                                     record[
+                                                                                                         'monthly_count']
                     counts['total_count'] += record['total_count']
 
                     await execute_query(
@@ -105,13 +106,21 @@ CALLBACK_COMMAND_MAPPING = {
     'get_dop_': 'Допы',
     'get_default_meaning_gpt_': 'Обычная трактовка',
     'get_day_spread_meaning_': 'Трактовка расклада дня',
-    'day_meaning_day_': 'Трактовка карт дня'
+    'day_meaning_day_': 'Трактовка карт дня',
 }
+
+ALLOWED_COMMANDS = {
+    "библиотека", "допы", "доп", "мантра", "мтриплет", "помощь",
+    "стриплет", "колода", "карта", "значение", "расклад",
+    "допы", "триплет", "саб", "мой профиль"
+}
+
+ALLOWED_COMMANDS = {cmd.lower() for cmd in ALLOWED_COMMANDS}
 
 
 def get_command_name(callback_data: str) -> str:
     for prefix, command in CALLBACK_COMMAND_MAPPING.items():
-        if prefix in callback_data:
+        if callback_data.startswith(prefix):
             return command
     return callback_data
 
@@ -126,16 +135,16 @@ class HandlerStatisticsMiddleware(BaseMiddleware):
             event: Message | CallbackQuery,
             data: Dict[str, Any]
     ) -> Any:
-        # Определяем команду
+        await self.stats_cache.start_auto_flush()  # Гарантируем запуск фоновой задачи
+
         if isinstance(event, Message):
-            command = event.text.split()[0] if event.text else 'unknown_message'
+            words = event.text.lower().split()[:3] if event.text else []
+            command = "_".join(words) if words and words[0] in ALLOWED_COMMANDS else "unknown_message"
         elif isinstance(event, CallbackQuery):
             command = get_command_name(event.data)
         else:
             command = 'unknown_event'
+        print(command)
 
-        # Запускаем обновление статистики асинхронно
-        asyncio.create_task(self.stats_cache.increment(command.lower()))
-
-        # Выполняем основной обработчик
+        asyncio.create_task(self.stats_cache.increment(command))
         return await handler(event, data)

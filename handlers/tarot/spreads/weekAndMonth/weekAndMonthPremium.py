@@ -1,7 +1,8 @@
+from aiogram.filters import or_f
 from aiogram.types import BufferedInputFile, CallbackQuery
 
 from database import execute_query, execute_select
-from filters.baseFilters import IsReply
+from filters.baseFilters import IsReply, IsBooster
 from filters.subscriptions import SubscriptionLevel, get_subscription
 from functions.cards.createThreeCards import get_image_three_cards_wb
 from functions.messages.messages import typing_animation_decorator, delete_message
@@ -71,7 +72,7 @@ async def get_week_spread_premium(user_id, bot, message, spread_name):
 
 
 @router.callback_query(IsReply(), F.data.in_({'create_week_premium_spread', 'create_month_premium_spread'}),
-                       SubscriptionLevel(3))
+                       or_f(SubscriptionLevel(3), IsBooster()))
 @typing_animation_decorator(initial_message = "Раскладываю и трактую, ждите")
 async def get_premium_spread_image(call: CallbackQuery, bot: Bot):
     spread_name = call.data.split("_")[1]

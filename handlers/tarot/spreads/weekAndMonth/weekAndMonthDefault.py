@@ -2,7 +2,7 @@ from aiogram.types import CallbackQuery, BufferedInputFile, InputFile
 from database import execute_query, execute_select
 from filters.baseFilters import IsReply
 from filters.subscriptions import get_subscription, SubscriptionLevel
-from functions.cards.createSixCards import send_image_six_cards, create_image_six_cards
+from functions.cards.createSixCards import send_image_six_cards, create_image_six_cards, create_meaning_keyboard
 from functions.messages.messages import get_reply_message, typing_animation_decorator
 from handlers.tarot.spreads.weekAndMonth.weekAndMonthPremium import get_week_spread_premium
 from PIL import ImageDraw
@@ -28,11 +28,14 @@ async def get_month_week_spread(bot, message, spread_name):
     table = f"spreads_{spread_name}"
 
     file_id = await execute_select(f"SELECT file_id FROM {table} WHERE user_id = '{user_id}'")
+    deck = await execute_select(f"SELECT deck FROM {table} WHERE user_id = '{user_id}'")
 
     if file_id:
         try:
             await bot.send_photo(message.chat.id, photo = file_id, caption = "Вот твой расклад.",
-                                 reply_to_message_id = message.message_id)
+                                 reply_to_message_id = message.message_id,
+                                 reply_markup = await create_meaning_keyboard(
+                                     spread_name) if await deck == 'raider' else None)
         except:
             await bot.send_document(user_id, document = file_id, caption = "Вот твой расклад.",
                                     reply_to_message_id = message.message_id)

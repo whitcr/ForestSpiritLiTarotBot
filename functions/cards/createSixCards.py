@@ -39,7 +39,7 @@ async def send_image_six_cards(bot, message, username, image, theme=None):
     msg = await bot.send_photo(message.chat.id, photo = await get_buffered_image(image),
                                reply_to_message_id = await get_reply_message(message),
                                reply_markup = await create_meaning_keyboard(theme) if await get_choice_spread(
-                                   message.reply_to_message.from_user.id) is 'raider' else None)
+                                   message.reply_to_message.from_user.id) == 'raider' else None)
     file_id = msg.photo[-1].file_id
 
     if theme is not None:
@@ -90,8 +90,8 @@ async def create_image_six_cards(user_id, theme=None):
         table = f"spreads_{theme}"
         await execute_query(
             f"insert into {table} (p1, p2, p3, n1, n2, n3, threat, advice, user_id) "
-            f"values ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
-            (num[0], num[1], num[2], num[3], num[4], num[5], num[6], num[7], user_id))
+            f"values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+            (num[0], num[1], num[2], num[3], num[4], num[5], num[6], num[7], user_id, choice))
 
     # if choice in ['deviantoom', 'manara']:
     card_positions = [
