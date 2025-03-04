@@ -4,12 +4,16 @@ from PIL import Image, ImageDraw
 from PIL import ImageFilter
 from io import BytesIO
 import numpy as np
-
+from aiogram import types, Router, F, Bot
 from database import execute_query
-from functions.cards.create import get_path_cards, get_gradient_3d, get_path_background
+from filters.baseFilters import IsReply
+from functions.cards.create import get_path_cards, get_gradient_3d, get_path_background, get_buffered_image
+
+router = Router()
 
 
-async def history_image(bot, channel_id):
+@router.callback_query(IsReply(), F.data == 'practice_history')
+async def practice_history(bot: Bot, call: types.CallbackQuery):
     image = await get_image_history()
 
     draw_text = ImageDraw.Draw(image)
@@ -19,10 +23,7 @@ async def history_image(bot, channel_id):
 
     draw_text = ImageDraw.Draw(image)
     draw_text.text((1230, 20), '@ForestSpiritLi', font = FONT_L, fill = 'white')
-    bio = BytesIO()
-    bio.name = 'image.png'
-    image.save(bio, 'PNG')
-    bio.seek(0)
+
     text = f"<b><u>Трактовка Истории</u></b>\n\nВам нужно растрактовать историю, которую поведали нам карты. "\
            f"Не ограничивайте себя, проявите все свои знания, главно сделайте это интересно и чтобы это подходило к значениям карт! \n\n"\
            f"<i>У каждого могут быть разные рассказы и в этом вся прелесть, не бойтесь ошибиться и не бойтесь сказать что-то не так, наоборот проявите смекалку и каплю юмора, если она будет уместна. </i> \n\n"\
@@ -30,7 +31,8 @@ async def history_image(bot, channel_id):
            f"После — карты, описывающие саму историю, их связывает некая белая полоса, которая показывает хронологический порядок событий."\
            f" И последние три карты описывают главное событие истории.\n\n"\
            f"Жду ваших замечательных историй в комментариях!"
-    msg = await bot.send_photo(channel_id, photo = bio, caption = text)
+
+    msg = await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image), caption = text)
     file_id = msg.photo[-1].file_id
     await execute_query("UPDATE posting SET file_id ='{}' where post = 'history'", (file_id,))
 

@@ -50,6 +50,9 @@ practice_menu_tarot_buttons = [
     [
         InlineKeyboardButton(text = "Триплет", callback_data = "practice_triple"),
         InlineKeyboardButton(text = "Викторина", callback_data = "practice_quiz")
+    ],
+    [
+        InlineKeyboardButton(text = "История", callback_data = "practice_history")
     ]
 ]
 practice_menu_tarot_keyboard = InlineKeyboardMarkup(inline_keyboard = practice_menu_tarot_buttons)
@@ -249,6 +252,7 @@ profile_buttons = [
     ],
     [
         InlineKeyboardButton(text = "Подписка", callback_data = "get_sub_menu"),
+        InlineKeyboardButton(text = "Помощь", callback_data = "get_support"),
     ]
 ]
 profile_keyboard = InlineKeyboardMarkup(inline_keyboard = profile_buttons)

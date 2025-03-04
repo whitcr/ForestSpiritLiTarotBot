@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass
 from dotenv import load_dotenv
 
+
 # load_dotenv()
 
 
@@ -29,6 +30,8 @@ class TgBot:
     channel_id: int
     chat_id: int
     channel_username: str
+    logger_chat: str
+    support_chat: str
 
 
 @dataclass
@@ -46,7 +49,9 @@ def load_config() -> Config:
             channel_id = int(os.environ.get('CHANNEL_ID', '0')),
             bot_id = int(os.environ.get('BOT_ID', '0')),
             chat_id = int(os.environ.get('CHAT_ID', '0')),
-            channel_username = os.environ.get('CHANNEL_USERNAME', '0')
+            channel_username = os.environ.get('CHANNEL_USERNAME', '0'),
+            logger_chat = os.environ.get('LOGGER_CHAT', '0'),
+            support_chat = os.environ.get('SUPPORT_CHAT', '0')
         ),
         webhook = WebhookConfig(
             webhook_path = os.environ.get('WEBHOOK_PATH', ''),

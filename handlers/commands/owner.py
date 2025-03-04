@@ -106,9 +106,7 @@ async def cmd_stats(message: Message):
 
 
 @router.message(IsAdmin(), F.content_type.in_({'photo', 'video', 'document'}))
-async def media_handler(message: Message, bot: Bot):
-    logger_chat = -4718379490
-
+async def media_handler(message: Message, bot: Bot, logger_chat):
     if message.photo:
         media_id = message.photo[-1].file_id
     elif message.video:

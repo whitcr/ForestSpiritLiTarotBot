@@ -32,6 +32,10 @@ async def process_subscription(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     logger.info(
         f"User {call.from_user.id} ({call.message.from_user.full_name}) requested subscription options.")
+
+    # await bot.send_photo(call.message.chat.id, photo = )
+    # await bot.send_photo(call.message.chat.id, photo = )
+
     await bot.send_message(chat_id = call.message.chat.id,
                            text =
                            "Типы подписок\n\n"
@@ -52,6 +56,8 @@ async def process_buy_command(call: types.CallbackQuery, callback_data: Subscrip
     logger.info(
         f"User {call.from_user.id} ({call.from_user.full_name}) selected subscription '{name}' for {callback_data.amount}.")
 
+    # await bot.send_document(call.message.chat.id, document = , caption = 'Покупая подписку, вы соглашаетесь с пользовательским соглашением ниже.')
+
     await bot.send_invoice(
         call.message.chat.id,
         title = 'Премиум подписка на Ли',
@@ -65,14 +71,16 @@ async def process_buy_command(call: types.CallbackQuery, callback_data: Subscrip
 
 
 @router.pre_checkout_query()
-async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery, bot: Bot):
+async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery, bot: Bot, logger_chat):
     logger.info(
         f"Pre-checkout query received from user {pre_checkout_query.from_user.id} ({pre_checkout_query.from_user.full_name}).")
+    await bot.send_message(logger_chat,
+                           f"Pre-checkout query received from user {pre_checkout_query.from_user.id} ({pre_checkout_query.from_user.full_name}).")
     await bot.answer_pre_checkout_query(pre_checkout_query.id, ok = True)
 
 
 @router.message(F.successful_payment)
-async def process_successful_payment(message: types.Message, bot: Bot):
+async def process_successful_payment(message: types.Message, bot: Bot, logger_chat):
     new_date = datetime.datetime.now(pytz.timezone('Europe/Kiev')) + datetime.timedelta(days = 30)
     date = new_date.strftime("%d.%m")
 
@@ -93,6 +101,9 @@ async def process_successful_payment(message: types.Message, bot: Bot):
 
     logger.info(
         f"Payment successful for user {user_id} ({message.from_user.full_name}): Subscription {sub_name}, amount {message.successful_payment.total_amount} {message.successful_payment.currency}.")
+    await bot.send_message(logger_chat,
+                           f"Payment successful for user {user_id} ({message.from_user.full_name}): Subscription {sub_name}, amount {message.successful_payment.total_amount} {message.successful_payment.currency}."
+                           f"Subscription will expire on {date}. Все данные про покупку: {message.successful_payment}.")
 
     await bot.send_message(
         message.chat.id,

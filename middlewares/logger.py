@@ -6,7 +6,7 @@ from aiogram.types import Update, CallbackQuery
 import logging
 from aiogram.dispatcher.event.bases import UNHANDLED
 from aiogram.utils.markdown import hlink
-
+from config import load_config
 from middlewares.statsHandler import get_command_name
 
 logging.basicConfig(level = logging.INFO)
@@ -17,7 +17,8 @@ class LoggingMiddleware(BaseMiddleware):
 
     async def __call__(self, handler: Callable, event: Update, data: Dict):
 
-        logger_chat = -4718379490
+        config = load_config()
+        logger_chat = config.tg_bot.logger_chat
 
         try:
             result = await handler(event, data)

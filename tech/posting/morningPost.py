@@ -6,6 +6,7 @@ from database import execute_select
 from filters.baseFilters import IsAdmin
 from functions.affirmations.affirmations import get_random_affirmations
 from functions.cards.create import get_path_cards, text_size, get_buffered_image
+from functions.gpt.requests import daily_question
 from other.phrases import get_random_phrases
 from constants import P_FONT_L, P_FONT_XL, P_FONT_S
 from tech.posting.moonInfo import moon_posting
@@ -54,7 +55,10 @@ async def morning_posting(bot, channel_id):
 
     phrase = await get_random_phrases(1)
 
-    text = f"<b><u>Аркан дня: {day_arcane}</u></b>\n{day_advice}\n\n<b><u>{moon_day} лунный день</u></b>\n{moon_day_text}<b><u>Аффирмации дня</u></b>"\
-           f"\n{day_affirmations}\n<b><u>Совет от Ли</u></b>\n{phrase[0]}\n\n—  Не забываем писать в комментариях <b>'Расклад дня'</b>, чтобы получить персональный прогноз на день от Ли!"
+    daily_questions = await daily_question()
+
+    text = f"<b><u>Аркан дня: {day_arcane}</u></b>\n{day_advice}\n\
+    <b><u>{moon_day} лунный день</u></b>\n{moon_day_text}<b><u>Аффирмации дня</u></b>"\
+           f"\n{day_affirmations}\n<b><u>Совет от Ли</u></b>\n{phrase[0]}\n\n<b><u>Вопрос дня</u></b>\n{daily_questions}\n\n—  Не забываем писать в комментариях <b>'Расклад дня'</b>, чтобы получить персональный прогноз на день от Ли!"
 
     await bot.send_photo(channel_id, await get_buffered_image(image), caption = text)

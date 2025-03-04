@@ -24,9 +24,7 @@ from fastapi import FastAPI, Request
 logger = logging.getLogger(__name__)
 
 
-async def on_startup(bot: Bot, admin_id, channel_id) -> None:
-    logger_chat = -4718379490
-
+async def on_startup(bot: Bot, admin_id, channel_id, logger_chat) -> None:
     try:
         _delete_data_task = asyncio.create_task(delete_expired_data())
         _schedule_task = asyncio.create_task(schedule(bot, channel_id, admin_id))
@@ -36,9 +34,7 @@ async def on_startup(bot: Bot, admin_id, channel_id) -> None:
         logger.exception(f"An error occurred during bot startup: {e}")
 
 
-async def on_shutdown(bot: Bot, admin_id) -> None:
-    logger_chat = -4718379490
-
+async def on_shutdown(bot: Bot, logger_chat) -> None:
     try:
         await bot.delete_webhook(drop_pending_updates = True)
         logger.info('Stopping bot')
@@ -52,6 +48,7 @@ def main() -> None:
     api_token = config.tg_bot.token
     admin_id = config.tg_bot.admin_id
     channel_id = config.tg_bot.channel_id
+    logger_chat = config.tg_bot.logger_chat
 
     bot = Bot(token = api_token, default = DefaultBotProperties(parse_mode = ParseMode.HTML))
     dp = Dispatcher()
@@ -80,7 +77,8 @@ def main() -> None:
 
     dp.update.outer_middleware(LoggingMiddleware())
 
-    dp.workflow_data.update({'admin_id': admin_id, 'channel_id': channel_id, 'api_token': api_token})
+    dp.workflow_data.update(
+        {'admin_id': admin_id, 'channel_id': channel_id, 'api_token': api_token, 'logger_chat': logger_chat})
 
     if config.webhook.webhook_path:
 

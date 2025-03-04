@@ -6,11 +6,11 @@ from aiogram import Bot
 
 from database import execute_query
 from events.subscriptions.checkSubscription import check_subscriptions
+from functions.gpt.requests import daily_question, random_card
 
 from tech.mailing.dayCard import day_card_follow_schedule
 from tech.mailing.monthSpread import month_card_follow_schedule
 from tech.mailing.weekSpread import week_card_follow_schedule
-from tech.posting.historyPracticePost import history_image
 from tech.posting.meditationPost import get_meditation_post
 from tech.posting.morningPost import morning_posting
 from tech.posting.practiceCardPost import practice_choose_card_post, practice_choose_card_post_answer
@@ -35,9 +35,6 @@ async def schedule(bot, channel_id, admin_id):
     aioschedule.every().day.at("05:00").do(lambda: asyncio.create_task(morning_posting(bot, channel_id)))
     aioschedule.every().day.at("18:00").do(lambda: asyncio.create_task(get_statistic_post(bot, channel_id)))
 
-    # aioschedule.every().day.at("08:00").do(daily_question)
-    # aioschedule.every().day.at("12:00").do(random_card)
-
     aioschedule.every().monday.at("07:00").do(lambda: asyncio.create_task(notify_week_spread(bot, channel_id)))
 
     aioschedule.every().monday.at("14:00").do(lambda: asyncio.create_task(practice_quiz_post(bot, channel_id)))
@@ -53,8 +50,7 @@ async def schedule(bot, channel_id, admin_id):
     aioschedule.every().thursday.at("17:00").do(
         lambda: asyncio.create_task(practice_choose_card_post_answer(bot, channel_id)))
 
-    aioschedule.every().saturday.at("13:00 ").do(lambda: asyncio.create_task(history_image(bot, channel_id)))
-    aioschedule.every().sunday.at("15:00").do(lambda: asyncio.create_task(get_meditation_post(bot, channel_id)))
+    # aioschedule.every().sunday.at("15:00").do(lambda: asyncio.create_task(get_meditation_post(bot, channel_id)))
 
     # ПОДПИСКИ
     aioschedule.every().day.at("10:00").do(lambda: asyncio.create_task(check_subscriptions(bot)))

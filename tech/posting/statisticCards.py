@@ -43,7 +43,6 @@ async def get_statistic_post(bot, channel_id):
     draw_text = ImageDraw.Draw(image)
     draw_text.text((780, 15), 'ЭНЕРГИИ ДНЯ', font = P_FONT_L, fill = 'white')
 
-    text_energy = await get_text_energy_day(cards_name)
     text = f"<b>Энергии сегодняшнего дня </b>\n\n<b>Вот такие вот Арканы преследовали нас сегодня. "\
            f"Как прошел ваш день? Есть ли какие-то соответствия? "\
            f"Какие ваши мысли в целом об этом дне и как могли бы данные карты проиграться?</b>"\
@@ -51,7 +50,10 @@ async def get_statistic_post(bot, channel_id):
            f"Также можете посмотреть, как пройдет ваш завтрашний день с помощью команды <b>'расклад на завтра'</b>."
 
     post = await bot.send_photo(channel_id, photo = await get_buffered_image(image), caption = text)
-    await bot.send_message(channel_id, text = text_energy, reply_to_message_id = post.message_id)
+
+    # Трактовка карт дня
+    # text_energy = await get_text_energy_day(cards_name)
+    # await bot.send_message(channel_id, text = text_energy, reply_to_message_id = post.message_id)
 
 
 text_temp = []

@@ -63,6 +63,7 @@ async def daily_question():
         {"role": "user", "content": text},
     ]
     message = await get_gpt_response(messages)
+    return message
     # await bot.send_message(CHANNEL_ID, message, parse_mode = "HTML")
 
 

@@ -122,17 +122,6 @@ async def generate_profile_summary(message: types.Message):
     await message.answer(profile_text, reply_markup = profile_keyboard, reply_to_message_id = message.message_id)
 
 
-@router.message(F.text.lower() == "помощь")
-async def get_help(message: types.Message):
-    if message.chat.type == "private":
-        text = hlink('—', 'https://telegra.ph/Lesnoj-Duh-Li-10-10')
-        await message.answer(f'{text} Тебя приветствует <b>Лесной Дух</b>. Чего желаешь?',
-                             reply_markup = menu_private_keyboard)
-    else:
-        text = hlink('—', 'https://telegra.ph/Lesnoj-Duh-Li-10-10')
-        await message.answer(f'{text} Тебя приветствует <b>Лесной Дух</b>. Чего желаешь?')
-
-
 @router.message(F.text.lower() == "заказать расклад")
 async def services(message: types.Message, bot: Bot):
     if message.chat.type == 'private':

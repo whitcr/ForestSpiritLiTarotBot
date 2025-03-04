@@ -65,11 +65,11 @@ async def update_user_statistics(event: Message) -> bool:
                 """
                 INSERT INTO users 
                 (user_id, daily_count, weekly_count, monthly_count, total_count,
-                 last_daily_update, last_weekly_update, last_monthly_update)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                 last_daily_update, last_weekly_update, last_monthly_update, join_date)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 """,
                 (user_id, daily_count, weekly_count, monthly_count, total_count,
-                 today, week_start, month_start)
+                 today, week_start, month_start, today)
             )
 
     except Exception as e:

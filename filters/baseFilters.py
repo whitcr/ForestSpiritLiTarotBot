@@ -9,7 +9,10 @@ channel_id = config.tg_bot.channel_id
 
 class IsReply(BaseFilter):
     async def __call__(self, callback_query: CallbackQuery) -> bool:
-        return callback_query.from_user.id == callback_query.message.reply_to_message.from_user.id
+        try:
+            return callback_query.from_user.id == callback_query.message.reply_to_message.from_user.id
+        except:
+            return False
 
 
 class IsAdmin(BaseFilter):
