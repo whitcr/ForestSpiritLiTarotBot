@@ -104,7 +104,8 @@ async def process_callback_get_dop(call: types.CallbackQuery, bot: Bot,
                                                                          image, call, spread_name
                                                                          )
 
-    await send_image_dops(bot, call, image, nums, positions, prev_callback_data_gpt, dop_num, card_position)
+    await send_image_dops(bot, call, image, nums, positions, prev_callback_data_gpt, dop_num, card_position,
+                          spread_name = spread_name)
 
 
 async def get_image_with_dops(api_token, user_id, nums, card_position, dop_positions, image, message, spread_name=None):
@@ -228,9 +229,11 @@ async def get_image_with_dops(api_token, user_id, nums, card_position, dop_posit
     return image, dop_positions, dop_num, card_position
 
 
-async def send_image_dops(bot, message, image, nums, position, prev_callback_data_gpt, dop_num, card_position):
+async def send_image_dops(bot, message, image, nums, position, prev_callback_data_gpt, dop_num, card_position,
+                          spread_name):
     buttons = await create_keyboard_dops(nums, position, spread_name = None)
-    buttons = await create_gpt_keyboard(buttons, nums, prev_callback_data_gpt, card_position, dop_num)
+    buttons = await create_gpt_keyboard(buttons, nums, prev_callback_data_gpt, card_position, dop_num,
+                                        spread_name = spread_name)
     keyboard = InlineKeyboardMarkup(inline_keyboard = buttons)
 
     await bot.edit_message_media(chat_id = message.message.chat.id,

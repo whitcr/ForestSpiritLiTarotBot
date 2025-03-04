@@ -71,7 +71,7 @@ async def send_image_three_cards(bot, message, username, image, nums, spread_nam
         current_h += h + pad
 
     buttons = await create_keyboard_dops(nums, [1, 1, 1], spread_name = spread_name)
-    buttons = await create_gpt_keyboard(buttons, nums)
+    buttons = await create_gpt_keyboard(buttons, nums, spread_name = spread_name)
     keyboard = InlineKeyboardMarkup(inline_keyboard = buttons)
 
     await bot.send_photo(message.chat.id,

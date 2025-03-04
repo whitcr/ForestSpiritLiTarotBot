@@ -14,6 +14,8 @@ from typing import Optional
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
+from handlers.tarot.spreads.spreadsConfig import SPREADS, get_name_by_cb_key, get_questions_by_name
+
 
 class ChangeQuestionState(StatesGroup):
     waiting_for_question = State()
@@ -54,8 +56,10 @@ class GptCallbackMeaning(CallbackData, prefix = "get_default_meaning_gpt_"):
     situation: Optional[str]
 
 
-async def create_gpt_keyboard(buttons, nums, prev_callback_data=None, card_position=None, dop_num=None):
-    def create_callback_data(nums, d1cards, d2cards, d3cards, premium=False, question=None, situation=None):
+async def create_gpt_keyboard(buttons, nums, prev_callback_data=None, card_position=None, dop_num=None,
+                              spread_name=None):
+    def create_callback_data(nums, d1cards, d2cards, d3cards, premium=False, question=None, situation=None,
+                             spread_name=None):
         return GptCallbackMeaning(
             card_1 = nums[0], d1card_1 = d1cards[0],
             d2card_1 = d2cards[0],
@@ -66,7 +70,7 @@ async def create_gpt_keyboard(buttons, nums, prev_callback_data=None, card_posit
             card_3 = nums[2], d1card_3 = d1cards[2],
             d2card_3 = d2cards[2],
             d3card_3 = d3cards[2],
-            spread_name = None,
+            spread_name = SPREADS[spread_name]['cb_key'] if spread_name else None,
             premium = premium,
             question = question,
             situation = situation
@@ -104,8 +108,9 @@ async def create_gpt_keyboard(buttons, nums, prev_callback_data=None, card_posit
             elif d3cards[2] is None:
                 d3cards[2] = dop_num
 
-    callback_data_default = create_callback_data(nums, d1cards, d2cards, d3cards)
-    callback_data_premium = create_callback_data(nums, d1cards, d2cards, d3cards, premium = True)
+    callback_data_default = create_callback_data(nums, d1cards, d2cards, d3cards, spread_name = spread_name)
+    callback_data_premium = create_callback_data(nums, d1cards, d2cards, d3cards, premium = True,
+                                                 spread_name = spread_name)
 
     buttons.extend([[InlineKeyboardButton(text = 'Трактовка', callback_data = callback_data_default),
                      InlineKeyboardButton(text = 'Трактовка+', callback_data = callback_data_premium)]])
@@ -121,9 +126,11 @@ async def format_callback_data(call, data):
     if question.strip():
         get_question = question
 
-    spread_name = data.get('spread_name')
-    if spread_name:
-        get_theme = spread_name
+    print(data)
+
+    spread_key = data.get('spread_name')
+    if spread_key:
+        get_theme = await get_name_by_cb_key(spread_key)
 
     for i in range(0, 4):
         card = data.get(f'card_{i}')
@@ -142,7 +149,7 @@ async def format_callback_data(call, data):
     return "\n".join(get_cards), get_question, get_theme
 
 
-@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == True), SubscriptionLevel(3))
+@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == True), SubscriptionLevel(2))
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning,
                                          state: FSMContext):
     await call.answer()
@@ -171,7 +178,7 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
     await get_cards_meanings_premium(call, state)
 
 
-@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(2))
+@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(1))
 @typing_animation_decorator(initial_message = "Трактую")
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning):
     await call.answer()
@@ -189,15 +196,25 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
     get_cards, get_question, get_theme = await format_callback_data(call, data_dict)
 
     text = ""
-    if get_theme:
-        text += f"Тема: {get_theme}. \n\n"
     if get_question:
-        text += f"Вопрос: {get_question}. \n\n"
+        if get_theme:
+            text += f"Тема: {get_theme}. \n\n"
+
+            questions = await get_questions_by_name(get_theme)
+
+            text += f"Вопрос для 1 карты: {questions[0]}. \n\n"
+            text += f"Вопрос для 2 карты: {questions[1]}. \n\n"
+            text += f"Вопрос для 3 карты: {questions[2]}. \n\n"
+        else:
+            text += f"Вопрос: {get_question}. \n\n"
     if get_cards:
         text += f"{get_cards}"
 
-    message = await get_cards_meanings(text)
-    await call.message.answer(message)
+    print(text)
+
+    # message = await get_cards_meanings(text)
+    # await call.message.answer(message)
+    await call.message.answer(text)
 
 
 async def get_text_for_meaning(data):
@@ -300,7 +317,7 @@ async def process_new_situation(message: types.Message, state: FSMContext):
     await get_cards_meanings_premium(call = message, state = state)
 
 
-@router.callback_query(IsReply(), F.data == "get_details")
+@router.callback_query(IsReply(), F.data == "get_details", SubscriptionLevel(3))
 async def change_details(call: types.CallbackQuery, state: FSMContext):
     await call.answer()
     await delete_message(call.message)

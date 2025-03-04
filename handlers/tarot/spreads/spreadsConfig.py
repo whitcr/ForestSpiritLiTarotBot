@@ -11,6 +11,7 @@ SPREADS = {
             ("На что обратить внимание?", FONT_M),
         ],
         'keywords': {'знак', 'знак вселенной', 'вселенной'},
+        'cb_key': '1',
     },
     "relationship_spread": {
         'name': {'Отношения'},
@@ -20,6 +21,7 @@ SPREADS = {
             ("Ее чувства к нему", FONT_L),
         ],
         'keywords': {'отношения'},
+        'cb_key': '2',
     },
     "his_feelings_spread": {
         'name': {'Его чувства'},
@@ -29,6 +31,7 @@ SPREADS = {
             ("Его действия", FONT_L),
         ],
         'keywords': {'чувства'},
+        'cb_key': '3',
     },
     "health_spread": {
         'name': {'Здоровье'},
@@ -38,6 +41,7 @@ SPREADS = {
             ("Ум", FONT_L),
         ],
         'keywords': {'состояние', 'здоровье'},
+        'cb_key': '4',
     },
     "study_spread": {
         'name': {'Учеба'},
@@ -47,6 +51,7 @@ SPREADS = {
             ("Как выйти в плюс", FONT_L),
         ],
         'keywords': {'учеба', 'учебу'},
+        'cb_key': '5',
     },
     "time_spread": {
         'name': {'Время'},
@@ -56,6 +61,7 @@ SPREADS = {
             ("Будущее", FONT_L),
         ],
         'keywords': {'время', 'времени'},
+        'cb_key': '6',
     },
     "finance_spread": {
         'name': {'Финансы'},
@@ -65,6 +71,7 @@ SPREADS = {
             ("Как выйти в плюс", FONT_L),
         ],
         'keywords': {'деньги', 'финансы'},
+        'cb_key': '7',
     },
     "where_is_item_spread": {
         'name': {'Местоположение'},
@@ -74,6 +81,7 @@ SPREADS = {
             ("", FONT_M),
         ],
         'keywords': {'предмет', 'где', 'место'},
+        'cb_key': '8',
     },
     "person_spread": {
         'name': {'Характер человека'},
@@ -83,6 +91,7 @@ SPREADS = {
             ("То, что скрывает  ", FONT_L),
         ],
         'keywords': {'деньги', 'финансы'},
+        'cb_key': '9',
     },
     "what_person_doing_spread": {
         'name': {'Занятие человека'},
@@ -92,6 +101,7 @@ SPREADS = {
             ("", FONT_M),
         ],
         'keywords': {'что делает', 'дело'},
+        'cb_key': '10',
     },
     "perspective_spread": {
         'name': {'Развитие'},
@@ -101,6 +111,7 @@ SPREADS = {
             ("Третий месяц", FONT_L),
         ],
         'keywords': {'развитие', 'перспектива'},
+        'cb_key': '11',
     },
     "final_of_situation_spread": {
         'name': {'Итог ситуации'},
@@ -110,29 +121,48 @@ SPREADS = {
             ("Какой урок понять", FONT_L),
         ],
         'keywords': {'итог', 'финал'},
+        'cb_key': '12',
     },
     "today_spread": {
         'name': {'Сегодня'},
         'keywords': {'день', 'сегодня', 'дня'},
+        'cb_key': '13',
         "func_cb": today_spread,
         "func": today_spread,
     },
     "tomorrow_spread": {
         'name': {'Завтра'},
         "keywords": {'завтра'},
+        'cb_key': '14',
         "func_cb": tomorrow_spread,
         "func": tomorrow_spread,
     },
     "week_spread": {
         'name': {'Неделя'},
         "keywords": {'неделю', 'неделя', 'недели'},
+        'cb_key': '15',
         "func_cb": get_month_week_spread_cb,
         "func": get_month_week_spread,
     },
     "month_spread": {
         'name': {'Месяц'},
         "keywords": {'месяц', 'месяца'},
+        'cb_key': '16',
         "func_cb": get_month_week_spread_cb,
         "func": get_month_week_spread,
     },
 }
+
+
+async def get_name_by_cb_key(cb_key):
+    for spread in SPREADS.values():
+        if spread['cb_key'] == cb_key:
+            return list(spread['name'])[0]
+    return None
+
+
+async def get_questions_by_name(name):
+    for key, data in SPREADS.items():
+        if name in data['name']:
+            return [question for question, _ in data['image']]
+    return []
