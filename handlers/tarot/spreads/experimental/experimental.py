@@ -27,23 +27,18 @@ from functions.messages.messages import delete_message, typing_animation_decorat
 router = Router()
 
 
-class DeckCallback(CallbackData, prefix = "deck"):
-    triplet_type: str
-    key: str
-
-
 async def generate_ex_decks_keyboard(triplet_type: Union["mtriplet", "striplet"]):
     builder = InlineKeyboardBuilder()
 
     for key, value in DECK_MAP.items():
         builder.button(
             text = value,
-            callback_data = DeckCallback(triplet_type = triplet_type, key = f"{key}_experimental")
+            callback_data = f"{triplet_type}_" + key + "_experimental"
         )
 
     builder.button(
         text = "Очистить колоды",
-        callback_data = DeckCallback(triplet_type = triplet_type, key = "clear_experimental")
+        callback_data = f"{triplet_type}_clear_experimental"
     )
     builder.adjust(3)
 
@@ -274,6 +269,7 @@ async def set_triplets_choices(call: types.CallbackQuery, bot: Bot):
 @router.callback_query(IsReply(), lambda call: call.data.endswith('_experimental'))
 async def get_ex_choices(call: types.CallbackQuery, bot: Bot):
     await call.answer()
+    print(call.data)
     type = call.data.split('_')[0]
     keyboard = await generate_ex_decks_keyboard(type)
     if call.data == f"{type}_clear_experimental":
@@ -296,6 +292,7 @@ async def get_ex_choices(call: types.CallbackQuery, bot: Bot):
             choice = call.data.split("_")[1]
 
         new_choice = []
+
         for i in choice.split(', '):
             name = DECK_MAP[i]
             new_choice.append(name)
