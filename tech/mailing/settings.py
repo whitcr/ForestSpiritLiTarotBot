@@ -14,6 +14,12 @@ async def day_follow(message: types.Message):
                         reply_markup = follow_daily_mailing_keyboard)
 
 
+@router.callback_query(IsReply(), F.data.startswith('get_mailing'), SubscriptionLevel(1))
+async def day_follow_cb(call: types.CallbackQuery):
+    await call.message.answer("Какую информацию вы хотите получать ежедневно?",
+                              reply_markup = follow_daily_mailing_keyboard)
+
+
 @router.callback_query(IsReply(), F.data.endswith('follow_yes'))
 async def daily_follow_yes(call: types.CallbackQuery, bot: Bot):
     follow_type = call.data.replace('_yes', '')

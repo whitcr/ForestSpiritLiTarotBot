@@ -104,7 +104,7 @@ class StatisticsCache:
 
 CALLBACK_COMMAND_MAPPING = {
     'get_dop_': 'Допы',
-    'get_default_meaning_gpt_': 'Обычная трактовка',
+    'get_def_gpt_': 'Обычная трактовка',
     'get_day_spread_meaning_': 'Трактовка расклада дня',
     'day_meaning_day_': 'Трактовка карт дня',
 }

@@ -17,32 +17,43 @@ from constants import FONT_L, FONT_S, FONT_XL
 import keyboard as kb
 from typing import Union
 from constants import DECK_MAP
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.filters.callback_data import CallbackData
+from typing import Union
 
 from functions.messages.messages import delete_message, typing_animation_decorator
 
 router = Router()
 
 
-async def generate_ex_decks_keyboard(triplet_type: Union["mtriplet", "striplet"]):
-    buttons = []
-    for key, value in DECK_MAP.items():
-        button = InlineKeyboardButton(text = value, callback_data = f"{triplet_type}_" + key + "_experimental")
-        buttons.append(button)
+class DeckCallback(CallbackData, prefix = "deck"):
+    triplet_type: str
+    key: str
 
-    button = InlineKeyboardButton(text = "Очистить колоды", callback_data = f"{triplet_type}_clear_experimental")
-    buttons.append(button)
-    choose_ex_cards_keyboard = InlineKeyboardMarkup(resize_keyboard = True, row_width = 3).add(*buttons)
-    return choose_ex_cards_keyboard
+
+async def generate_ex_decks_keyboard(triplet_type: Union["mtriplet", "striplet"]):
+    builder = InlineKeyboardBuilder()
+
+    for key, value in DECK_MAP.items():
+        builder.button(
+            text = value,
+            callback_data = DeckCallback(triplet_type = triplet_type, key = f"{key}_experimental")
+        )
+
+    builder.button(
+        text = "Очистить колоды",
+        callback_data = DeckCallback(triplet_type = triplet_type, key = "clear_experimental")
+    )
+    builder.adjust(3)
+
+    return builder.as_markup()
 
 
 async def generate_cards(choices, triplet_type: Union["mtriplet", "striplet"], user_id):
     cards = []
     for choice in choices:
-        if triplet_type == "striplet":
-            num = await get_random_num(choice, 3, user_id)
-        else:
-            num = await get_random_num(choice, 6, user_id)
+        num = await get_random_num(choice, 3, user_id)
         cards.extend([get_path_cards_sync(choice, num[i]) for i in range(3)])
     return cards[::-1]
 

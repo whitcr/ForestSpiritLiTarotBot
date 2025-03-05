@@ -73,7 +73,7 @@ async def create_keyboard_dops(nums, position, spread_name=None):
 
 async def generate_dop(choice, call):
     async def parse_callback_data(callback_data):
-        parts = callback_data.replace('get_default_meaning_gpt_:', '').split(':')
+        parts = callback_data.replace('get_def_gpt_:', '').split(':')
         numbers = [int(part) for part in parts if part]
         return numbers
 

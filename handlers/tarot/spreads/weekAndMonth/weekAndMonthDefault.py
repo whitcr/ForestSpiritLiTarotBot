@@ -43,7 +43,8 @@ async def get_month_week_spread(bot, message, spread_name):
         theme = "месяц" if spread_name == "month" else "неделю"
         await bot.send_message(message.chat.id,
                                text = f"<code>Ты уверен в выборе своей колоды?\nТвоя колода — {deck_type}\n"
-                                      f"Расклад на {theme} делается лишь единожды.</code>",
+                                      f"Расклад на {theme} делается лишь единожды.</code>\n"
+                                      f"Если у тебя есть подписка Жрица или ты бустер канала, можешь сделать премиум расклад.",
                                reply_markup = keyboard, reply_to_message_id = await get_reply_message(message))
 
 
@@ -67,7 +68,7 @@ async def create_spread_image(bot, call: CallbackQuery, spread_type: str):
     await send_image_six_cards(bot, call.message, call.from_user.first_name, image, spread_type)
 
 
-@router.callback_query(IsReply(), F.data == 'create_month_spread', SubscriptionLevel(3))
+@router.callback_query(IsReply(), F.data == 'create_month_spread')
 async def get_month_spread_image(call: CallbackQuery, bot: Bot):
     await create_spread_image(bot, call, 'месяца')
 

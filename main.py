@@ -68,10 +68,10 @@ def main() -> None:
     dp.message.middleware(ThrottlingMiddleware())
     dp.callback_query.middleware(ThrottlingMiddleware())
 
-    stats_middleware = HandlerStatisticsMiddleware(flush_interval = 60)
+    # stats_middleware = HandlerStatisticsMiddleware(flush_interval = 60)
 
-    dp.message.outer_middleware(stats_middleware)
-    dp.callback_query.outer_middleware(stats_middleware)
+    # dp.message.outer_middleware(stats_middleware)
+    # dp.callback_query.outer_middleware(stats_middleware)
 
     dp.update.outer_middleware(CouponMiddleware())
 

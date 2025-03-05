@@ -24,7 +24,7 @@ async def get_choice_spread(user_id):
 async def get_random_num(choice, count, user_id=None):
     min_max_map = {
         "vikaoracul": (0, 47),
-        "vikanimaloracul": (0, 47),
+        "vikanimaloracul": (1, 47),
         "lenorman": (1, 35),
         "animalspirit": (0, 63),
         "tarot": (1, 77),
@@ -40,8 +40,11 @@ async def get_random_num(choice, count, user_id=None):
         return num
 
     else:
-        nums = random.sample(range(min_num, max_num + 1), count) if min_num == 1 else list(
-            itertools.islice(random.randint(0, max_num), count))
+        nums = (
+            random.sample(range(min_num, max_num + 1), count)
+            if min_num == 1
+            else list(itertools.islice((random.randint(0, max_num) for _ in range(count)), count))
+        )
 
         if user_id:
             for num in nums:

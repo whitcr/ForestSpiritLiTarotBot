@@ -2,7 +2,7 @@ from aiogram import types, Router, F
 from database import execute_select, execute_select_all, execute_query
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
-from functions.messages.messages import typing_animation_decorator
+from functions.messages.messages import typing_animation_decorator, send_long_message
 from functions.gpt.requests import get_cards_day_meanings
 
 router = Router()
@@ -18,7 +18,7 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
                                    (date, call.from_user.id,))
 
     if meaning:
-        await call.message.answer(meaning)
+        await send_long_message(call.message, meaning)
         return
     else:
 
@@ -63,7 +63,7 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     meaning = await execute_select(f"SELECT meaning FROM {table} WHERE user_id = $1", (call.from_user.id,))
 
     if meaning:
-        await call.message.answer(meaning)
+        await send_long_message(call.message, meaning)
         return
     else:
         nums = await execute_select_all(

@@ -32,7 +32,7 @@ class ChangeDetailsState(StatesGroup):
 router = Router()
 
 
-class GptCallbackMeaning(CallbackData, prefix = "get_default_meaning_gpt_"):
+class GptCallbackMeaning(CallbackData, prefix = "get_def_gpt_"):
     card_1: int
     d1card_1: Optional[int]
     d2card_1: Optional[int]

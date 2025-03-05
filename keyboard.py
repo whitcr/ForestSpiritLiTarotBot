@@ -242,7 +242,7 @@ profile_buttons = [
     ],
     [
         InlineKeyboardButton(text = "Рефералы", callback_data = "get_referral_url"),
-        InlineKeyboardButton(text = "Рассылки", callback_data = "get_referral_url"),
+        InlineKeyboardButton(text = "Рассылки", callback_data = "get_mailing"),
     ],
     [
         InlineKeyboardButton(text = "Статистика", callback_data = "get_user_statistics"),

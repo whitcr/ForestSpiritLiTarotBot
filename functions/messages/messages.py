@@ -72,3 +72,9 @@ async def delete_message(message, sleep_time: int = 0) -> None:
 async def timeout_state_finish(state, sleep_time: int = 0) -> None:
     await asyncio.sleep(sleep_time)
     await state.finish()
+
+
+async def send_long_message(message, text):
+    chunk_size = 4096
+    for i in range(0, len(text), chunk_size):
+        await message.answer(text[i:i + chunk_size])
