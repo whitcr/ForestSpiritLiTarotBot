@@ -20,17 +20,23 @@ class SupportState(StatesGroup):
     waiting_for_answer = State()
 
 
-# 📌 Команда "помощь" (работает ТОЛЬКО в ЛС бота)
+@router.message(F.text.lower() == "помощь")
 @router.callback_query(F.data == "get_support")
-async def help_command(call: CallbackQuery, bot: Bot):
-    if call.message.chat.type == 'private':
-        keyboard = InlineKeyboardBuilder()
-        keyboard.button(text = "📝 Написать разработчику", callback_data = "ask_support")
-        await bot.send_message(call.from_user.id,
-                               "Если у вас есть какой-то вопрос, жалоба или предложение, вы можете написать разработчику. Нажмите кнопку и напишите. "
-                               "Только текст, никаких файлов. \n\n"
-                               "Список команд вы можете посмотреть тут — https://telegra.ph/Lesnoj-Duh-Li-10-10.",
-                               reply_markup = keyboard.as_markup())
+async def help_command(event: Message | CallbackQuery):
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text = "📝 Написать разработчику", callback_data = "ask_support")
+
+    text = (
+        "Если у вас есть какой-то вопрос, жалоба или предложение, "
+        "вы можете написать разработчику. Нажмите кнопку и напишите. "
+        "Только текст, никаких файлов.\n\n"
+        "Список команд вы можете посмотреть тут — https://telegra.ph/Lesnoj-Duh-Li-10-10."
+    )
+
+    if isinstance(event, Message):
+        await event.answer(text, reply_markup = keyboard.as_markup())
+    elif isinstance(event, CallbackQuery):
+        await event.message.answer(text, reply_markup = keyboard.as_markup())
 
 
 # 📌 Пользователь нажал "Написать вопрос/жалобу"

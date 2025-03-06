@@ -122,26 +122,16 @@ async def generate_profile_summary(message: types.Message):
     await message.answer(profile_text, reply_markup = profile_keyboard, reply_to_message_id = message.message_id)
 
 
-@router.message(F.text.lower() == "заказать расклад")
+@router.message(F.text.lower() == "услуги")
 async def services(message: types.Message, bot: Bot):
     if message.chat.type == 'private':
-        link = f"https://t.me/forestspiritoo"
+        link = f"https://t.me/forestspiritottarotreviews"
         group = hlink("группе", link)
-        link = f"https://t.me/forestspiritoo"
-        wanderer = hlink("Страннику", link)
-        link = f"https://t.me/forestspiritoo/54"
-        love_spread = hlink("Все о любви, его чувствах и намерениях", link)
-        link = f"https://t.me/forestspiritoo/56"
-        self_spread = hlink("Понимая себя, мы открываем совершенно иной мир", link)
-        link = f"https://t.me/forestspiritoo/57"
-        money_spread = hlink("Как улучшть свои финансы и что принесет мне этот путь?", link)
+        link = f"https://t.me/kmorebi"
+        wanderer = hlink("мне", link)
         await bot.send_message(message.chat.id,
-                               text = f"— Вы можете ознакомиться с раскладами и иными услугами в этой {group} или напрямую обратиться "
-                                      f"к {wanderer}\n\n"
-                                      f"<b>ПОПУЛЯРНЫЕ РАСКЛАДЫ:</b>\n\n"
-                                      f"{love_spread}\n\n"
-                                      f"{self_spread}\n\n"
-                                      f"{money_spread}\n\n")
+                               text = f"— Вы можете ознакомиться с отзывами и услугами в этой {group} или напрямую по раскладам обратиться "
+                                      f"ко {wanderer}\n\n")
     else:
         pass
 

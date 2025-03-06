@@ -112,7 +112,7 @@ CALLBACK_COMMAND_MAPPING = {
 ALLOWED_COMMANDS = {
     "библиотека", "доп", "мантра", "мтриплет", "помощь",
     "стриплет", "колода", "карта", "значение", "расклад",
-    "допы", "триплет", "саб", "мой профиль", 'карта', 'настройки', 'заказать расклад',
+    "допы", "триплет", "саб", "мой профиль", 'карта', 'настройки', 'услуги',
     "расклад на день", "расклад на неделю",
     "расклад на завтра", "расклад на месяц",
 }
@@ -158,7 +158,6 @@ class HandlerStatisticsMiddleware(BaseMiddleware):
             command = get_command_name(event.data)
         else:
             command = 'unknown_event'
-        print(command)
 
         asyncio.create_task(self.stats_cache.increment(command))
         return await handler(event, data)
