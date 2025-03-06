@@ -12,7 +12,7 @@ async def update_user_statistics(event: Message | CallbackQuery, bot) -> bool:
     if isinstance(event, Message):
         user_id = event.from_user.id
     elif isinstance(event, CallbackQuery):
-        user_id = event.message.from_user.id
+        user_id = event.message.reply_to_message.from_user.id
 
     today = datetime.utcnow().date()
     week_start = today - timedelta(days = today.weekday())
@@ -25,7 +25,7 @@ async def update_user_statistics(event: Message | CallbackQuery, bot) -> bool:
         if notification == 0:
             await execute_query("UPDATE users SET notification = $1 WHERE user_id = $2", (True, user_id))
             await bot.send_message(user_id,
-                                   "— Спасибо, что пользуетесь Ли. На данный момент был запущен тестовый режим крупного обновления, поэтому функционал был расширен. "
+                                   "— Спасибо, что пользуетесь Ли. На данный момент был запущен тестовый режим крупного обновления, поэтому некоторый функционал был расширен, когда как другой будет доступен только при приобретении подписки. "
                                    "Если у вас возникли вопросы или проблемы, пишите в поддержку с помощью команды 'помощь'. Список команд -  https://telegra.ph/Lesnoj-Duh-Li-10-10")
 
         # Fetch the current counts and last update dates
@@ -102,7 +102,10 @@ class UserStatisticsMiddleware(BaseMiddleware):
         if await update_user_statistics(event, bot):
             return await handler(event, data)
         else:
-            user_id = event.from_user.id
+            if isinstance(event, Message):
+                user_id = event.from_user.id
+            elif isinstance(event, CallbackQuery):
+                user_id = event.message.from_user.id
             await bot.send_message(user_id,
                                    text = "Ваш дневной лимит раскладов окончен. Возвращайтесь завтра или приобретите "
                                           "подписку с неограниченными раскладами",
