@@ -47,6 +47,7 @@ async def set_user_cards_type(bot: Bot, call: types.CallbackQuery, cards_type, c
         await execute_query(
             "INSERT INTO users (user_id) VALUES ($1) ON CONFLICT (user_id) DO UPDATE SET user_id = EXCLUDED.user_id",
             (call.from_user.id,))
+
         await execute_query("UPDATE users SET cards_type =$1 WHERE user_id = $2", (cards_type, call.from_user.id))
         await bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id,
                                     text = f"— {cards_name} приветствует вас!")

@@ -8,6 +8,7 @@ from aiogram.types import BufferedInputFile
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from events.user.referrals import get_referral_count
+from functions.messages.messages import typing_animation_decorator
 
 router = Router()
 
@@ -100,6 +101,7 @@ async def mark_bonuses(image_path, personal_bonus_number, friend_bonus_number, t
 
 
 @router.callback_query(F.data.startswith("get_bonus_card"))
+@typing_animation_decorator(initial_message = "Вычисляю")
 async def get_bonus_cards(call: types.CallbackQuery, bot: Bot, channel_id):
     await call.answer()
     result = await execute_select_all(

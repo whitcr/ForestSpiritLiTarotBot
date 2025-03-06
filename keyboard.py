@@ -119,19 +119,6 @@ sub_buy_keyboard_buttons = [
 
 sub_buy_keyboard = InlineKeyboardMarkup(inline_keyboard = sub_buy_keyboard_buttons)
 
-# КНОПКИ ДЛЯ РАССЫЛКИ
-follow_daily_mailing_buttons = [
-    [
-        InlineKeyboardButton(text = "Луна", callback_data = "moon_follow_yes"),
-        InlineKeyboardButton(text = "Расклад дня", callback_data = "day_card_follow_yes")
-    ],
-    [
-        InlineKeyboardButton(text = "Расклад на неделю", callback_data = "week_card_follow_yes"),
-        InlineKeyboardButton(text = "Расклад на месяц", callback_data = "month_card_follow_yes")
-    ]
-]
-follow_daily_mailing_keyboard = InlineKeyboardMarkup(inline_keyboard = follow_daily_mailing_buttons)
-
 moon_follow_no_buttons = [
     [InlineKeyboardButton(text = "Отписаться", callback_data = "moon_follow_no")]
 ]
