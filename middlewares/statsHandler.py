@@ -110,18 +110,32 @@ CALLBACK_COMMAND_MAPPING = {
 }
 
 ALLOWED_COMMANDS = {
-    "библиотека", "допы", "доп", "мантра", "мтриплет", "помощь",
+    "библиотека", "доп", "мантра", "мтриплет", "помощь",
     "стриплет", "колода", "карта", "значение", "расклад",
-    "допы", "триплет", "саб", "мой профиль"
+    "допы", "триплет", "саб", "мой профиль", 'карта', 'настройки', 'заказать расклад',
+    "расклад на день", "расклад на неделю",
+    "расклад на завтра", "расклад на месяц",
+}
+
+COMMAND_ALIASES = {
+    "расклад дня": "расклад на день",
+    "расклад недели": "расклад на неделю",
+    "расклад месяца": "расклад на месяц",
+    "расклад завтра": "расклад на завтра",
+    "значение": "узнать значение",
 }
 
 ALLOWED_COMMANDS = {cmd.lower() for cmd in ALLOWED_COMMANDS}
 
 
 def get_command_name(callback_data: str) -> str:
-    for prefix, command in CALLBACK_COMMAND_MAPPING.items():
-        if callback_data.startswith(prefix):
+    callback_data = callback_data.lower()
+    for command in sorted(ALLOWED_COMMANDS, key = len, reverse = True):
+        if callback_data.startswith(command):
             return command
+    for alias, standard in COMMAND_ALIASES.items():
+        if callback_data.startswith(alias):
+            return standard
     return callback_data
 
 

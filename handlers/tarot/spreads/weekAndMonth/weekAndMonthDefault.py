@@ -54,7 +54,7 @@ async def get_month_week_spread_cb(bot, call: types.CallbackQuery):
 
 
 async def create_spread_image(bot, call: CallbackQuery, spread_type: str):
-    await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
+    # await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
     image, cards = await create_image_six_cards(call.from_user.id, spread_type)
     draw_text = ImageDraw.Draw(image)
 

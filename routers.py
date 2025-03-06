@@ -27,12 +27,12 @@ from functions.bonuses import giveBonuses
 def setup_routers():
     router = Router()
 
-    # card.router.message.middleware(UserStatisticsMiddleware())
-    # experimental.router.message.middleware(UserStatisticsMiddleware())
-    # weekAndMonthDefault.router.message.middleware(UserStatisticsMiddleware())
-    # daySpread.router.message.middleware(UserStatisticsMiddleware())
-    # getSpreads.router.message.middleware(UserStatisticsMiddleware())
-    # dopCard.router.message.middleware(UserStatisticsMiddleware())
+    card.router.message.middleware(UserStatisticsMiddleware())
+    experimental.router.message.middleware(UserStatisticsMiddleware())
+    weekAndMonthDefault.router.message.middleware(UserStatisticsMiddleware())
+    daySpread.router.message.middleware(UserStatisticsMiddleware())
+    getSpreads.router.message.middleware(UserStatisticsMiddleware())
+    dopCard.router.message.middleware(UserStatisticsMiddleware())
 
     router.include_routers(card.router, addedToGroup.router, bannedByUser.router, chooseDeck.router, meaning.router,
                            meaningCb.router, experimental.router, weekAndMonthDefault.router, daySpread.router,
