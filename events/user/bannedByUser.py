@@ -21,4 +21,4 @@ async def user_blocked_bot(event: ChatMemberUpdated):
     ChatMemberUpdatedFilter(member_status_changed = MEMBER)
 )
 async def user_unblocked_bot(event: ChatMemberUpdated):
-    await event.answer("Привет, рад, что ты меня разблокировал. В бане было очень грустно :(")
+    await event.answer("Привет, рад, что ты меня разблокировал. В бане было очень грустно :( ")

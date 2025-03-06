@@ -19,7 +19,7 @@ async def delete_from_db(bot: Bot, user_id, channel_id):
     else:
         await bot.send_message(user_id,
                                "— До свидания, рады были видеть тебя у нас!")
-        await execute_query(f"DELETE FROM users WHERE user_id = $1", (user_id,))
+        # await execute_query(f"DELETE FROM users WHERE user_id = $1", (user_id,))
 
 
 @router.chat_member(IsChannel(), ChatMemberUpdatedFilter(member_status_changed = IS_NOT_MEMBER << IS_MEMBER))
@@ -32,4 +32,5 @@ async def left_channel_handler(chat_member: types.ChatMemberUpdated, bot: Bot, c
                                reply_markup = follow_channel_keyboard)
         _ = asyncio.create_task(delete_from_db(bot, chat_member.from_user.id, channel_id))
     except Exception as e:
-        await execute_query(f"DELETE FROM users WHERE user_id = $1", (chat_member.from_user.id,))
+        # await execute_query(f"DELETE FROM users WHERE user_id = $1", (chat_member.from_user.id,))
+        pass

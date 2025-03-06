@@ -27,8 +27,6 @@ async def start(message: types.Message, bot: Bot):
         text = hlink('—', 'https://telegra.ph/Lesnoj-Duh-Li-10-10')
         await message.reply(f'{text} Тебя приветствует <b>Лесной Дух</b>. Чего желаешь?',
                             reply_markup = menu_private_keyboard)
-    else:
-        await get_help(message)
 
 
 @router.message(F.text.lower() == "меню")

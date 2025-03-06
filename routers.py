@@ -28,11 +28,33 @@ def setup_routers():
     router = Router()
 
     card.router.message.middleware(UserStatisticsMiddleware())
+
     experimental.router.message.middleware(UserStatisticsMiddleware())
+    experimental.router.callback_query.middleware(UserStatisticsMiddleware())
+
     weekAndMonthDefault.router.message.middleware(UserStatisticsMiddleware())
+    weekAndMonthDefault.router.callback_query.middleware(UserStatisticsMiddleware())
+
     daySpread.router.message.middleware(UserStatisticsMiddleware())
+    daySpread.router.callback_query.middleware(UserStatisticsMiddleware())
+
     getSpreads.router.message.middleware(UserStatisticsMiddleware())
+    getSpreads.router.callback_query.middleware(UserStatisticsMiddleware())
+
     dopCard.router.message.middleware(UserStatisticsMiddleware())
+    dopCard.router.callback_query.middleware(UserStatisticsMiddleware())
+
+    chooseDeck.router.message.middleware(UserStatisticsMiddleware())
+    chooseDeck.router.callback_query.middleware(UserStatisticsMiddleware())
+
+    meaning.router.message.middleware(UserStatisticsMiddleware())
+    meaning.router.callback_query.middleware(UserStatisticsMiddleware())
+
+    meaningCb.router.message.middleware(UserStatisticsMiddleware())
+    meaningCb.router.callback_query.middleware(UserStatisticsMiddleware())
+
+    getMeaningSpread.router.message.middleware(UserStatisticsMiddleware())
+    getMeaningSpread.router.callback_query.middleware(UserStatisticsMiddleware())
 
     router.include_routers(card.router, addedToGroup.router, bannedByUser.router, chooseDeck.router, meaning.router,
                            meaningCb.router, experimental.router, weekAndMonthDefault.router, daySpread.router,

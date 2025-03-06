@@ -8,13 +8,26 @@ from filters.subscriptions import get_subscription
 from datetime import datetime, timedelta
 
 
-async def update_user_statistics(event: Message) -> bool:
-    user_id = event.from_user.id
+async def update_user_statistics(event: Message | CallbackQuery, bot) -> bool:
+    if isinstance(event, Message):
+        user_id = event.from_user.id
+    elif isinstance(event, CallbackQuery):
+        user_id = event.message.from_user.id
+
     today = datetime.utcnow().date()
     week_start = today - timedelta(days = today.weekday())
     month_start = today.replace(day = 1)
 
     try:
+
+        notification = await execute_select("SELECT notification FROM users WHERE user_id = $1", (user_id,))
+
+        if notification == 0:
+            await execute_query("UPDATE users SET notification = $1 WHERE user_id = $2", (True, user_id))
+            await bot.send_message(user_id,
+                                   "— Спасибо, что пользуетесь Ли. На данный момент был запущен тестовый режим крупного обновления, поэтому функционал был расширен. "
+                                   "Если у вас возникли вопросы или проблемы, пишите в поддержку с помощью команды 'помощь'. Список команд -  https://telegra.ph/Lesnoj-Duh-Li-10-10")
+
         # Fetch the current counts and last update dates
         result = await execute_select_all(
             """
@@ -85,10 +98,10 @@ class UserStatisticsMiddleware(BaseMiddleware):
             event: Union[CallbackQuery, Message],
             data: Dict[str, Any]
     ) -> Any:
-        if await update_user_statistics(event):
+        bot = data.get("bot")
+        if await update_user_statistics(event, bot):
             return await handler(event, data)
         else:
-            bot = data.get("bot")
             user_id = event.from_user.id
             await bot.send_message(user_id,
                                    text = "Ваш дневной лимит раскладов окончен. Возвращайтесь завтра или приобретите "
