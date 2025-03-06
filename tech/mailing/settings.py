@@ -43,12 +43,13 @@ async def day_follow(message: types.Message):
 
 
 @router.callback_query(IsReply(), F.data.startswith('get_mailing'), SubscriptionLevel(1))
-async def day_follow_cb(call: types.CallbackQuery):
+async def day_follow_cb(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     keyboard = await generate_mail_kb(call.from_user.id)
     if keyboard:
-        await call.message.reply("Какую информацию вы хотите получать ежедневно?\n 🟢 - включить, 🔴 - выключить",
-                                 reply_markup = keyboard)
+        await bot.send_message(call.message.chat.id,
+                               "Какую информацию вы хотите получать ежедневно?\n 🟢 - включить, 🔴 - выключить",
+                               reply_markup = keyboard, reply_to_message_id = call.message.reply_to_message.message_id)
 
 
 @router.callback_query(IsReply(), F.data.endswith('follow_yes') | F.data.endswith('follow_no'))
