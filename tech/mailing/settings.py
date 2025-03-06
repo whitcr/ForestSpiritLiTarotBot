@@ -44,6 +44,7 @@ async def day_follow(message: types.Message):
 
 @router.callback_query(IsReply(), F.data.startswith('get_mailing'), SubscriptionLevel(1))
 async def day_follow_cb(call: types.CallbackQuery):
+    await call.answer()
     keyboard = await generate_mail_kb(call.message.reply_to_message.from_user.id)
     if keyboard:
         await call.message.reply("Какую информацию вы хотите получать ежедневно?\n 🟢 - включить, 🔴 - выключить",
@@ -52,6 +53,7 @@ async def day_follow_cb(call: types.CallbackQuery):
 
 @router.callback_query(IsReply(), F.data.endswith('follow_yes') | F.data.endswith('follow_no'))
 async def toggle_subscription(call: types.CallbackQuery, bot: Bot):
+    await call.answer()
     follow_type, action = call.data.rsplit('_', 1)
     new_status = 1 if action == 'yes' else 0
 
@@ -59,5 +61,5 @@ async def toggle_subscription(call: types.CallbackQuery, bot: Bot):
 
     keyboard = await generate_mail_kb(call.from_user.id)
     if keyboard:
-        await call.message.edit_text("Какую информацию вы хотите получать ежедневно?", reply_markup = keyboard)
-    await call.answer()
+        await call.message.edit_text("Какую информацию вы хотите получать ежедневно?\n 🟢 - включить, 🔴 - выключить",
+                                     reply_markup = keyboard)
