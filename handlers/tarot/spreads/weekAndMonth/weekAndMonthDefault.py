@@ -32,7 +32,7 @@ async def get_month_week_spread(bot, message, spread_name):
 
     if file_id:
         await bot.send_photo(message.chat.id, photo = file_id, caption = "Вот твой расклад.",
-                             reply_to_message_id = message.message.reply_to_message.message_id,
+                             reply_to_message_id = message.message_id,
                              reply_markup = await create_meaning_keyboard(
                                  spread_name) if deck == 'raider' else None)
 
@@ -50,7 +50,7 @@ async def get_month_week_spread(bot, message, spread_name):
 
 async def get_month_week_spread_cb(bot, call: types.CallbackQuery):
     spread_name = call.data.split("_")[0]
-    await get_month_week_spread(bot, call, f"{spread_name}_callback")
+    await get_month_week_spread(bot, call.message.reply_to_message, f"{spread_name}_callback")
 
 
 async def create_spread_image(bot, call: CallbackQuery, spread_type: str):
