@@ -235,7 +235,7 @@ async def get_text_for_meaning(data):
     if get_cards:
         text += f"{get_cards}\n\n"
     if get_details:
-        text += f"Уточняющие вопросы клиенту: \n{get_details_questions}\n\nОтветы клиента:{get_details}\n\n"
+        text += f"Уточняющие вопросы клиенту: \n{get_details_questions}\n\nОтветы клиента:\n{get_details}\n\n"
 
     return text
 

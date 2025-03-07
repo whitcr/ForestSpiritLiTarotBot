@@ -12,7 +12,7 @@ async def update_user_statistics(event: Message | CallbackQuery, bot) -> bool:
     if isinstance(event, Message):
         user_id = event.from_user.id
     elif isinstance(event, CallbackQuery):
-        user_id = event.message.reply_to_message.from_user.id
+        user_id = event.from_user.id
 
     today = datetime.utcnow().date()
     week_start = today - timedelta(days = today.weekday())
