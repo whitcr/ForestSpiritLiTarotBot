@@ -28,9 +28,9 @@ async def meaning_cb(call: types.CallbackQuery, bot: Bot):
     choice = call.data.split('_')[1]
     table = f"meaning_{choice}"
     keyboard = await generate_meaning_keyboard(choice, call.data)
-    print(f"SELECT {theme} FROM {table} WHERE number = {num}")
+
     meaning_text = await execute_select(f"SELECT {theme} FROM {table} WHERE number = $1;", (num,))
-    print(meaning_text)
+
     if len(meaning_text) > 4096:
         meaning_text = meaning_text[:4000]
 

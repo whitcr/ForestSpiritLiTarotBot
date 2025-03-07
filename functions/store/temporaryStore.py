@@ -11,7 +11,7 @@ async def store_data(message: types.Message, num1=None, num2=None):
     timestamp = time.time()
 
     if num2 is None:
-        data = {'chat_id': chat_id, 'num': num1, 'timestamp': timestamp}
+        data = {'chat_id': chat_id, 'num1': num1, 'timestamp': timestamp}
     elif num1 is not None and num2 is not None:
         data = {'chat_id': chat_id, 'num1': num1, 'num2': num2, 'timestamp': timestamp}
     else:
@@ -22,6 +22,7 @@ async def store_data(message: types.Message, num1=None, num2=None):
 
 async def get_data(message_id):
     message_data = data_store.get(message_id)
+    print(message_data)
     if message_data:
         return message_data['num1']
     else:
