@@ -224,8 +224,8 @@ profile_buttons = [
         InlineKeyboardButton(text = "Расклад на завтра", callback_data = "tomorrow_spread")
     ],
     [
-        InlineKeyboardButton(text = "Расклад на неделю", callback_data = "get_month_week_spread_cb"),
-        InlineKeyboardButton(text = "Расклад на месяц", callback_data = "get_month_month_spread_cb")
+        InlineKeyboardButton(text = "Расклад на неделю", callback_data = "week_spread"),
+        InlineKeyboardButton(text = "Расклад на месяц", callback_data = "month_spread")
     ],
     [
         InlineKeyboardButton(text = "Рефералы", callback_data = "get_referral_url"),
