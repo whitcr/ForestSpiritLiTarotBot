@@ -29,6 +29,8 @@ async def get_month_week_spread(bot, message, spread_name):
 
     file_id = await execute_select(f"SELECT file_id FROM {table} WHERE user_id = '{user_id}'")
     deck = await execute_select(f"SELECT deck FROM {table} WHERE user_id = '{user_id}'")
+    sub = await execute_select(f"SELECT subscription FROM {table} WHERE user_id = '{user_id}'")
+    booster = await execute_select(f"SELECT boosted FROM {table} WHERE user_id = '{user_id}'")
 
     if file_id:
         await bot.send_photo(message.chat.id, photo = file_id, caption = "Вот твой расклад.",
@@ -41,14 +43,22 @@ async def get_month_week_spread(bot, message, spread_name):
         deck_type = DECK_MAP[choice]
         keyboard = create_month_spread_keyboard if spread_name == "month" else create_week_spread_keyboard
         theme = "месяц" if spread_name == "month" else "неделю"
+
+        text = f"<code>Ты уверен в выборе своей колоды?\nТвоя колода — {deck_type}\n"
+        f"Расклад на {theme} делается лишь единожды.</code>\n"
+
+        if booster:
+            text += f"Ты бустер канала, можешь сделать премиум расклад. Спасибо за поддержку!"
+        if sub == 3:
+            text += f"У тебя есть подписка Жрица, можешь сделать премиум расклад. Спасибо за поддержку!"
+
         await bot.send_message(message.chat.id,
-                               text = f"<code>Ты уверен в выборе своей колоды?\nТвоя колода — {deck_type}\n"
-                                      f"Расклад на {theme} делается лишь единожды.</code>\n"
-                                      f"Если у тебя есть подписка Жрица или ты бустер канала, можешь сделать премиум расклад.",
+                               text,
                                reply_markup = keyboard, reply_to_message_id = await get_reply_message(message))
 
 
 async def get_month_week_spread_cb(bot, call: types.CallbackQuery):
+    await call.answer()
     spread_name = call.data.split("_")[0]
     await get_month_week_spread(bot, call.message.reply_to_message, f"{spread_name}_callback")
 
@@ -70,9 +80,11 @@ async def create_spread_image(bot, call: CallbackQuery, spread_type: str):
 
 @router.callback_query(IsReply(), F.data == 'create_month_spread')
 async def get_month_spread_image(call: CallbackQuery, bot: Bot):
+    await call.answer()
     await create_spread_image(bot, call, 'месяца')
 
 
 @router.callback_query(IsReply(), F.data == 'create_week_spread')
 async def get_week_spread_image(call: CallbackQuery, bot: Bot):
+    await call.answer()
     await create_spread_image(bot, call, 'недели')
