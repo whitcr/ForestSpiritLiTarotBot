@@ -28,16 +28,20 @@ class CouponMiddleware:
         if result is UNHANDLED:
             return result
 
-        random_number = random.random()
-        user_id = data.get('event_from_user').id
+        try:
+            random_number = random.random()
+            user_id = data.get('event_from_user').id
 
-        for card, info in self.CARD_CHANCES.items():
-            if random_number <= info["chance"]:
-                await self.update_coupon(user_id, info["field"])
-                await self.notify_user(data, card, info["sale"])
-                break
+            for card, info in self.CARD_CHANCES.items():
+                if random_number <= info["chance"]:
+                    await self.update_coupon(user_id, info["field"])
+                    await self.notify_user(data, card, info["sale"])
+                    break
 
-        return result
+            return result
+
+        except:
+            pass
 
     async def update_coupon(self, user_id: int, field: str):
         await execute_query(f"UPDATE users SET {field} = {field} + 1 WHERE user_id = $1;", (user_id,))
