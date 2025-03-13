@@ -21,13 +21,12 @@ class CheckingSubscription(BaseMiddleware):
             event: TelegramObject,
             data: Dict[str, Any]
     ) -> Any:
-
         user = data.get('event_from_user')
         chat = data.get('event_chat')
         bot = data['bot']
         channel_id = data['channel_id']
 
-        if await check_subscription(user.id, bot, channel_id):
+        if await check_subscription(user.id, bot, channel_id) or chat == channel_id or event.text.startswith('/start'):
             return await handler(event, data)
 
         msg = await bot.send_message(
@@ -35,9 +34,6 @@ class CheckingSubscription(BaseMiddleware):
             text = 'Вы должны быть подключены к моему информационному каналу, чтобы я мог вам помогать.',
             reply_markup = follow_channel_keyboard
         )
-
-        if chat == channel_id:
-            return await handler(event, data)
 
         await delete_message(msg, 30)
         return

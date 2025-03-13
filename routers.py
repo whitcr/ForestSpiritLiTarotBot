@@ -61,7 +61,7 @@ def setup_routers():
                            questions.router, date.router, getSpreads.router, dopCard.router,
                            getMeaningSpread.router, meaningDaySpread.router, givedBoost.router,
                            getInvoice.router, settings.router, menuCreate.router, weekAndMonthPremium.router,
-                           owner.router, referrals.router, audio.router, createBonusCard.router,
+                           owner.router, user.router, referrals.router, audio.router, createBonusCard.router,
                            giveBonuses.router, support.router)
 
     return router

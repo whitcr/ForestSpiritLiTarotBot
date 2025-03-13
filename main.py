@@ -66,8 +66,6 @@ def main() -> None:
     dp.message.middleware(CheckingSubscription())
     dp.callback_query.middleware(CheckingSubscription())
 
-    dp.include_router(user.router)
-
     dp.message.middleware(ThrottlingMiddleware())
     dp.callback_query.middleware(ThrottlingMiddleware())
 
@@ -117,7 +115,8 @@ def main() -> None:
         dp.shutdown.register(on_shutdown)
 
         asyncio.run(dp.start_polling(bot, skip_updates = True,
-                                     allowed_updates = dp.resolve_used_update_types()))
+                                     allowed_updates = dp.resolve_used_update_types(),
+                                     drop_pending_updates = True))
 
 
 if __name__ == "__main__":
