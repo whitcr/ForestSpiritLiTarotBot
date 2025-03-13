@@ -76,7 +76,7 @@ async def generate_profile_summary(message: types.Message, bot: Bot):
     }
     interactions = profile_data[7]
     booster = profile_data[8]
-    referrals = profile_data[9]
+    referrals_ids = profile_data[9]
     paid_meanings = profile_data[10]
     coupon_gold = profile_data[11]
     coupon_silver = profile_data[12]
@@ -92,10 +92,10 @@ async def generate_profile_summary(message: types.Message, bot: Bot):
     subscription_date = subscription_date if subscription_date else "Без подписки"
     interactions = interactions if interactions else "Не указано"
     booster = 'Да' if booster else 'Нет'
-    referrals = len(referrals) if referrals else "Нет приглашенных"
+    referrals = len(referrals_ids) if referrals_ids else "Нет приглашенных"
     if referrals >= 1:
         results = []
-        for user_id in referrals:
+        for user_id in referrals_ids:
             try:
                 user = await bot.get_chat(user_id)
                 if user.first_name:
