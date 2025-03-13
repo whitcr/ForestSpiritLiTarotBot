@@ -9,6 +9,7 @@ from aiogram.enums import ParseMode
 from aiogram.types import Update
 
 from config import load_config
+from handlers.commands import user
 from middlewares.logger import LoggingMiddleware
 from middlewares.statsHandler import HandlerStatisticsMiddleware
 from routers import setup_routers
@@ -64,6 +65,8 @@ def main() -> None:
 
     dp.message.middleware(CheckingSubscription())
     dp.callback_query.middleware(CheckingSubscription())
+
+    dp.include_router(user.router)
 
     dp.message.middleware(ThrottlingMiddleware())
     dp.callback_query.middleware(ThrottlingMiddleware())
