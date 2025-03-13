@@ -99,15 +99,15 @@ async def generate_profile_summary(message: types.Message, bot: Bot):
             try:
                 user = await bot.get_chat(user_id)
                 if user.first_name:
-                    results.append(f'<a href="tg://user?id={user_id}">{user.first_name}</a>')  # Имя
-                elif user.username:
                     results.append(f"@{user.username}")  # Ник
+                elif user.username:
+                    results.append(f'<a href="tg://user?id={user_id}">{user.first_name}</a>')  # Имя
                 else:
                     results.append(f'<a href="tg://user?id={user_id}">{user_id}</a>')  # Кликабельный ID
             except Exception as e:
                 results.append(f"Ошибка: {e}")
 
-        referrals = "\n".join(results)
+        referrals = ", ".join(results)
 
     paid_meanings = paid_meanings if paid_meanings else "0"
 
