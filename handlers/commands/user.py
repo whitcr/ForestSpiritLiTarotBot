@@ -1,3 +1,5 @@
+from itertools import count
+
 from aiogram import types, Router, Bot, F
 from aiogram.filters import CommandStart
 from aiogram.utils.markdown import hlink
@@ -90,7 +92,7 @@ async def generate_profile_summary(message: types.Message):
     subscription_date = subscription_date if subscription_date else "Без подписки"
     interactions = interactions if interactions else "Не указано"
     booster = 'Да' if booster else 'Нет'
-    referrals = referrals if referrals else "Нет приглашенных"
+    referrals = len(referrals) if referrals else "Нет приглашенных"
     paid_meanings = paid_meanings if paid_meanings else "0"
 
     # Проверка на наличие значений для day_follow и установка текстов по умолчанию
