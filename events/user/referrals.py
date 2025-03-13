@@ -33,7 +33,7 @@ async def get_referral_count(user_id, bot, channel_id):
             count += 1
         else:
             invited_result.remove(user)
-            await execute_query("UPDATE users SET invited = $1 WHERE user_id = $2", (invited_result, user_id))
+            await execute_query("UPDATE users SET referrals = $1 WHERE user_id = $2", (invited_result, user_id))
             pass
 
     return count
@@ -60,7 +60,7 @@ async def get_referrals(bot, message, command_params):
 
     if user_id not in invited:
         invited.append(user_id)
-        await execute_query("UPDATE users SET invited = $1 WHERE user_id = $2", (invited, referrer_id))
+        await execute_query("UPDATE users SET referrals = $1 WHERE user_id = $2", (invited, referrer_id))
         await bot.send_message(referrer_id,
                                f"Ты пригласил друга, спасибо!")
         await bot.send_message(user_id,
