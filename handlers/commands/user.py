@@ -60,7 +60,7 @@ async def get_formatted_card_statistics(callback_query: types.CallbackQuery, bot
 
 
 @router.message(F.text.lower() == "мой профиль")
-async def generate_profile_summary(message: types.Message):
+async def generate_profile_summary(message: types.Message, bot: Bot):
     user_id = message.from_user.id
     user_profile = await get_user_profile(user_id)
     profile_data = user_profile[0]
@@ -93,6 +93,22 @@ async def generate_profile_summary(message: types.Message):
     interactions = interactions if interactions else "Не указано"
     booster = 'Да' if booster else 'Нет'
     referrals = len(referrals) if referrals else "Нет приглашенных"
+    if referrals >= 1:
+        results = []
+        for user_id in referrals:
+            try:
+                user = await bot.get_chat(user_id)
+                if user.first_name:
+                    results.append(f'<a href="tg://user?id={user_id}">{user.first_name}</a>')  # Имя
+                elif user.username:
+                    results.append(f"@{user.username}")  # Ник
+                else:
+                    results.append(f'<a href="tg://user?id={user_id}">{user_id}</a>')  # Кликабельный ID
+            except Exception as e:
+                results.append(f"Ошибка: {e}")
+
+        referrals = "\n".join(results)
+
     paid_meanings = paid_meanings if paid_meanings else "0"
 
     # Проверка на наличие значений для day_follow и установка текстов по умолчанию
