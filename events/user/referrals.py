@@ -14,20 +14,21 @@ async def process_callback_get_referral_url(callback_query: CallbackQuery, bot: 
     user_id = callback_query.from_user.id
 
     referrals_ids = await execute_select("SELECT referrals FROM users WHERE user_id = $1", (user_id,))
-    referrals = len(referrals_ids) if referrals_ids else "Нет приглашенных"
 
     referral_link = f'https://t.me/ForestSpiritLi_bot?start=ref_{user_id}'
     text = f'Ваша ссылка для приглашения друзей:\n\n<code>{referral_link}</code>\n\n'
 
-    if referrals >= 1:
+    if len(referrals_ids) >= 1:
         count, removed = await get_referral_count(user_id, bot, channel_id)
         referrals = await get_names_from_array_ids(referrals_ids, bot)
 
-        text += f"Количество твоих приглашенных - {count}: {referrals}"
+        text += f"Твои приглашенные: {referrals}"
 
         if len(removed) > 0:
             removed = await get_names_from_array_ids(removed, bot)
             text += f"\nИз них не подписаны на канал: {removed}"
+    else:
+        text = "Нет приглашенных"
 
     await bot.send_message(
         user_id,
@@ -39,7 +40,7 @@ async def get_referral_count(user_id, bot, channel_id):
     invited_result = await execute_select("SELECT referrals FROM users WHERE user_id = $1", (user_id,))
 
     if invited_result is False:
-        return 0
+        return 0, []  # Return a tuple instead of just an integer
 
     count = 0
     removed = []
@@ -48,9 +49,8 @@ async def get_referral_count(user_id, bot, channel_id):
             count += 1
         else:
             removed.append(user)
-            pass
 
-    return count, removed
+    return count, removed  # Ensure tuple return
 
 
 async def get_referral_count_text(user_id, bot, channel_id):
