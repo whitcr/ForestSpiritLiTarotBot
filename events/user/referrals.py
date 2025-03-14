@@ -28,21 +28,21 @@ async def get_referral_count(user_id, bot, channel_id):
         return 0
 
     count = 0
+    removed = []
     for user in invited_result:
         if await check_subscription(user, bot, channel_id):
             count += 1
         else:
-            invited_result.remove(user)
-            await execute_query("UPDATE users SET referrals = $1 WHERE user_id = $2", (invited_result, user_id))
+            removed.append(user)
             pass
 
-    return count
+    return count, removed
 
 
 async def get_referral_count_text(user_id, bot, channel_id):
-    count = await get_referral_count(user_id, bot, channel_id)
-
-    text = f"Количество приглашенных и подписанных на канал - {count}"
+    count, removed = await get_referral_count(user_id, bot, channel_id)
+    removed = await get_names_from_array_ids(removed, bot)
+    text = f"Количество приглашенных и подписанных на канал - {count}, не подписаны: {removed}"
     return text
 
 
@@ -72,3 +72,20 @@ async def get_referrals(bot, message, command_params):
         await bot.send_message(user_id,
                                'Ты уже состоишь в канале, приглашения не засчитано.')
     return
+
+
+async def get_names_from_array_ids(array, bot):
+    results = []
+    for user_id in array:
+        try:
+            user = await bot.get_chat(user_id)
+            if user.first_name:
+                results.append(f"@{user.username}")  # Ник
+            elif user.username:
+                results.append(f'<a href="tg://user?id={user_id}">{user.first_name}</a>')  # Имя
+            else:
+                results.append(f'<a href="tg://user?id={user_id}">{user_id}</a>')  # Кликабельный ID
+        except Exception as e:
+            results.append(f"Ошибка: {e}")
+
+    return ", ".join(results)

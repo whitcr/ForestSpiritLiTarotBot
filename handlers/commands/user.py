@@ -9,7 +9,7 @@ import pendulum
 
 from constants import DECK_MAP, SUBS_TYPE
 from database import execute_query, execute_select_all
-from events.user.referrals import get_referrals
+from events.user.referrals import get_referrals, get_names_from_array_ids
 from functions.cards.create import get_buffered_image
 from functions.messages.messages import get_reply_message, get_chat_id, typing_animation_decorator
 from functions.statistics.getUserStats import get_user_statistics
@@ -94,20 +94,7 @@ async def generate_profile_summary(message: types.Message, bot: Bot):
     booster = 'Да' if booster else 'Нет'
     referrals = len(referrals_ids) if referrals_ids else "Нет приглашенных"
     if referrals >= 1:
-        results = []
-        for user_id in referrals_ids:
-            try:
-                user = await bot.get_chat(user_id)
-                if user.first_name:
-                    results.append(f"@{user.username}")  # Ник
-                elif user.username:
-                    results.append(f'<a href="tg://user?id={user_id}">{user.first_name}</a>')  # Имя
-                else:
-                    results.append(f'<a href="tg://user?id={user_id}">{user_id}</a>')  # Кликабельный ID
-            except Exception as e:
-                results.append(f"Ошибка: {e}")
-
-        referrals = ", ".join(results)
+        referrals = await get_names_from_array_ids(referrals, bot)
 
     paid_meanings = paid_meanings if paid_meanings else "0"
 

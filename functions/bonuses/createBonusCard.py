@@ -7,7 +7,7 @@ from database import execute_select, execute_select_all
 from aiogram.types import BufferedInputFile
 from aiogram.utils.media_group import MediaGroupBuilder
 
-from events.user.referrals import get_referral_count
+from events.user.referrals import get_referral_count, get_names_from_array_ids
 from functions.messages.messages import typing_animation_decorator
 
 router = Router()
@@ -110,7 +110,7 @@ async def get_bonus_cards(call: types.CallbackQuery, bot: Bot, channel_id):
 
     spreads_count, paid_count, referrals_paid = result[0]
 
-    referrals_array = await get_referral_count(call.from_user.id, bot, channel_id)
+    referrals_array, removed = await get_referral_count(call.from_user.id, bot, channel_id)
 
     img1 = await mark_bonuses(
         image_path = "./images/tech/bonusCards/bonusCard1.png",
@@ -122,7 +122,7 @@ async def get_bonus_cards(call: types.CallbackQuery, bot: Bot, channel_id):
     img2 = await mark_bonuses(
         image_path = "./images/tech/bonusCards/bonusCard2.png",
         personal_bonus_number = spreads_count,
-        friend_bonus_number = len(referrals_array) if referrals_array else 0,
+        friend_bonus_number = referrals_array,
         type = 2
     )
 
@@ -138,3 +138,9 @@ async def get_bonus_cards(call: types.CallbackQuery, bot: Bot, channel_id):
         media_group.add_photo(media = BufferedInputFile(output2.getvalue(), "image1.png"))
 
         await call.message.reply_media_group(media = media_group.build())
+
+    if len(removed) >= 1:
+        names = await get_names_from_array_ids(removed, bot)
+
+        await bot.send_message(call.from_user.id,
+                               f"К сожалению, {names} не подписан(ы) на канал и не был(и) засчитан(ы) вам в бонусы.")
