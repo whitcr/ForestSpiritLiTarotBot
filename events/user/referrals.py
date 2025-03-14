@@ -9,15 +9,27 @@ router = Router()
 
 
 @router.callback_query(F.data == 'get_referral_url')
-async def process_callback_get_referral_url(callback_query: CallbackQuery, bot: Bot):
+async def process_callback_get_referral_url(callback_query: CallbackQuery, bot: Bot, channel_id):
     await callback_query.answer()
-
     user_id = callback_query.from_user.id
+
+    referrals_ids = await execute_select("SELECT referrals FROM users WHERE user_id = $1", (user_id,))
+    referrals = len(referrals_ids) if referrals_ids else "Нет приглашенных"
+
     referral_link = f'https://t.me/ForestSpiritLi_bot?start=ref_{user_id}'
+    text = f'Ваша ссылка для приглашения друзей:\n\n<code>{referral_link}</code>\n\n'
+
+    if referrals >= 1:
+        count, removed = await get_referral_count(user_id, bot, channel_id)
+        referrals = await get_names_from_array_ids(referrals_ids, bot)
+        text += f"\n\nКоличество твоих приглашенных - {count}: {referrals}"
+
+        if len(removed) > 0:
+            text += f"\nИз них не подписаны на канал: {removed}"
 
     await bot.send_message(
         user_id,
-        f'Ваша ссылка для приглашения друзей:\n\n<code>{referral_link}</code>\n\n'
+        text
     )
 
 

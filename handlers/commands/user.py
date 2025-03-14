@@ -92,9 +92,6 @@ async def generate_profile_summary(message: types.Message, bot: Bot):
     subscription_date = subscription_date if subscription_date else "Без подписки"
     interactions = interactions if interactions else "Не указано"
     booster = 'Да' if booster else 'Нет'
-    referrals = len(referrals_ids) if referrals_ids else "Нет приглашенных"
-    if referrals >= 1:
-        referrals = await get_names_from_array_ids(referrals_ids, bot)
 
     paid_meanings = paid_meanings if paid_meanings else "0"
 
@@ -119,7 +116,6 @@ async def generate_profile_summary(message: types.Message, bot: Bot):
         f"<b>Купоны:</b>{coupons}\n"
         f"<b>Взаимодействий:</b> {interactions}\n"
         f"<b>Буст:</b> {booster}\n"
-        f"<b>Приглашенные:</b>  {referrals}\n"
     )
 
     await message.answer(profile_text, reply_markup = profile_keyboard, reply_to_message_id = message.message_id)
