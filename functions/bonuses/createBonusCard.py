@@ -65,6 +65,15 @@ async def mark_bonuses(image_path, personal_bonus_number, friend_bonus_number, t
             16: (width * 0.5, height * 0.45),  # Free вопрос
             24: (width * 0.75, height * 0.45),  # 2 Free вопроса
         }
+
+        friend_bonus_positions = {
+            1: (width * 0.15, height * 0.8),  # 20% скидка
+            3: (width * 0.3, height * 0.8),  # Week премиум
+            5: (width * 0.45, height * 0.8),  # 2 Free вопроса
+            7: (width * 0.6, height * 0.8),  # 3 Free вопроса
+            9: (width * 0.75, height * 0.8),  # Month премиум
+            12: (width * 0.9, height * 0.8),  # 4 Free вопроса
+        }
     else:
         personal_bonus_positions = {
             1000: (width * 0.2, height * 0.17),  # Расклад на неделю от ли
@@ -78,14 +87,14 @@ async def mark_bonuses(image_path, personal_bonus_number, friend_bonus_number, t
             10000: (width * 0.75, height * 0.45),  # 2 Free вопроса
         }
 
-    friend_bonus_positions = {
-        1: (width * 0.15, height * 0.8),  # 20% скидка
-        3: (width * 0.3, height * 0.8),  # Week премиум
-        5: (width * 0.45, height * 0.8),  # 2 Free вопроса
-        7: (width * 0.6, height * 0.8),  # 3 Free вопроса
-        9: (width * 0.75, height * 0.8),  # Month премиум
-        12: (width * 0.9, height * 0.8),  # 4 Free вопроса
-    }
+        friend_bonus_positions = {
+            3: (width * 0.15, height * 0.8),  # 20% скидка
+            6: (width * 0.3, height * 0.8),  # Week премиум
+            9: (width * 0.45, height * 0.8),  # 2 Free вопроса
+            12: (width * 0.6, height * 0.8),  # 3 Free вопроса
+            15: (width * 0.75, height * 0.8),  # Month премиум
+            18: (width * 0.9, height * 0.8),  # 4 Free вопроса
+        }
 
     for number, position in personal_bonus_positions.items():
         if number <= personal_bonus_number:
