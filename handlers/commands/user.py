@@ -94,7 +94,7 @@ async def generate_profile_summary(message: types.Message, bot: Bot):
     booster = 'Да' if booster else 'Нет'
     referrals = len(referrals_ids) if referrals_ids else "Нет приглашенных"
     if referrals >= 1:
-        referrals = await get_names_from_array_ids(referrals, bot)
+        referrals = await get_names_from_array_ids(referrals_ids, bot)
 
     paid_meanings = paid_meanings if paid_meanings else "0"
 
