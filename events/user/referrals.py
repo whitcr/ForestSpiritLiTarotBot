@@ -22,9 +22,11 @@ async def process_callback_get_referral_url(callback_query: CallbackQuery, bot: 
     if referrals >= 1:
         count, removed = await get_referral_count(user_id, bot, channel_id)
         referrals = await get_names_from_array_ids(referrals_ids, bot)
-        text += f"\n\nКоличество твоих приглашенных - {count}: {referrals}"
+
+        text += f"Количество твоих приглашенных - {count}: {referrals}"
 
         if len(removed) > 0:
+            removed = await get_names_from_array_ids(removed, bot)
             text += f"\nИз них не подписаны на канал: {removed}"
 
     await bot.send_message(
