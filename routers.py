@@ -3,7 +3,8 @@ from aiogram import Router
 from events.group import addedToGroup
 from events.user import bannedByUser, referrals
 from handlers.audio import audio
-from handlers.commands import owner, user, support
+from handlers.commands import user, support
+from handlers.commands.admin import owner, get_user_profile
 from handlers.tarot.spreads import getSpreads
 from handlers.tarot.spreads.meaningSpreads import getMeaningSpread
 from handlers.tarot.spreads.weekAndMonth import weekAndMonthDefault, weekAndMonthPremium
