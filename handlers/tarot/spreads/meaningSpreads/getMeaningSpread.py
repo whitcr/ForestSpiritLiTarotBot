@@ -3,6 +3,7 @@ from aiogram import types, Router, F
 from database import execute_select, execute_query
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
+from functions.cards.create import get_choice_spread
 from functions.messages.messages import get_reply_message, typing_animation_decorator, delete_message
 
 from functions.gpt.requests import get_cards_meanings, get_cards_meanings_details
@@ -56,7 +57,7 @@ class GptCallbackMeaning(CallbackData, prefix = "get_def_gpt_"):
     situation: Optional[str]
 
 
-async def create_gpt_keyboard(buttons, nums, prev_callback_data=None, card_position=None, dop_num=None,
+async def create_gpt_keyboard(user_id, buttons, nums, prev_callback_data=None, card_position=None, dop_num=None,
                               spread_name=None):
     def create_callback_data(nums, d1cards, d2cards, d3cards, premium=False, question=None, situation=None,
                              spread_name=None):
@@ -112,8 +113,10 @@ async def create_gpt_keyboard(buttons, nums, prev_callback_data=None, card_posit
     callback_data_premium = create_callback_data(nums, d1cards, d2cards, d3cards, premium = True,
                                                  spread_name = spread_name)
 
-    buttons.extend([[InlineKeyboardButton(text = 'Трактовка', callback_data = callback_data_default),
-                     InlineKeyboardButton(text = 'Трактовка+', callback_data = callback_data_premium)]])
+    choice = await get_choice_spread(user_id)
+    if choice == 'raider':
+        buttons.extend([[InlineKeyboardButton(text = 'Трактовка', callback_data = callback_data_default),
+                         InlineKeyboardButton(text = 'Трактовка+', callback_data = callback_data_premium)]])
 
     return buttons
 

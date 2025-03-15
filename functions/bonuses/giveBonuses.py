@@ -10,7 +10,7 @@ async def handle_admin_command_give_bonuses(message: types.Message, bot: Bot):
     if not message.reply_to_message:
         return
     target_user_id = message.reply_to_message.from_user.id
-    print(message.text.strip(" ")[3])
+
     try:
         value = int(message.text.strip(" ")[3])
     except ValueError:

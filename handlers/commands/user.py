@@ -61,64 +61,67 @@ async def get_formatted_card_statistics(callback_query: types.CallbackQuery, bot
 
 @router.message(F.text.lower() == "мой профиль")
 async def generate_profile_summary(message: types.Message, bot: Bot):
-    user_id = message.from_user.id
-    user_profile = await get_user_profile(user_id)
-    profile_data = user_profile[0]
+    if message.chat.type == "private":
+        user_id = message.from_user.id
+        user_profile = await get_user_profile(user_id)
+        profile_data = user_profile[0]
 
-    deck_type = profile_data[0]
-    subscription = profile_data[1]
-    subscription_date = profile_data[2]
-    day_follow = {
-        "moon_follow": profile_data[3],
-        "day_card_follow": profile_data[4],
-        "week_card_follow": profile_data[5],
-        "month_card_follow": profile_data[6],
-    }
-    interactions = profile_data[7]
-    booster = profile_data[8]
-    referrals_ids = profile_data[9]
-    paid_meanings = profile_data[10]
-    coupon_gold = profile_data[11]
-    coupon_silver = profile_data[12]
-    coupon_iron = profile_data[13]
+        deck_type = profile_data[0]
+        subscription = profile_data[1]
+        subscription_date = profile_data[2]
+        day_follow = {
+            "moon_follow": profile_data[3],
+            "day_card_follow": profile_data[4],
+            "week_card_follow": profile_data[5],
+            "month_card_follow": profile_data[6],
+        }
+        interactions = profile_data[7]
+        booster = profile_data[8]
+        referrals_ids = profile_data[9]
+        paid_meanings = profile_data[10]
+        coupon_gold = profile_data[11]
+        coupon_silver = profile_data[12]
+        coupon_iron = profile_data[13]
 
-    coupons = (f"{coupon_gold} золот{'ых' if coupon_gold != 1 else 'ой'}, "
-               f"{coupon_silver} серебрян{'ых' if coupon_silver != 1 else 'ый'}, "
-               f"{coupon_iron} железн{'ых' if coupon_iron != 1 else 'ый'}")
+        coupons = (f"{coupon_gold} золот{'ых' if coupon_gold != 1 else 'ой'}, "
+                   f"{coupon_silver} серебрян{'ых' if coupon_silver != 1 else 'ый'}, "
+                   f"{coupon_iron} железн{'ых' if coupon_iron != 1 else 'ый'}")
 
-    deck_type = DECK_MAP[deck_type] if deck_type else "Не указано"
-    subscription = SUBS_TYPE[subscription] if subscription else "Без подписки"
+        deck_type = DECK_MAP[deck_type] if deck_type else "Не указано"
+        subscription = SUBS_TYPE[subscription] if subscription else "Без подписки"
 
-    subscription_date = subscription_date if subscription_date else "Без подписки"
-    interactions = interactions if interactions else "Не указано"
-    booster = 'Да' if booster else 'Нет'
+        subscription_date = subscription_date if subscription_date else "Без подписки"
+        interactions = interactions if interactions else "Не указано"
+        booster = 'Да' if booster else 'Нет'
 
-    paid_meanings = paid_meanings if paid_meanings else "0"
+        paid_meanings = paid_meanings if paid_meanings else "0"
 
-    # Проверка на наличие значений для day_follow и установка текстов по умолчанию
-    moon_follow = "Есть" if day_follow['moon_follow'] else 'Нет'
-    day_card_follow = "Есть" if day_follow['day_card_follow'] else 'Нет'
-    week_card_follow = "Есть" if day_follow['week_card_follow'] else 'Нет'
-    month_card_follow = "Есть" if day_follow['month_card_follow'] else 'Нет'
+        # Проверка на наличие значений для day_follow и установка текстов по умолчанию
+        moon_follow = "Есть" if day_follow['moon_follow'] else 'Нет'
+        day_card_follow = "Есть" if day_follow['day_card_follow'] else 'Нет'
+        week_card_follow = "Есть" if day_follow['week_card_follow'] else 'Нет'
+        month_card_follow = "Есть" if day_follow['month_card_follow'] else 'Нет'
 
-    # Формирование текста профиля
-    profile_text = (
-        f"📋 <b>Ваш профиль</b>\n\n"
-        f"<b>Колода:</b> {deck_type}\n"
-        f"<b>Подписка:</b> {subscription}\n"
-        f"<b>Конец подписки:</b> {subscription_date}\n"
-        f"<b>Кол-во трактовок от Ли:</b> {paid_meanings}\n"
-        f"<b>Рассылки:</b>\n"
-        f"    🌙 Луна: {moon_follow}\n"
-        f"    🌞 Расклад дня: {day_card_follow}\n"
-        f"    📅 Расклад недели: {week_card_follow}\n"
-        f"    📆 Расклад месяца: {month_card_follow}\n"
-        f"<b>Купоны:</b>{coupons}\n"
-        f"<b>Взаимодействий:</b> {interactions}\n"
-        f"<b>Буст:</b> {booster}\n"
-    )
+        # Формирование текста профиля
+        profile_text = (
+            f"📋 <b>Ваш профиль</b>\n\n"
+            f"<b>Колода:</b> {deck_type}\n"
+            f"<b>Подписка:</b> {subscription}\n"
+            f"<b>Конец подписки:</b> {subscription_date}\n"
+            f"<b>Кол-во трактовок от Ли:</b> {paid_meanings}\n"
+            f"<b>Рассылки:</b>\n"
+            f"    🌙 Луна: {moon_follow}\n"
+            f"    🌞 Расклад дня: {day_card_follow}\n"
+            f"    📅 Расклад недели: {week_card_follow}\n"
+            f"    📆 Расклад месяца: {month_card_follow}\n"
+            f"<b>Купоны:</b>{coupons}\n"
+            f"<b>Взаимодействий:</b> {interactions}\n"
+            f"<b>Буст:</b> {booster}\n"
+        )
 
-    await message.answer(profile_text, reply_markup = profile_keyboard, reply_to_message_id = message.message_id)
+        await message.answer(profile_text, reply_markup = profile_keyboard, reply_to_message_id = message.message_id)
+    else:
+        await message.reply("Эта команда доступна только в личных сообщениях.")
 
 
 @router.message(F.text.lower() == "услуги")
