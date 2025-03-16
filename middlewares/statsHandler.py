@@ -107,6 +107,21 @@ CALLBACK_COMMAND_MAPPING = {
     'get_def_gpt_': 'Обычная трактовка',
     'get_day_spread_meaning_': 'Трактовка расклада дня',
     'day_meaning_day_': 'Трактовка карт дня',
+    'add_referrals_': 'Трактовка карт дня',
+    'admin_back_': 'Админ Команда',
+    'admin_referrals_': 'Админ Команда',
+    'admin_subscription_': 'Админ Команда',
+    'admin_coupons_': 'Админ Команда',
+    'sub_type_': 'Админ Команда',
+    'admin_meanings_': 'Админ Команда',
+    'coupon_type_': 'Админ Команда',
+    'add_coupon_': 'Админ Команда',
+    'manual_coupon_': 'Админ Команда',
+    'manual_meanings_': 'Админ Команда',
+    'cancel_subscription_': 'Админ Команда',
+    'add_sub_': 'Админ Команда',
+    'manual_sub_': 'Админ Команда',
+    'manual_referrals_': 'Админ Команда',
 }
 
 ALLOWED_COMMANDS = {

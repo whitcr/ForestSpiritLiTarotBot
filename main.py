@@ -9,7 +9,6 @@ from aiogram.enums import ParseMode
 from aiogram.types import Update
 
 from config import load_config
-from handlers.commands import user
 from middlewares.logger import LoggingMiddleware
 from middlewares.statsHandler import HandlerStatisticsMiddleware
 from routers import setup_routers
@@ -67,7 +66,7 @@ def main() -> None:
     dp.callback_query.middleware(CheckingSubscription())
 
     dp.message.middleware(ThrottlingMiddleware())
-    dp.callback_query.middleware(ThrottlingMiddleware())
+    # dp.callback_query.middleware(ThrottlingMiddleware())
 
     stats_middleware = HandlerStatisticsMiddleware(flush_interval = 60)
 

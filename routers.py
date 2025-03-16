@@ -2,9 +2,12 @@ from aiogram import Router
 
 from events.group import addedToGroup
 from events.user import bannedByUser, referrals
+from functions.contest import contest, contestAdmin
+from functions.quiz import createQuiz
 from handlers.audio import audio
 from handlers.commands import user, support
-from handlers.commands.admin import owner, get_user_profile
+from handlers.commands.admin import owner, getUserProfile
+from handlers.library import library
 from handlers.tarot.spreads import getSpreads
 from handlers.tarot.spreads.meaningSpreads import getMeaningSpread
 from handlers.tarot.spreads.weekAndMonth import weekAndMonthDefault, weekAndMonthPremium
@@ -63,6 +66,7 @@ def setup_routers():
                            getMeaningSpread.router, meaningDaySpread.router, givedBoost.router,
                            getInvoice.router, settings.router, menuCreate.router, weekAndMonthPremium.router,
                            owner.router, user.router, referrals.router, audio.router, createBonusCard.router,
-                           giveBonuses.router, support.router)
+                           giveBonuses.router, support.router, getUserProfile.router, createQuiz.router, contest.router,
+                           contestAdmin.router, library.router)
 
     return router

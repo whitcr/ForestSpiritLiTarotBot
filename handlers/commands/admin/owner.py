@@ -104,16 +104,15 @@ async def cmd_stats(message: Message):
     else:
         await message.answer("Статистика пока не собрана.")
 
-
-@router.message(IsAdmin(), F.content_type.in_({'photo', 'video', 'document'}))
-async def media_handler(message: Message, bot: Bot, logger_chat):
-    if message.photo:
-        media_id = message.photo[-1].file_id
-    elif message.video:
-        media_id = message.video.file_id
-    elif message.document:
-        media_id = message.document.file_id
-    else:
-        return
-
-    await bot.send_message(logger_chat, f"Media ID: `{media_id}`", parse_mode = "Markdown")
+# @router.message(IsAdmin(), F.content_type.in_({'photo', 'video', 'document'}))
+# async def media_handler(message: Message, bot: Bot, logger_chat):
+#     if message.photo:
+#         media_id = message.photo[-1].file_id
+#     elif message.video:
+#         media_id = message.video.file_id
+#     elif message.document:
+#         media_id = message.document.file_id
+#     else:
+#         return
+#
+#     await bot.send_message(logger_chat, f"Media ID: `{media_id}`", parse_mode = "Markdown")

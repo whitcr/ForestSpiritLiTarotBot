@@ -11,6 +11,7 @@ from constants import DECK_MAP, SUBS_TYPE
 from database import execute_query, execute_select_all
 from events.user.referrals import get_referrals, get_names_from_array_ids
 from functions.cards.create import get_buffered_image
+from functions.contest.contest import contest_with_referral
 from functions.messages.messages import get_reply_message, get_chat_id, typing_animation_decorator
 from functions.statistics.getUserStats import get_user_statistics
 from keyboard import menu_private_keyboard, profile_keyboard
@@ -24,6 +25,9 @@ async def start(message: types.Message, bot: Bot):
 
     if "ref_" in command_params:
         await get_referrals(bot, message, command_params)
+
+    if "contest" in command_params:
+        await contest_with_referral(message)
 
     if message.chat.type == "private":
         text = hlink('—', 'https://telegra.ph/Lesnoj-Duh-Li-10-10')
@@ -40,7 +44,7 @@ async def get_menu(message: types.Message):
 
 async def get_user_profile(user_id: int):
     query = """
-    SELECT cards_type, subscription, subscription_date, moon_follow, day_card_follow, 
+    SELECT cards_type, subscription, subscфription_date, moon_follow, day_card_follow, 
            week_card_follow, month_card_follow, total_count as interactions, boosted, referrals, paid_meanings,
            coupon_gold, coupon_silver, coupon_iron
     FROM users

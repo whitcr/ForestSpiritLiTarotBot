@@ -7,7 +7,7 @@ from filters.baseFilters import IsAdmin
 from functions.affirmations.affirmations import get_random_affirmations
 from functions.cards.create import get_path_cards, text_size, get_buffered_image
 from functions.gpt.requests import daily_question
-from other.phrases import get_random_phrases
+from tech.texts.phrases import get_random_phrases
 from constants import P_FONT_L, P_FONT_XL, P_FONT_S
 from tech.posting.moonInfo import moon_posting
 from tech.posting.templates import get_post_template
@@ -16,9 +16,9 @@ router = Router()
 
 
 @router.callback_query(IsAdmin(), F.data == 'morning_posting')
-async def get_morning_posting(call: types.CallbackQuery):
+async def get_morning_posting(call: types.CallbackQuery, bot, channel_id):
     await call.answer()
-    await morning_posting()
+    await morning_posting(bot, channel_id)
 
 
 async def morning_posting(bot, channel_id):

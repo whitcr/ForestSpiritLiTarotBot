@@ -22,6 +22,7 @@ class LoggingMiddleware(BaseMiddleware):
 
         try:
             result = await handler(event, data)
+
             if result is UNHANDLED:
                 return result
 
@@ -31,9 +32,9 @@ class LoggingMiddleware(BaseMiddleware):
             chat = data.get('event_chat')
             user_id = user.id if user else 'Неизвестный пользователь'
             user_link = f"tg://user?id={user_id}" if user_id != 'Неизвестный пользователь' else 'Неизвестный пользователь'
-            chat_id = chat.id if chat else 'Неизвестный чат'
-            chat_title = chat.title if chat.title else 'Личка'
-            chat_us = chat.username if chat.username else ''
+            chat_id = chat.id if chat is not None else 'Неизвестный чат'
+            chat_title = chat.title if chat is not None else 'Личка'
+            chat_us = chat.username if chat is not None else ''
 
             command_name = event.message.text if event and event.message and event.message.text else 'Неизвестная комманда'
 
@@ -53,15 +54,15 @@ class LoggingMiddleware(BaseMiddleware):
             return result
         except Exception as e:
 
-            bot = data.get("bot")
-            admin_id = data.get("admin_id")
-            user = data.get('event_from_user')
-            chat = data.get('event_chat')
+            bot = data.get("bot") if data.get("bot") else None
+            admin_id = data.get("admin_id") if data.get("admin_id") else None
+            user = data.get('event_from_user') if data.get('event_from_user') else None
+            chat = data.get('event_chat') if data.get('event_chat') else None
             user_id = user.id if user else 'Неизвестный пользователь'
             user_link = f"tg://user?id={user_id}" if user_id != 'Неизвестный пользователь' else 'Неизвестный пользователь'
-            chat_id = chat.id if chat else 'Неизвестный чат'
-            chat_title = chat.title if chat.title else 'Личка'
-            chat_us = chat.username if chat.username else ''
+            chat_id = chat.id if chat is not None else 'Неизвестный чат'
+            chat_title = chat.title if chat is not None else 'Личка'
+            chat_us = chat.username if chat is not None else ''
             command = getattr(event.message, 'text', 'Неизвестная команда')
 
             message = (
