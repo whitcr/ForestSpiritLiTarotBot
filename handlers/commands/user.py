@@ -44,7 +44,7 @@ async def get_menu(message: types.Message):
 
 async def get_user_profile(user_id: int):
     query = """
-    SELECT cards_type, subscription, subscфription_date, moon_follow, day_card_follow, 
+    SELECT cards_type, subscription, subscription_date, moon_follow, day_card_follow, 
            week_card_follow, month_card_follow, total_count as interactions, boosted, referrals, paid_meanings,
            coupon_gold, coupon_silver, coupon_iron
     FROM users
