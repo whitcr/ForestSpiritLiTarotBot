@@ -1,145 +1,190 @@
-from aiogram import executor, types
-from bot import dp, db, bot, cursor
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from io import BytesIO
-import math
-from random import randint
-import numpy as np
-import textwrap
-from datetime import datetime
-import pytz
-from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.dispatcher.filters import IDFilter
-from aiogram.types import ContentType, Message
-import random
-import keyboard as kb
 import asyncio
-from datetime import datetime, timedelta
-import filters as ft
+import pytz
+from datetime import datetime
+from aiogram import Bot, F, Router
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import Message, CallbackQuery
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-# @dp.message_handler(lambda message: message.text.lower() == "тест")
-async def maraphone_message():
-    newdate = datetime.now(pytz.timezone('Europe/Kiev'))
-    date = newdate.strftime("%d.%m")
+from constants import CARDS
+from database import execute_query, execute_select, execute_select_all
 
-    cursor.execute("SELECT arcane from maraphone_arcanes where number = 99;")
-    number = cursor.fetchone()[0]
-
-    cursor.execute("SELECT text from maraphone_arcanes where number = 99;")
-    med = cursor.fetchone()[0]
-    try:
-        cursor.execute("SELECT arcane from maraphone_arcanes where number = {};".format(number))
-        arcane = cursor.fetchone()[0]
-        cursor.execute("SELECT raider from path_decks where number = {};".format(number))
-        photo = cursor.fetchone()[0]
-    except:
-        pass
-    number = float(number) +0.5
-    if number == 22:
-        number = 0;
-    try:
-        cursor.execute("UPDATE maraphone_arcanes SET arcane = '{}' where number = 99;".format(number))
-        db.commit()
-        text = f"Сегодня мы проживаем аркан <b>{arcane} </b>\n\n" \
-               f"{med}"
-
-        msg = await bot.send_photo(-1001445412679, photo=open(photo, 'rb'), caption=text)
-        await bot.pin_chat_message(msg.chat.id, msg.message_id)
-    except:
-        pass
-    # await bot.pin_chat_message(-1001445412679, message_id=msg)
+router = Router()
+MARATHONER_CHAT = -1001445412679
 
 
-@dp.message_handler(lambda message: message.text.lower() == "марафон")
-async def get_notif_maraphone(message: types.Message):
-    if message.chat.id == -1001445412679:
-        text = f"Как насчет записать результаты сегодняшнего дня?"
-        await bot.send_message(-1001445412679, text=text, reply_markup=kb.rec_keyboard_maraphone)
-    else:
-        pass
+# закинуть в основное расписание
+# asyncio.create_task(schedule_notifications(bot))
 
-async def notif_maraphone():
-    text = f"Как насчет записать результаты сегодняшнего дня?"
-    await bot.send_message(-1001445412679, text=text, reply_markup=kb.rec_keyboard_maraphone)
+async def check_and_create_db():
+    await execute_query(
+        """CREATE TABLE IF NOT EXISTS maraphone_records (
+        id SERIAL PRIMARY KEY,
+        user_id BIGINT NOT NULL,
+        arcane TEXT NOT NULL,
+        text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)""",
+        ()
+    )
+    await execute_query(
+        """CREATE TABLE IF NOT EXISTS maraphone_arcanes (
+        id SERIAL PRIMARY KEY,
+        number FLOAT NOT NULL,
+        arcane TEXT NOT NULL,
+        text TEXT NOT NULL)""",
+        ()
+    )
 
-async def notif_meditate():
-    text = f"Не забывайте, что вы можете перед сном помедитировать на сегодняшний Аркан, чтобы вам приснился сон с интересным сюжетом!"
-    await bot.send_message(-1001445412679, text=text)
 
 class Records(StatesGroup):
     arcane = State()
     day = State()
 
-@dp.callback_query_handler(lambda call: call.data == 'rec_maraphone')
-async def rec_marapone(call: types.CallbackQuery, state: FSMContext):
+
+async def get_today_arcane():
+    arcane = await execute_select(
+        "SELECT arcane, text FROM maraphone_arcanes WHERE number = 99"
+    )
+    if arcane:
+        return arcane[0], arcane[1]
+    return "Не найден", "Нет информации."
+
+
+async def morning_arcane_notification(bot: Bot):
+    arcane, description = await get_today_arcane()
+    text = f"🌞 Доброе утро! Сегодня мы проживаем аркан <b>{arcane}</b>\n\n{description}"
+    await bot.send_message(MARATHONER_CHAT, text = text, parse_mode = "HTML")
+
+
+async def evening_record_notification(bot: Bot):
+    text = "🌙 Как насчет записать результаты сегодняшнего дня?"
+    await bot.send_message(MARATHONER_CHAT, text = text)
+
+
+# гавно переделать
+async def schedule_notifications(bot: Bot):
+    tz = pytz.timezone("Europe/Kiev")
+
+    while True:
+        now = datetime.now(tz)
+        morning_time = now.replace(hour = 9, minute = 0, second = 0, microsecond = 0)
+        evening_time = now.replace(hour = 21, minute = 0, second = 0, microsecond = 0)
+
+        if now < morning_time:
+            sleep_time = (morning_time - now).total_seconds()
+            await asyncio.sleep(sleep_time)
+            await morning_arcane_notification(bot)
+
+        elif now < evening_time:
+            sleep_time = (evening_time - now).total_seconds()
+            await asyncio.sleep(sleep_time)
+            await evening_record_notification(bot)
+
+        else:
+            await asyncio.sleep(3600)
+
+
+@router.message(F.text.lower() == "марафон")
+async def marathon_info(message: Message, bot: Bot):
+    await check_and_create_db()
+
+    arcane, arcane_text = await get_today_arcane()
+    date = datetime.now(pytz.timezone("Europe/Kiev")).strftime("%d.%m")
+
+    text = (
+        f"📅 <b>Марафон</b>\n"
+        f"Сегодня <b>{date}</b>\n\n"
+        f"🌟 Сегодняшний Аркан: <b>{arcane}</b>\n\n"
+        f"{arcane_text}"
+    )
+
+    keyboard = ReplyKeyboardBuilder()
+    keyboard.button(text = "📖 Мой дневник")
+    keyboard.button(text = "✍ Записать результат")
+    keyboard.adjust(1)
+
+    await bot.send_message(
+        message.chat.id, text = text, reply_markup = keyboard.as_markup(resize_keyboard = True), parse_mode = "HTML"
+    )
+
+
+@router.callback_query(F.data == "rec_maraphone")
+async def rec_maraphone(call: CallbackQuery, state: FSMContext):
     await call.answer()
     await call.message.answer("Какой аркан вы сегодня проживали?")
-    await Records.arcane.set()
+    await state.set_state(Records.arcane)
 
-@dp.message_handler(state=Records.arcane)
-async def get_day_maraphone(message: types.Message, state: FSMContext):
-        await state.update_data(arcane=message.text)
-        data = await state.get_data()
-        arcane = str(data['arcane'])
-        if any(word in arcane.lower() for word in ft.CARDS):
-            await message.answer(
-                "Опишите то, как проигрался ваш сегодняшний аркан. Любые подробности, любые мелочи будут уместны.")
-            await Records.day.set()
-        else:
-            await message.answer(
-                "Это какая-то новая колода? Не слышал про такой Аркан, напиши по Уэйту.")
-            await Records.arcane.set()
 
-@dp.message_handler(state=Records.day)
-async def get_rec_maraphone(message: types.Message, state: FSMContext):
+@router.message(Records.arcane)
+async def get_day_maraphone(message: Message, state: FSMContext):
+    await state.update_data(arcane = message.text)
+    arcane = message.text.lower()
+
+    if any(word in arcane for word in CARDS):
+        await message.answer("Опишите то, как проигрался ваш сегодняшний аркан.")
+        await state.set_state(Records.day)
+    else:
+        await message.answer("Это какая-то новая колода? Напиши по Уэйту.")
+        await state.set_state(Records.arcane)
+
+
+@router.message(Records.day)
+async def get_rec_maraphone(message: Message, state: FSMContext):
     try:
-        user_id = message.from_user.id
-        await state.update_data(text=message.text)
         data = await state.get_data()
-        arcane = str(data['arcane'])
-        text = str(data['text'])
-        try:
-            cursor.execute("SELECT text from maraphone_records where user_id = '{}' and arcane = '{}' ;".format(user_id, arcane))
-            old_text = cursor.fetchone()[0]
-            text = f"{old_text}\n\n{text}"
-        except:
-            text = text
-            cursor.execute("insert into maraphone_records (user_id, arcane) values ({}, '{}')".format(user_id, arcane))
-        cursor.execute("UPDATE maraphone_records SET text = '{}' where user_id = {} and arcane = '{}';".format(text, user_id, arcane))
-        db.commit()
-        await message.answer("Записано!")
-    except:
-        await message.answer("Что-то пошло не так.")
-    await state.finish()
+        user_id = message.from_user.id
+        arcane = data["arcane"]
+        text = message.text
 
-@dp.message_handler(lambda message: message.text.lower() == "мой дневник")
-async def show_rec_maraphone(message: types.Message, state: FSMContext):
-    if message.chat.id == -1001445412679:
+        existing_record = await execute_select(
+            "SELECT text FROM maraphone_records WHERE user_id = %s AND arcane = %s",
+            (user_id, arcane),
+        )
+
+        if existing_record:
+            text = f"{existing_record[0]}\n\n{text}"
+        else:
+            await execute_query(
+                "INSERT INTO maraphone_records (user_id, arcane, text) VALUES (%s, %s, %s)",
+                (user_id, arcane, text),
+            )
+
+        await execute_query(
+            "UPDATE maraphone_records SET text = %s WHERE user_id = %s AND arcane = %s",
+            (text, user_id, arcane),
+        )
+
+        await message.answer("Записано!")
+    except Exception as e:
+        print(e)
+        await message.answer("Что-то пошло не так.")
+    finally:
+        await state.clear()
+
+
+@router.message(F.text.lower() == "мой дневник")
+async def show_rec_maraphone(message: Message):
+    if message.chat.id == MARATHONER_CHAT:
         try:
             user_id = message.from_user.id
-            info= []
-            cursor.execute("SELECT arcane from maraphone_records where user_id = '{}';".format(user_id))
-            arcanes = cursor.fetchall()
+            records = await execute_select_all(
+                "SELECT arcane, text FROM maraphone_records WHERE user_id = %s",
+                (user_id,),
+            )
 
-            index = len(arcanes)
+            if not records:
+                await message.answer("Ваш дневник пуст.")
+                return
 
-            cursor.execute("SELECT text from maraphone_records where user_id = '{}';".format(user_id))
-            texts = cursor.fetchall()
+            info = [f"<b>{arcane}</b>\n\n{text}" for arcane, text in records]
 
-            i=0
-            while i<index:
-                text = f"<b>{''.join(arcanes[i])}</b>\n\n{''.join(texts[i])}\n\n"
-                i +=1
-                info.append(text)
-
-            if len(text) > 4096:
-                temp = len(text)/2
-                await message.answer(f"<b>ДНЕВНИК ПО ПРОЖИВАНИЮ АРКАНОВ</b>\n\n{''.join(text[:temp])}")
-                await message.answer(f"{''.join(text[temp:])}")
+            full_text = "\n\n".join(info)
+            if len(full_text) > 4096:
+                for part in [full_text[i:i + 4096] for i in range(0, len(full_text), 4096)]:
+                    await message.answer(f"<b>ДНЕВНИК ПО ПРОЖИВАНИЮ АРКАНОВ</b>\n\n{part}", parse_mode = "HTML")
             else:
-                await message.answer(f"<b>ДНЕВНИК ПО ПРОЖИВАНИЮ АРКАНОВ</b>\n\n{''.join(info)}")
-        except:
-            pass
-    else:
-        pass
+                await message.answer(f"<b>ДНЕВНИК ПО ПРОЖИВАНИЮ АРКАНОВ</b>\n\n{full_text}", parse_mode = "HTML")
+        except Exception as e:
+            print(e)
+            await message.answer("Ошибка при получении данных.")
