@@ -66,6 +66,7 @@ async def generate_profile_summary(message: types.Message, bot: Bot):
     if message.chat.type == "private":
         user_id = message.from_user.id
         user_profile = await get_user_profile(user_id)
+        print(user_profile)
         profile_data = user_profile[0]
 
         deck_type = profile_data[0] if profile_data[0] else None

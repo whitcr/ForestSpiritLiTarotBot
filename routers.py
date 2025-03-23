@@ -60,6 +60,9 @@ def setup_routers():
     getMeaningSpread.router.message.middleware(UserStatisticsMiddleware())
     getMeaningSpread.router.callback_query.middleware(UserStatisticsMiddleware())
 
+    user.router.message.middleware(UserStatisticsMiddleware())
+    user.router.callback_query.middleware(UserStatisticsMiddleware())
+
     router.include_routers(card.router, addedToGroup.router, bannedByUser.router, chooseDeck.router, meaning.router,
                            meaningCb.router, experimental.router, weekAndMonthDefault.router, daySpread.router,
                            questions.router, date.router, getSpreads.router, dopCard.router,

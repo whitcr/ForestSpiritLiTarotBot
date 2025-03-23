@@ -35,8 +35,8 @@ async def get_random_num(choice, count, user_id=None):
         num = random.randint(min_num, max_num)
 
         if user_id:
-            asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
-            asyncio.create_task(get_statistic_card(num))
+            await get_user_card_statistics(user_id = user_id, num = num)
+            await get_statistic_card(num)
         return num
 
     else:
@@ -48,8 +48,8 @@ async def get_random_num(choice, count, user_id=None):
 
         if user_id:
             for num in nums:
-                asyncio.create_task(get_user_card_statistics(user_id = user_id, num = num))
-                asyncio.create_task(get_statistic_card(num))
+                await get_user_card_statistics(user_id = user_id, num = num)
+                await get_statistic_card(num)
         return nums
 
 

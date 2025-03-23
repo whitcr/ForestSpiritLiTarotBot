@@ -20,7 +20,7 @@ async def update_user_statistics(event: Message | CallbackQuery, bot) -> bool:
 
     try:
 
-        await notificate_user(user_id, bot)
+        await notify_user(user_id, bot)
 
         # Fetch the current counts and last update dates
         result = await execute_select_all(
@@ -106,12 +106,12 @@ class UserStatisticsMiddleware(BaseMiddleware):
                                    reply_markup = kb.sub_keyboard)
 
 
-async def notificate_user(user_id, bot):
+async def notify_user(user_id, bot):
     notification = await execute_select("SELECT notification FROM users WHERE user_id = $1", (user_id,))
 
     if notification == 0:
         await execute_query("UPDATE users SET notification = $1 WHERE user_id = $2", (True, user_id))
-        await execute_query("UPDATE users SET paid_meanings = paid_meanings + 10 WHERE user_id = $1", (user_id))
+        await execute_query("UPDATE users SET paid_meanings = paid_meanings + 10 WHERE user_id = $1", (user_id,))
         await bot.send_message(user_id,
                                "— Спасибо, что пользуетесь Ли. На данный момент был запущен тестовый режим крупного обновления, поэтому некоторый функционал был расширен, когда как другой будет доступен только при приобретении подписки. \n"
                                "Если у вас возникли вопросы или проблемы, пишите в поддержку с помощью команды 'помощь'. Список команд -  https://telegra.ph/Lesnoj-Duh-Li-10-10 \n\n"
