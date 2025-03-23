@@ -6,7 +6,7 @@ from tech.activities.contest import contestAdmin, contest
 from tech.activities.quiz import createQuiz
 from functions.statistics import globalStats, statisticsLogs
 from handlers.audio import audio
-from handlers.commands import user, support
+from handlers.commands import user, support, start
 from handlers.commands.admin import adminPanel, getUserProfile
 from handlers.library import library
 from handlers.tarot.spreads import getSpreads
@@ -60,8 +60,7 @@ def setup_routers():
     getMeaningSpread.router.message.middleware(UserStatisticsMiddleware())
     getMeaningSpread.router.callback_query.middleware(UserStatisticsMiddleware())
 
-    user.router.message.middleware(UserStatisticsMiddleware())
-    user.router.callback_query.middleware(UserStatisticsMiddleware())
+    start.router.message.middleware(UserStatisticsMiddleware())
 
     router.include_routers(card.router, addedToGroup.router, bannedByUser.router, chooseDeck.router, meaning.router,
                            meaningCb.router, experimental.router, weekAndMonthDefault.router, daySpread.router,
@@ -71,6 +70,6 @@ def setup_routers():
                            adminPanel.router, user.router, referrals.router, audio.router, createBonusCard.router,
                            support.router, getUserProfile.router, createQuiz.router, contest.router,
                            contestAdmin.router, library.router, globalStats.router, statisticsLogs.router,
-                           boostyPayment.router, privacy.router)
+                           boostyPayment.router, privacy.router, start.router)
 
     return router

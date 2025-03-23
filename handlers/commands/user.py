@@ -1,5 +1,4 @@
 from aiogram import types, Router, Bot, F
-from aiogram.filters import CommandStart
 from aiogram.utils.markdown import hlink
 from datetime import datetime
 import pytz
@@ -7,30 +6,12 @@ import pendulum
 
 from constants import DECK_MAP, SUBS_TYPE
 from database import execute_query, execute_select_all
-from events.user.referrals import get_referrals
 from functions.cards.create import get_buffered_image
 from functions.messages.messages import get_reply_message, get_chat_id, typing_animation_decorator
 from functions.statistics.getUserStats import get_user_statistics
 from keyboard import menu_private_keyboard, profile_keyboard
-from tech.activities.contest.contest import contest_with_referral
 
 router = Router()
-
-
-@router.message(CommandStart())
-async def start(message: types.Message, bot: Bot):
-    command_params = message.text
-
-    if "ref_" in command_params:
-        await get_referrals(bot, message, command_params)
-
-    if "contest" in command_params:
-        await contest_with_referral(message)
-
-    if message.chat.type == "private":
-        text = hlink('—', 'https://telegra.ph/Lesnoj-Duh-Li-10-10')
-        await message.reply(f'{text} Тебя приветствует <b>Лесной Дух</b>. Чего желаешь?',
-                            reply_markup = menu_private_keyboard)
 
 
 @router.message(F.text.lower() == "меню")
