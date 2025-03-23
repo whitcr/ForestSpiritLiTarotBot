@@ -1,4 +1,5 @@
 from aiogram import types, Router, F
+from aiogram.filters import or_f
 
 from database import execute_select, execute_query
 from filters.baseFilters import IsReply
@@ -181,7 +182,7 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
     await get_cards_meanings_premium(call, state)
 
 
-@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(1))
+@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(1, True))
 @typing_animation_decorator(initial_message = "Трактую")
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning):
     await call.answer()

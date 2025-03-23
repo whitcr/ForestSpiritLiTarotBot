@@ -4,7 +4,7 @@ import textwrap
 from aiogram import types, Router, F
 from database import execute_select
 from filters.baseFilters import IsAdmin
-from functions.affirmations.affirmations import get_random_affirmations
+from tech.texts.affirmations import get_random_affirmations
 from functions.cards.create import get_path_cards, text_size, get_buffered_image
 from functions.gpt.requests import daily_question
 from tech.texts.phrases import get_random_phrases

@@ -1,10 +1,22 @@
 from PIL import ImageFont
 
 SUBS_TYPE = {
-    0: "Без подписки",
-    1: "Шут",
-    2: "Маг",
-    3: "Жрица"
+    0: {"name": "Без подписки", "stars": 0, "rubles": 0, "euros": 0},
+    1: {"name": "Шут", "stars": 100, "rubles": 170, "euros": 1.80},
+    2: {"name": "Маг", "stars": 150, "rubles": 250, "euros": 2.70},
+    3: {"name": "Жрица", "stars": 250, "rubles": 450, "euros": 4.60}
+}
+
+DURATION_DISCOUNTS = {
+    1: 0,  # 1 месяц - без скидки
+    3: 10,  # 3 месяца - скидка 10%
+    6: 20  # 6 месяцев - скидка 20%
+}
+
+PAID_MEANINGS_COST = {
+    50: {"stars": 75, "rubles": 100, "euros": 1, "sale": 0},
+    100: {"stars": 150, "rubles": 200, "euros": 2, "sale": 10},
+    200: {"stars": 300, "rubles": 400, "euros": 4, "sale": 15},
 }
 
 DAILY_LIMIT = 10
@@ -130,3 +142,27 @@ FONT_S = ImageFont.truetype("./images/tech/fonts/KTFJermilov-Solid.ttf", 20)
 P_FONT_S = ImageFont.truetype("./images/tech/fonts/1246-font.otf", 50)
 P_FONT_L = ImageFont.truetype("./images/tech/fonts/1246-font.otf", 60)
 P_FONT_XL = ImageFont.truetype("./images/tech/fonts/1246-font.otf", 100)
+
+COUPONS = {
+    "gold": {
+        "name": "золотой",
+        "fname": "золотых",
+        "chance": 0.001,
+        "field": "coupon_gold",
+        "sale": "50"
+    },
+    "silver": {
+        "name": "серебрянный",
+        "fname": "серебряных",
+        "chance": 0.002,
+        "field": "coupon_silver",
+        "sale": "25"
+    },
+    "iron": {
+        "name": "железный",
+        "fname": "железных",
+        "chance": 0.003,
+        "field": "coupon_iron",
+        "sale": "10"
+    }
+}

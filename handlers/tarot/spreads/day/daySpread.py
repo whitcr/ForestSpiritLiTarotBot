@@ -2,7 +2,7 @@ from aiogram import types, Router, F, Bot
 
 from database import execute_select, execute_query
 from filters.baseFilters import IsReply
-from functions.affirmations.affirmations import get_random_affirmations
+from tech.texts.affirmations import get_random_affirmations
 from functions.messages.messages import get_reply_message, get_chat_id
 
 from PIL import Image, ImageDraw

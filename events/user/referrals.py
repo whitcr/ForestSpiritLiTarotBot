@@ -40,7 +40,7 @@ async def get_referral_count(user_id, bot, channel_id):
     invited_result = await execute_select("SELECT referrals FROM users WHERE user_id = $1", (user_id,))
 
     if invited_result is False:
-        return 0, []  # Return a tuple instead of just an integer
+        return 0, []
 
     count = 0
     removed = []
@@ -50,7 +50,7 @@ async def get_referral_count(user_id, bot, channel_id):
         else:
             removed.append(user)
 
-    return count, removed  # Ensure tuple return
+    return count, removed
 
 
 async def get_referral_count_text(user_id, bot, channel_id):

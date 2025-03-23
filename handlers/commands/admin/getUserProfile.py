@@ -6,17 +6,19 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram import types, Router
 
-from constants import DECK_MAP, SUBS_TYPE
+from constants import DECK_MAP, SUBS_TYPE, COUPONS
 from database import execute_query, execute_select_all
 from filters.baseFilters import IsAdmin
 from aiogram import F, Bot
 
+from functions.subscription.sub import give_sub
 from handlers.commands.user import get_user_profile
 
 router = Router()
 
+logger_chat = -4739443638
 
-# Определение состояний для FSM (Finite State Machine)
+
 class AdminStates(StatesGroup):
     waiting_meanings_amount = State()
     waiting_coupon_amount = State()
@@ -26,25 +28,17 @@ class AdminStates(StatesGroup):
 
 @router.message(IsAdmin(), F.text.lower().startswith("!профиль"))
 async def admin_view_profile(message: types.Message, bot: Bot):
-    """Просмотр профиля пользователя администратором по ID, юзернейму или пересланному сообщению"""
-
     args = message.text.split()
 
-    # Получаем ID пользователя
     user_id = None
 
-    # Проверяем, есть ли пересланное сообщение
     if message.reply_to_message:
         user_id = message.reply_to_message.from_user.id
-    # Если команда содержит аргумент (ID или username)
     elif len(args) > 1:
-        # Проверяем, является ли аргумент числом (ID)
         if args[1].isdigit():
             user_id = int(args[1])
-        # Иначе считаем, что это username
         else:
             username = args[1].lstrip('@')
-            # Здесь нужно получить ID по username
             user_id_result = await execute_query("SELECT user_id FROM users WHERE username = $1", (username,))
             if user_id_result and user_id_result[0]:
                 user_id = user_id_result[0][0]
@@ -59,8 +53,6 @@ async def admin_view_profile(message: types.Message, bot: Bot):
 
 
 async def show_user_profile(message, user_id):
-    """Отображение профиля пользователя с админской клавиатурой"""
-    # Получаем профиль пользователя
     user_profile = await get_user_profile(user_id)
 
     bonuses = await execute_select_all("SELECT paid_spread, referrals_paid, referrals FROM users WHERE user_id = $1",
@@ -96,7 +88,7 @@ async def show_user_profile(message, user_id):
                f"{coupon_iron} железн{'ых' if coupon_iron != 1 else 'ый'}")
 
     deck_type = DECK_MAP[deck_type] if deck_type else "Не указано"
-    subscription = SUBS_TYPE[subscription] if subscription else "Без подписки"
+    subscription = SUBS_TYPE[subscription]['name'] if subscription else "Без подписки"
 
     subscription_date = subscription_date if subscription_date else "Без подписки"
     interactions = interactions if interactions else "Не указано"
@@ -104,13 +96,11 @@ async def show_user_profile(message, user_id):
 
     paid_meanings = paid_meanings if paid_meanings else "0"
 
-    # Проверка на наличие значений для day_follow и установка текстов по умолчанию
     moon_follow = "Есть" if day_follow['moon_follow'] else 'Нет'
     day_card_follow = "Есть" if day_follow['day_card_follow'] else 'Нет'
     week_card_follow = "Есть" if day_follow['week_card_follow'] else 'Нет'
     month_card_follow = "Есть" if day_follow['month_card_follow'] else 'Нет'
 
-    # Формирование текста профиля для админа с дополнительной информацией
     profile_text = (
         f"📋 <b>Профиль пользователя</b> (ID: {user_id})\n\n"
         f"<b>Колода:</b> {deck_type}\n"
@@ -130,7 +120,6 @@ async def show_user_profile(message, user_id):
         f"<b>Платных раскладов:</b> {paid_spread}\n"
     )
 
-    # Создаем основную админскую клавиатуру
     admin_profile_keyboard = InlineKeyboardMarkup(
         inline_keyboard = [
             [
@@ -147,9 +136,6 @@ async def show_user_profile(message, user_id):
     await message.answer(profile_text, reply_markup = admin_profile_keyboard)
 
 
-# Обработчики для кнопок из админской клавиатуры
-
-# Обработчик для трактовок
 @router.callback_query(lambda c: c.data.startswith("admin_meanings_"))
 async def admin_meanings_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
@@ -181,7 +167,6 @@ async def admin_meanings_callback(callback_query: types.CallbackQuery):
     )
 
 
-# Обработчик для купонов
 @router.callback_query(lambda c: c.data.startswith("admin_coupons_"))
 async def admin_coupons_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
@@ -209,19 +194,13 @@ async def admin_coupons_callback(callback_query: types.CallbackQuery):
     )
 
 
-# Обработчик для типов купонов
 @router.callback_query(lambda c: c.data.startswith("coupon_type_"))
 async def coupon_type_callback(callback_query: types.CallbackQuery):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
     coupon_type = parts[3]
     await callback_query.answer()
-    # Определяем название типа купона для отображения
-    coupon_name = {
-        "gold": "золотых",
-        "silver": "серебряных",
-        "iron": "железных"
-    }.get(coupon_type, "")
+    coupon_name = COUPONS[coupon_type]["fname"]
 
     coupon_amount_keyboard = InlineKeyboardMarkup(
         inline_keyboard = [
@@ -245,7 +224,6 @@ async def coupon_type_callback(callback_query: types.CallbackQuery):
     )
 
 
-# Обработчик для подписки
 @router.callback_query(lambda c: c.data.startswith("admin_subscription_"))
 async def admin_subscription_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
@@ -276,19 +254,14 @@ async def admin_subscription_callback(callback_query: types.CallbackQuery):
     )
 
 
-# Обработчик для выбора типа подписки
 @router.callback_query(lambda c: c.data.startswith("sub_type_"))
 async def sub_type_callback(callback_query: types.CallbackQuery):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
     sub_type = parts[3]
     await callback_query.answer()
-    # Определяем название типа подписки для отображения
-    sub_name = {
-        "1": "базовой",
-        "2": "продвинутой",
-        "3": "премиум"
-    }.get(sub_type, "")
+
+    sub_name = SUBS_TYPE[sub_type]['name']
 
     sub_duration_keyboard = InlineKeyboardMarkup(
         inline_keyboard = [
@@ -319,7 +292,6 @@ async def sub_type_callback(callback_query: types.CallbackQuery):
     )
 
 
-# Обработчик для друзей (реферралов)
 @router.callback_query(lambda c: c.data.startswith("admin_referrals_"))
 async def admin_referrals_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
@@ -354,22 +326,18 @@ async def add_meanings_callback(callback_query: types.CallbackQuery):
     user_id = int(parts[2])
     amount = int(parts[3])
     await callback_query.answer(f"Добавлено {amount} трактовок пользователю!")
-    # Добавляем трактовки пользователю
     await execute_query(
         "UPDATE users SET paid_meanings = paid_meanings + $1 WHERE user_id = $2",
         (amount, user_id)
     )
 
-    # Возвращаемся к профилю пользователя для отображения обновленных данных
     await show_user_profile(callback_query.message, user_id)
 
 
-# Обработчик для ручного ввода количества трактовок
 @router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_meanings_"))
 async def manual_meanings_callback(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
-    # Устанавливаем состояние для ожидания ввода
     await state.set_state("waiting_meanings_amount")
     await state.update_data(user_id = user_id)
 
@@ -379,20 +347,16 @@ async def manual_meanings_callback(callback_query: types.CallbackQuery, state: F
     )
 
 
-# Обработчик для добавления купонов
 @router.callback_query(lambda c: c.data.startswith("add_coupon_"))
-async def add_coupon_callback(callback_query: types.CallbackQuery):
+async def add_coupon_callback(callback_query: types.CallbackQuery, bot: Bot):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
     coupon_type = parts[3]
     amount = int(parts[4])
-    await callback_query.answer(f"Добавлено {amount} {coupon_name} купонов пользователю!")
-    # Определяем колонку в БД в зависимости от типа купона
-    column = {
-        "gold": "coupon_gold",
-        "silver": "coupon_silver",
-        "iron": "coupon_iron"
-    }.get(coupon_type)
+    await callback_query.answer()
+    await bot.send_message(logger_chat, f"Добавлено {amount} {coupon_type} купонов пользователю!")
+
+    column = COUPONS[coupon_type]["field"]
 
     # Добавляем купоны пользователю
     await execute_query(
@@ -400,32 +364,19 @@ async def add_coupon_callback(callback_query: types.CallbackQuery):
         (amount, user_id)
     )
 
-    coupon_name = {
-        "gold": "золотых",
-        "silver": "серебряных",
-        "iron": "железных"
-    }.get(coupon_type, "")
-
-    # Возвращаемся к профилю пользователя для отображения обновленных данных
     await show_user_profile(callback_query.message, user_id)
 
 
-# Обработчик для ручного ввода количества купонов
 @router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_coupon_"))
 async def manual_coupon_callback(callback_query: types.CallbackQuery, state: FSMContext):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
     coupon_type = parts[3]
     await callback_query.answer()
-    # Устанавливаем состояние для ожидания ввода
     await state.set_state("waiting_coupon_amount")
     await state.update_data(user_id = user_id, coupon_type = coupon_type)
 
-    coupon_name = {
-        "gold": "золотых",
-        "silver": "серебряных",
-        "iron": "железных"
-    }.get(coupon_type, "")
+    coupon_name = COUPONS[coupon_type]["name"]
 
     await callback_query.message.edit_text(
         f"Введите количество {coupon_name} купонов для добавления пользователю (ID: {user_id}):\n"
@@ -433,59 +384,29 @@ async def manual_coupon_callback(callback_query: types.CallbackQuery, state: FSM
     )
 
 
-# Обработчик для добавления подписки
 @router.callback_query(lambda c: c.data.startswith("add_sub_"))
-async def add_subscription_callback(callback_query: types.CallbackQuery):
+async def add_subscription_callback(callback_query: types.CallbackQuery, bot: Bot):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
     sub_type = parts[3]
     days = int(parts[4])
-    await callback_query.answer(f"Установлена подписка {sub_name} на {days} дней!")
-    # Получаем текущую дату окончания подписки
-    current_sub_data = await execute_query(
-        "SELECT subscription_date FROM users WHERE user_id = $1", (user_id,)
-    )
+    await callback_query.answer()
+    await bot.send_message(logger_chat, f"Установлена подписка {sub_type} на {days} дней!")
+    date = await give_sub(user_id, days, sub_type)
 
-    if current_sub_data and current_sub_data[0] and current_sub_data[0][0]:
-        # Если подписка уже есть, продлеваем её
-        current_date = datetime.strptime(current_sub_data[0][0], "%Y-%m-%d")
-        new_date = current_date + timedelta(days = days)
-    else:
-        # Если подписки нет, устанавливаем новую
-        new_date = datetime.now() + timedelta(days = days)
-
-    # Обновляем подписку в базе данных
-    await execute_query(
-        "UPDATE users SET subscription = $1, subscription_date = $2 WHERE user_id = $3",
-        (sub_type, new_date.strftime("%Y-%m-%d"), user_id)
-    )
-
-    sub_name = {
-        "1": "Базовая",
-        "2": "Продвинутая",
-        "3": "Премиум"
-    }.get(sub_type, "")
-
-    # Возвращаемся к профилю пользователя для отображения обновленных данных
     await show_user_profile(callback_query.message, user_id)
 
 
-# Обработчик для ручного ввода срока подписки
 @router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_sub_"))
 async def manual_sub_callback(callback_query: types.CallbackQuery, state: FSMContext):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
     sub_type = parts[3]
     await callback_query.answer()
-    # Устанавливаем состояние для ожидания ввода
     await state.set_state("waiting_sub_days")
     await state.update_data(user_id = user_id, sub_type = sub_type)
 
-    sub_name = {
-        "1": "базовой",
-        "2": "продвинутой",
-        "3": "премиум"
-    }.get(sub_type, "")
+    sub_name = SUBS_TYPE[sub_type]['name']
 
     await callback_query.message.edit_text(
         f"Введите количество дней для {sub_name} подписки пользователю (ID: {user_id}):\n"
@@ -493,44 +414,38 @@ async def manual_sub_callback(callback_query: types.CallbackQuery, state: FSMCon
     )
 
 
-# Обработчик для отмены подписки
 @router.callback_query(lambda c: c.data.startswith("cancel_subscription_"))
-async def cancel_subscription_callback(callback_query: types.CallbackQuery):
+async def cancel_subscription_callback(callback_query: types.CallbackQuery, bot: Bot):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer("Подписка отменена!")
-    # Обнуляем подписку в базе данных
+    await bot.send_message(logger_chat, f"Подписка отменена!")
     await execute_query(
         "UPDATE users SET subscription = NULL, subscription_date = NULL WHERE user_id = $1",
         (user_id,)
     )
 
-    # Возвращаемся к профилю пользователя для отображения обновленных данных
     await show_user_profile(callback_query.message, user_id)
 
 
-# Обработчик для добавления реферралов
 @router.callback_query(lambda c: c.data.startswith("add_referrals_"))
-async def add_referrals_callback(callback_query: types.CallbackQuery):
+async def add_referrals_callback(callback_query: types.CallbackQuery, bot: Bot):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
     amount = int(parts[3])
     await callback_query.answer(f"Добавлено {amount} друзей пользователю!")
-    # Добавляем реферралов пользователю
+    await bot.send_message(logger_chat, f"Добавлено {amount} друзей пользователю!")
     await execute_query(
         "UPDATE users SET referrals_paid = referrals_paid + $1 WHERE user_id = $2",
         (amount, user_id)
     )
 
-    # Возвращаемся к профилю пользователя для отображения обновленных данных
     await show_user_profile(callback_query.message, user_id)
 
 
-# Обработчик для ручного ввода количества реферралов
 @router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_referrals_"))
 async def manual_referrals_callback(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
-    # Устанавливаем состояние для ожидания ввода
     await state.set_state("waiting_referrals_amount")
     await state.update_data(user_id = user_id)
 
@@ -540,20 +455,16 @@ async def manual_referrals_callback(callback_query: types.CallbackQuery, state: 
     )
 
 
-# Обработчик для возврата к профилю
 @router.callback_query(lambda c: c.data.startswith("back_to_profile_"))
 async def back_to_profile_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.message.delete()
     await callback_query.answer()
-    # Возвращаемся к профилю пользователя
     await show_user_profile(callback_query.message, user_id)
 
 
-# Обработчики текстовых сообщений для ручного ввода значений
 @router.message(AdminStates.waiting_meanings_amount)
 async def process_meanings_amount(message: types.Message, state: FSMContext):
-    # Получаем данные из состояния
     data = await state.get_data()
     user_id = data.get("user_id")
 
@@ -563,7 +474,6 @@ async def process_meanings_amount(message: types.Message, state: FSMContext):
             await message.reply("Количество должно быть положительным числом.")
             return
 
-        # Добавляем трактовки пользователю
         await execute_query(
             "UPDATE users SET paid_meanings = paid_meanings + $1 WHERE user_id = $2",
             (amount, user_id)
@@ -571,10 +481,8 @@ async def process_meanings_amount(message: types.Message, state: FSMContext):
 
         await message.reply(f"Добавлено {amount} трактовок пользователю с ID {user_id}.")
 
-        # Очищаем состояние
         await state.clear()
 
-        # Показываем обновленный профиль
         await show_user_profile(message, user_id)
 
     except ValueError:
@@ -583,7 +491,6 @@ async def process_meanings_amount(message: types.Message, state: FSMContext):
 
 @router.message(AdminStates.waiting_coupon_amount)
 async def process_coupon_amount(message: types.Message, state: FSMContext):
-    # Получаем данные из состояния
     data = await state.get_data()
     user_id = data.get("user_id")
     coupon_type = data.get("coupon_type")
@@ -594,31 +501,19 @@ async def process_coupon_amount(message: types.Message, state: FSMContext):
             await message.reply("Количество должно быть положительным числом.")
             return
 
-        # Определяем колонку в БД в зависимости от типа купона
-        column = {
-            "gold": "coupon_gold",
-            "silver": "coupon_silver",
-            "iron": "coupon_iron"
-        }.get(coupon_type)
+        column = COUPONS[coupon_type]["field"]
 
-        # Добавляем купоны пользователю
         await execute_query(
             f"UPDATE users SET {column} = {column} + $1 WHERE user_id = $2",
             (amount, user_id)
         )
 
-        coupon_name = {
-            "gold": "золотых",
-            "silver": "серебряных",
-            "iron": "железных"
-        }.get(coupon_type, "")
+        coupon_name = COUPONS[coupon_type]["fname"]
 
         await message.reply(f"Добавлено {amount} {coupon_name} купонов пользователю с ID {user_id}.")
 
-        # Очищаем состояние
         await state.clear()
 
-        # Показываем обновленный профиль
         await show_user_profile(message, user_id)
 
     except ValueError:
@@ -627,7 +522,6 @@ async def process_coupon_amount(message: types.Message, state: FSMContext):
 
 @router.message(AdminStates.waiting_sub_days)
 async def process_sub_days(message: types.Message, state: FSMContext):
-    # Получаем данные из состояния
     data = await state.get_data()
     user_id = data.get("user_id")
     sub_type = data.get("sub_type")
@@ -638,40 +532,30 @@ async def process_sub_days(message: types.Message, state: FSMContext):
             await message.reply("Количество дней должно быть положительным числом.")
             return
 
-        # Получаем текущую дату окончания подписки
         current_sub_data = await execute_query(
             "SELECT subscription_date FROM users WHERE user_id = $1", (user_id,)
         )
 
         if current_sub_data and current_sub_data[0] and current_sub_data[0][0]:
-            # Если подписка уже есть, продлеваем её
             current_date = datetime.strptime(current_sub_data[0][0], "%Y-%m-%d")
             new_date = current_date + timedelta(days = days)
         else:
-            # Если подписки нет, устанавливаем новую
             new_date = datetime.now() + timedelta(days = days)
 
-        # Обновляем подписку в базе данных
         await execute_query(
             "UPDATE users SET subscription = $1, subscription_date = $2 WHERE user_id = $3",
             (sub_type, new_date.strftime("%Y-%m-%d"), user_id)
         )
 
-        sub_name = {
-            "1": "Шут",
-            "2": "Маг",
-            "3": "Жрица"
-        }.get(sub_type, "")
+        sub_name = SUBS_TYPE[sub_type]['name']
 
         await message.reply(
             f"Установлена подписка {sub_name} на {days} дней для пользователя с ID {user_id}.\n"
             f"Дата окончания: {new_date.strftime('%Y-%m-%d')}"
         )
 
-        # Очищаем состояние
         await state.clear()
 
-        # Показываем обновленный профиль
         await show_user_profile(message, user_id)
 
     except ValueError:
@@ -680,7 +564,6 @@ async def process_sub_days(message: types.Message, state: FSMContext):
 
 @router.message(AdminStates.waiting_referrals_amount)
 async def process_referrals_amount(message: types.Message, state: FSMContext):
-    # Получаем данные из состояния
     data = await state.get_data()
     user_id = data.get("user_id")
 
@@ -690,7 +573,6 @@ async def process_referrals_amount(message: types.Message, state: FSMContext):
             await message.reply("Количество должно быть положительным числом.")
             return
 
-        # Добавляем реферралов пользователю
         await execute_query(
             "UPDATE users SET referrals_paid = referrals_paid + $1 WHERE user_id = $2",
             (amount, user_id)
@@ -698,10 +580,8 @@ async def process_referrals_amount(message: types.Message, state: FSMContext):
 
         await message.reply(f"Добавлено {amount} друзей пользователю с ID {user_id}.")
 
-        # Очищаем состояние
         await state.clear()
 
-        # Показываем обновленный профиль
         await show_user_profile(message, user_id)
 
     except ValueError:

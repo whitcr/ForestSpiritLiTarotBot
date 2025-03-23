@@ -1,5 +1,3 @@
-from itertools import count
-
 from aiogram import types, Router, Bot, F
 from aiogram.filters import CommandStart
 from aiogram.utils.markdown import hlink
@@ -9,12 +7,12 @@ import pendulum
 
 from constants import DECK_MAP, SUBS_TYPE
 from database import execute_query, execute_select_all
-from events.user.referrals import get_referrals, get_names_from_array_ids
+from events.user.referrals import get_referrals
 from functions.cards.create import get_buffered_image
-from functions.contest.contest import contest_with_referral
 from functions.messages.messages import get_reply_message, get_chat_id, typing_animation_decorator
 from functions.statistics.getUserStats import get_user_statistics
 from keyboard import menu_private_keyboard, profile_keyboard
+from tech.activities.contest.contest import contest_with_referral
 
 router = Router()
 
@@ -70,7 +68,7 @@ async def generate_profile_summary(message: types.Message, bot: Bot):
         user_profile = await get_user_profile(user_id)
         profile_data = user_profile[0]
 
-        deck_type = profile_data[0]
+        deck_type = profile_data[0] if profile_data[0] else None
         subscription = profile_data[1]
         subscription_date = profile_data[2]
         day_follow = {
@@ -92,7 +90,7 @@ async def generate_profile_summary(message: types.Message, bot: Bot):
                    f"{coupon_iron} железн{'ых' if coupon_iron != 1 else 'ый'}")
 
         deck_type = DECK_MAP[deck_type] if deck_type else "Не указано"
-        subscription = SUBS_TYPE[subscription] if subscription else "Без подписки"
+        subscription = SUBS_TYPE[subscription]['name'] if subscription else "Без подписки"
 
         subscription_date = subscription_date if subscription_date else "Без подписки"
         interactions = interactions if interactions else "Не указано"

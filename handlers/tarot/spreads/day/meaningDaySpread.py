@@ -1,4 +1,6 @@
 from aiogram import types, Router, F
+from aiogram.filters import or_f
+
 from database import execute_select, execute_select_all, execute_query
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
@@ -8,7 +10,7 @@ from functions.gpt.requests import get_cards_day_meanings
 router = Router()
 
 
-@router.callback_query(IsReply(), F.data.startswith("get_day_spread_meaning"), SubscriptionLevel(1))
+@router.callback_query(IsReply(), F.data.startswith("get_day_spread_meaning"), SubscriptionLevel(1, True))
 @typing_animation_decorator(initial_message = "Трактую")
 async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     await call.answer()

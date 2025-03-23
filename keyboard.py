@@ -190,6 +190,12 @@ follow_channel_buttons = [
 ]
 follow_channel_keyboard = InlineKeyboardMarkup(inline_keyboard = follow_channel_buttons)
 
+# КНОПКА НА МЕНЯ
+me_buttons = [
+    [InlineKeyboardButton(text = "Написать", url = 'https://t.me/kmorebi')]
+]
+me_keyboard = InlineKeyboardMarkup(inline_keyboard = me_buttons)
+
 # ПОДПИСКА КОНКУРС
 follow_contest_buttons = [
     [InlineKeyboardButton(text = "Дыхание Леса", url = 'https://t.me/forestspirito')],

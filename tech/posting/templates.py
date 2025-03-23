@@ -7,8 +7,8 @@ from functions.cards.create import get_path_background
 async def get_post_template():
     background_path = await get_path_background()
 
-    color = Image.open('./cards/tech/design_posts/backcolor.png').convert("RGBA")
-    front = Image.open('./cards/tech/design_posts/front.png').convert("RGBA")
+    color = Image.open('.images/tech/design_posts/backcolor.png').convert("RGBA")
+    front = Image.open('.images/tech/design_posts/front.png').convert("RGBA")
 
     background = Image.open(background_path).convert("RGBA")
     background = background.resize((1920, 1080))

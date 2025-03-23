@@ -3,19 +3,18 @@ from typing import Any, Awaitable, Callable, Dict
 import logging
 from aiogram.types import TelegramObject
 from aiogram.dispatcher.event.bases import UNHANDLED
+from aiogram.utils.markdown import hlink
 
+from constants import COUPONS
 from database import execute_query
 
 logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger(__name__)
 
+logger_chat = -4739443638
+
 
 class CouponMiddleware:
-    CARD_CHANCES = {
-        "золотой": {"chance": 0.001, "field": "coupon_gold", "sale": "50"},
-        "серебряный": {"chance": 0.002, "field": "coupon_silver", "sale": "25"},
-        "железный": {"chance": 0.003, "field": "coupon_iron", "sale": "10"},
-    }
 
     async def __call__(
             self,
@@ -32,10 +31,10 @@ class CouponMiddleware:
             random_number = random.random()
             user_id = data.get('event_from_user').id
 
-            for card, info in self.CARD_CHANCES.items():
+            for card, info in COUPONS.items():
                 if random_number <= info["chance"]:
                     await self.update_coupon(user_id, info["field"])
-                    await self.notify_user(data, card, info["sale"])
+                    await self.notify_user(data, info["name"], info["sale"])
                     break
 
             return result
@@ -50,6 +49,13 @@ class CouponMiddleware:
         user = data.get('event_from_user')
         bot = data.get('bot')
         chat = data.get('event_chat')
+
+        user_link = f"tg://user?id={user.id}"
+        await bot.send_message(
+            logger_chat,
+            f"✅ Выдал {card} купон!\n\n"
+            f"Пользователь {hlink(f'{user.id}', user_link)}."
+        )
 
         logger.info(f"{card} купон выдали пользователю {user.id}, ник: {user.username}, имя: {user.full_name}")
 

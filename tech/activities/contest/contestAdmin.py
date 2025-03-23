@@ -15,7 +15,7 @@ from aiogram.filters.state import StateFilter
 
 from database import execute_query, execute_select, execute_select_all
 from filters.baseFilters import IsAdmin
-from functions.contest.contest import get_valid_referrals_count, check_subscription
+from tech.activities.contest.contest import get_valid_referrals_count, check_subscription
 
 router = Router()
 

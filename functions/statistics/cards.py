@@ -68,7 +68,6 @@ async def get_user_card_statistics(user_id: int, num: int):
     week_start = today - timedelta(days = today.weekday())
     month_start = today.replace(day = 1)
 
-    # Выполняем запрос к базе данных для получения статистики пользователя по карте
     result = await execute_select_all(
         """
         SELECT daily_stats_cards, weekly_stats_cards, monthly_stats_cards, total_stats_cards, 
@@ -80,7 +79,6 @@ async def get_user_card_statistics(user_id: int, num: int):
         (user_id,)
     )
 
-    # Функция для обновления JSON-статистики
     def update_json_stats(stats, card_num):
         num_str = str(card_num)
         stats[num_str] = stats.get(num_str, 0) + 1
@@ -90,13 +88,11 @@ async def get_user_card_statistics(user_id: int, num: int):
         (daily_stats_json, weekly_stats_json, monthly_stats_json, total_stats_json,
          last_daily_update, last_weekly_update, last_monthly_update) = result[0]
 
-        # Декодируем JSON строки в словари
         daily_stats = json.loads(daily_stats_json) if daily_stats_json else {}
         weekly_stats = json.loads(weekly_stats_json) if weekly_stats_json else {}
         monthly_stats = json.loads(monthly_stats_json) if monthly_stats_json else {}
         total_stats = json.loads(total_stats_json) if total_stats_json else {}
 
-        # Проверяем и обновляем статистику
         if last_daily_update != today:
             daily_stats = {}
         if last_weekly_update != week_start:
@@ -105,25 +101,21 @@ async def get_user_card_statistics(user_id: int, num: int):
             monthly_stats = {}
 
     else:
-        # Инициализируем новые словари статистики
         daily_stats = {}
         weekly_stats = {}
         monthly_stats = {}
         total_stats = {}
 
-    # Увеличиваем статистику для конкретной карты
     daily_stats = update_json_stats(daily_stats, num)
     weekly_stats = update_json_stats(weekly_stats, num)
     monthly_stats = update_json_stats(monthly_stats, num)
     total_stats = update_json_stats(total_stats, num)
 
-    # Преобразуем словари обратно в JSON строки
     daily_stats_json = json.dumps(daily_stats)
     weekly_stats_json = json.dumps(weekly_stats)
     monthly_stats_json = json.dumps(monthly_stats)
     total_stats_json = json.dumps(total_stats)
 
-    # Выполняем запрос к базе данных для обновления или вставки данных
     await execute_select(
         """
         INSERT INTO users 

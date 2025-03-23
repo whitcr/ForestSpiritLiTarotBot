@@ -62,15 +62,9 @@ class StatisticsCache:
 
                 if result:
                     record = result[0]
-                    counts['daily_count'] = 1 if record['last_daily_update'] != today else counts['daily_count'] +\
-                                                                                           record['daily_count']
-                    counts['weekly_count'] = 1 if record['last_weekly_update'] != week_start else counts[
-                                                                                                      'weekly_count'] +\
-                                                                                                  record['weekly_count']
-                    counts['monthly_count'] = 1 if record['last_monthly_update'] != month_start else counts[
-                                                                                                         'monthly_count'] +\
-                                                                                                     record[
-                                                                                                         'monthly_count']
+                    counts['daily_count'] = counts['daily_count'] + record['daily_count']
+                    counts['weekly_count'] = counts['weekly_count'] + record['weekly_count']
+                    counts['monthly_count'] = counts['monthly_count'] + record['monthly_count']
                     counts['total_count'] += record['total_count']
 
                     await execute_query(

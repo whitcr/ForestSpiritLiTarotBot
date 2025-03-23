@@ -29,3 +29,18 @@ class IsChannel(BaseFilter):
 class IsBooster(BaseFilter):
     async def __call__(self, message: Message) -> bool:
         return await execute_select("SELECT boosted FROM users WHERE user_id = $1", (message.from_user.id,)) >= 1
+
+
+class IsPrivate(BaseFilter):
+    async def __call__(self, message: Message) -> bool:
+        return message.chat.type == "private"
+
+
+class IsGroup(BaseFilter):
+    async def __call__(self, message: Message) -> bool:
+        return message.chat.type == "group"
+
+
+class IsChat(BaseFilter):
+    async def __call__(self, message: Message, chat_id) -> bool:
+        return message.chat.id == chat_id
