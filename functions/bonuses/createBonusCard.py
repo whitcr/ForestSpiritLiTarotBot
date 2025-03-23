@@ -604,9 +604,12 @@ async def get_bonus_cards(call: types.CallbackQuery, bot: Bot, channel_id):
                 BufferedInputFile(output2.getvalue(), "image.png")
             )
 
+            base_text = "Бонусы за расклады и приглашенных друзей в Ли"
+            message_text = f"{base_text}\n\n{removed_list}" if removed_list else base_text
+
             await bot.send_message(
                 call.from_user.id,
-                text = "Бонусы за расклады и приглашенных друзей в Ли \n\n" + removed_list if removed_list else "",
+                text = message_text,
                 reply_markup = create_bonus_keyboard("li", bonuses_li)
             )
 

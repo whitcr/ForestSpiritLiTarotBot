@@ -36,7 +36,9 @@ async def help_command(event: Message | CallbackQuery):
     if isinstance(event, Message):
         await event.answer(text, reply_markup = keyboard.as_markup())
     elif isinstance(event, CallbackQuery):
-        await event.message.answer(text, reply_markup = keyboard.as_markup())
+        keyboard.button(text = "◀️ Назад в профиль", callback_data = "get_my_profile")
+        keyboard.adjust(1)
+        await event.message.edit_text(text, reply_markup = keyboard.as_markup())
 
 
 # 📌 Пользователь нажал "Написать вопрос/жалобу"

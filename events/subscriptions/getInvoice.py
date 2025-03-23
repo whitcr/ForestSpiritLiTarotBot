@@ -27,10 +27,16 @@ async def get_sub_type_keyboard():
             text = SUBS_TYPE[i]["name"],
             callback_data = f"select_sub_type_{i}"
         )
+
     sub_keyboard.button(
-        text = "Приобрести трактовки",
-        callback_data = f"select_meanings_type"
+        text = "💰 Tрактовки",
+        callback_data = f"select_meanings_type",
+        row_width = 1
     )
+    sub_keyboard.button(
+        text = "◀️ Назад в профиль",
+        callback_data = "get_my_profile",
+        row_width = 1)
     sub_keyboard.adjust(3)
     return sub_keyboard
 

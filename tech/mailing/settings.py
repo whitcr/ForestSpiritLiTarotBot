@@ -29,7 +29,8 @@ async def generate_mail_kb(user_id):
     toggle_button("Расклад на неделю", week_card_follow, "week_card_follow")
     toggle_button("Расклад на месяц", month_card_follow, "month_card_follow")
 
-    keyboard.adjust(2)  # Делаем 2 кнопки в ряд
+    keyboard.button(text = "◀️ Мой профиль", callback_data = "get_my_profile")
+    keyboard.adjust(2)
 
     return keyboard.as_markup()
 
@@ -42,14 +43,15 @@ async def day_follow(message: types.Message):
                             reply_markup = keyboard)
 
 
-@router.callback_query(IsReply(), F.data.startswith('get_mailing'), SubscriptionLevel(1))
+@router.callback_query(IsReply(), F.data.startswith('get_mailing'))
 async def day_follow_cb(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     keyboard = await generate_mail_kb(call.from_user.id)
     if keyboard:
-        await bot.send_message(call.message.chat.id,
-                               "Какую информацию вы хотите получать ежедневно?\n 🟢 - включить, 🔴 - выключить",
-                               reply_markup = keyboard, reply_to_message_id = call.message.reply_to_message.message_id)
+        await bot.edit_message_text(chat_id = call.message.chat.id,
+                                    message_id = call.message.message_id,
+                                    text = "Какую информацию вы хотите получать ежедневно?\n 🟢 - включить, 🔴 - выключить",
+                                    reply_markup = keyboard)
 
 
 @router.callback_query(IsReply(), F.data.endswith('follow_yes') | F.data.endswith('follow_no'))

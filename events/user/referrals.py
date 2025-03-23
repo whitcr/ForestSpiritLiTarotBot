@@ -1,5 +1,6 @@
 from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from database import execute_select, execute_query
 from keyboard import follow_channel_keyboard
@@ -18,21 +19,28 @@ async def process_callback_get_referral_url(callback_query: CallbackQuery, bot: 
     referral_link = f'https://t.me/ForestSpiritLi_bot?start=ref_{user_id}'
     text = f'Ваша ссылка для приглашения друзей:\n\n<code>{referral_link}</code>\n\n'
 
-    if len(referrals_ids) >= 1:
-        count, removed = await get_referral_count(user_id, bot, channel_id)
-        referrals = await get_names_from_array_ids(referrals_ids, bot)
+    if referrals_ids:
+        if len(referrals_ids) >= 1:
+            count, removed = await get_referral_count(user_id, bot, channel_id)
+            referrals = await get_names_from_array_ids(referrals_ids, bot)
 
-        text += f"Твои приглашенные: {referrals}"
+            text += f"Твои приглашенные: {referrals}"
 
-        if len(removed) > 0:
-            removed = await get_names_from_array_ids(removed, bot)
-            text += f"\nИз них не подписаны на канал: {removed}"
+            if len(removed) > 0:
+                removed = await get_names_from_array_ids(removed, bot)
+                text += f"\nИз них не подписаны на канал: {removed}"
     else:
-        text = "Нет приглашенных"
+        text += "Нет приглашенных"
 
-    await bot.send_message(
-        user_id,
-        text
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text = "◀️ Назад в профиль", callback_data = "get_my_profile")
+    keyboard.adjust(1)
+
+    await bot.edit_message_text(
+        chat_id = callback_query.message.chat.id,
+        message_id = callback_query.message.message_id,
+        text = text,
+        reply_markup = keyboard.as_markup()
     )
 
 

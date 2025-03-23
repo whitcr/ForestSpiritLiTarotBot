@@ -13,6 +13,7 @@ class SubscriptionLevel(BaseFilter):
         self.use_meanings = use_meanings
 
     async def __call__(self, event: Message | CallbackQuery, bot: Bot) -> bool:
+
         user_id = event.from_user.id
         sub = await execute_select("SELECT subscription FROM users WHERE user_id = $1", (user_id,))
 
@@ -25,6 +26,8 @@ class SubscriptionLevel(BaseFilter):
             return True
         else:
             required_sub = SUBS_TYPE[self.required_level]['name']
+            if isinstance(event, CallbackQuery):
+                await event.answer()
 
             await bot.send_message(user_id,
                                    f"У вас нет доступа к этой функции, но вы можете приобрести ее по подписке {required_sub}",
