@@ -2,7 +2,7 @@ from aiogram import types, Router, F
 import requests
 from bs4 import BeautifulSoup
 from random import randint
-from database import execute_select
+from database import execute_select, execute_select_all
 from filters.subscriptions import SubscriptionLevel
 
 router = Router()
@@ -11,11 +11,10 @@ router = Router()
 @router.message(F.text.lower() == "совет луны", SubscriptionLevel(1), flags = {"use_user_statistics": True})
 async def get_moon_advice(message: types.Message):
     num = randint(0, 43)
-    result = await execute_select("SELECT moon_advice.advice, moon_advice.name FROM moon_advice WHERE number = $1",
-                                  (num,))
-    moon_advice_text = result.replace("(", " ")
-    moon_name = result.replace("(", " ")
-    await message.answer(f'<b>{moon_name}</b> \n \n{moon_advice_text}')
+    result = await execute_select_all("SELECT advice, name FROM moon_advice WHERE number = $1",
+                                      (num,))
+
+    await message.answer(f'<b>{result[0][0]}</b> \n \n{result[0][1]}')
 
 
 async def get_moon_today():
