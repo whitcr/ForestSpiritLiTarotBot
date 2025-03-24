@@ -3,14 +3,13 @@ from database import execute_select_all
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from filters.baseFilters import IsReply
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
-@router.callback_query(IsReply(), F.data == 'practice_menu_meditation', flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data == 'practice_menu_meditation')
+@use_user_statistics
 async def practice_zalivka_answer(bot: Bot, call: types.CallbackQuery):
     try:
         await call.answer()

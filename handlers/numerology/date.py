@@ -8,19 +8,17 @@ from database import execute_select
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
 from functions.store.temporaryStore import store_data, get_data_two_nums
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 class Cards(StatesGroup):
     arcan = State()
 
 
-@router.message(StateFilter(None), F.text.lower() == "узнать аркан", SubscriptionLevel(1),
-                flags = {"use_user_statistics": True})
+@router.message(StateFilter(None), F.text.lower() == "узнать аркан", SubscriptionLevel(1))
+@use_user_statistics
 async def arcan_date(message: types.Message, state: FSMContext):
     await message.reply("Введите дату рождения в формате 31.01.2001.")
     await state.set_state(Cards.arcan)

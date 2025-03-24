@@ -12,11 +12,9 @@ from filters.baseFilters import IsReply
 from functions.cards.create import get_path_cards, get_choice_spread, get_random_num, text_size
 from handlers.tarot.spreads.getSpreads import get_image_three_cards
 from constants import FONT_L
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @router.callback_query(IsReply(), F.data == 'practice_menu_tarot')
@@ -30,7 +28,8 @@ async def practice_menu_tarot(bot: Bot, call: types.CallbackQuery):
                                 reply_markup = kb.practice_menu_tarot_keyboard)
 
 
-@router.callback_query(IsReply(), F.data == 'practice_triple', flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data == 'practice_triple')
+@use_user_statistics
 async def practice_triple(bot: Bot, call: types.CallbackQuery):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
@@ -61,7 +60,8 @@ async def practice_triple(bot: Bot, call: types.CallbackQuery):
     await bot.send_photo(call.message.chat.id, photo = bio, caption = text)
 
 
-@router.callback_query(IsReply(), F.data == 'practice_card', flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data == 'practice_card')
+@use_user_statistics
 async def practice_card(bot: Bot, call: types.CallbackQuery, state="*"):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
@@ -104,7 +104,8 @@ async def practice_card(bot: Bot, call: types.CallbackQuery, state="*"):
                              reply_markup = kb.practice_card_keyboard)
 
 
-@router.callback_query(IsReply(), F.data == 'practice_choose_card', flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data == 'practice_choose_card')
+@use_user_statistics
 async def practice_choose_card(bot: Bot, call: types.CallbackQuery, state="*"):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
@@ -194,7 +195,8 @@ async def practice_card_answer(bot: Bot, call: types.CallbackQuery, state="*"):
         data['image_choose_card'] = None
 
 
-@router.callback_query(IsReply(), F.data == 'practice_quiz', flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data == 'practice_quiz')
+@use_user_statistics
 async def practice_quiz(bot: Bot, call: types.CallbackQuery):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)

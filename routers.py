@@ -3,6 +3,7 @@ from aiogram import Router
 from events.group import addedToGroup
 from events.user import bannedByUser, referrals
 from handlers.astrology import getMoon
+from handlers.practices import defaults, history, meditations, tarot, intuitions
 from tech.activities.contest import contestAdmin, contest
 from tech.activities.quiz import createQuiz
 from functions.statistics import globalStats, statisticsLogs
@@ -39,6 +40,7 @@ def setup_routers():
                            adminPanel.router, user.router, referrals.router, audio.router, createBonusCard.router,
                            support.router, getUserProfile.router, createQuiz.router, contest.router,
                            contestAdmin.router, library.router, globalStats.router, statisticsLogs.router,
-                           boostyPayment.router, privacy.router, start.router, getMoon.router)
+                           boostyPayment.router, privacy.router, start.router, getMoon.router, defaults.router,
+                           history.router, intuitions.router, meditations.router, tarot.router)
 
     return router

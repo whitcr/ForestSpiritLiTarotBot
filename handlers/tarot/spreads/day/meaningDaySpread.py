@@ -1,20 +1,17 @@
 from aiogram import types, Router, F
-from aiogram.filters import or_f
 
 from database import execute_select, execute_select_all, execute_query
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
-from functions.messages.messages import typing_animation_decorator, send_long_message
+from functions.messages.messages import typing_animation_decorator, send_long_message, get_reply_message
 from functions.gpt.requests import get_cards_day_meanings
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
-@router.callback_query(IsReply(), F.data.startswith("get_day_spread_meaning"), SubscriptionLevel(1, True),
-                       flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data.startswith("get_day_spread_meaning"), SubscriptionLevel(1, True))
+@use_user_statistics
 @typing_animation_decorator(initial_message = "Трактую")
 async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     await call.answer()
@@ -56,11 +53,11 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
         await execute_query("UPDATE spreads_day SET meaning = $1 WHERE date = $2 AND user_id = $3",
                             (message, date, call.from_user.id))
 
-        await call.message.answer(message)
+        await call.message.answer(message, reply_to_message_id = await get_reply_message(call))
 
 
-@router.callback_query(IsReply(), F.data.startswith("get_time_spread_meaning_"), SubscriptionLevel(1),
-                       flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data.startswith("get_time_spread_meaning_"), SubscriptionLevel(1))
+@use_user_statistics
 @typing_animation_decorator(initial_message = "Трактую")
 async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     await call.answer()

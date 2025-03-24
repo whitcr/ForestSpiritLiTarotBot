@@ -19,11 +19,9 @@ from handlers.tarot.spreads.spreadsConfig import SPREADS, get_name_by_cb_key
 from aiogram.filters.callback_data import CallbackData
 from typing import Optional
 
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 class NumbersCallbackFactory(CallbackData, prefix = "get_dop_"):
@@ -90,7 +88,8 @@ async def generate_dop(choice, call):
     return random_number
 
 
-@router.callback_query(IsReply(), NumbersCallbackFactory.filter(), flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), NumbersCallbackFactory.filter())
+@use_user_statistics
 async def process_callback_get_dop(call: types.CallbackQuery, bot: Bot,
                                    callback_data: NumbersCallbackFactory, api_token: str):
     await call.answer()

@@ -3,11 +3,9 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def generate_keyboard(callback_data):
@@ -26,7 +24,8 @@ async def generate_keyboard(callback_data):
     return keyboard
 
 
-@router.message(F.text.lower() == "вопросы", SubscriptionLevel(1), flags = {"use_user_statistics": True})
+@router.message(F.text.lower() == "вопросы", SubscriptionLevel(1))
+@use_user_statistics
 async def get_menu_questions(message: types.Message):
     keyboard = await generate_keyboard("General")
     await message.reply("На какую тематику вы хотите получить список вопросов?", reply_markup = keyboard)

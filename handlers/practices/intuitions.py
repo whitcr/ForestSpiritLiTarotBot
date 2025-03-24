@@ -3,14 +3,13 @@ from database import execute_select
 from random import randint
 import keyboard as kb
 from filters.baseFilters import IsReply
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
-@router.callback_query(IsReply(), F.data == 'practice_menu_intuition', flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data == 'practice_menu_intuition')
+@use_user_statistics
 async def practice_menu_intuition(bot: Bot, call: types.CallbackQuery):
     await bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id,
                                 text = f"<b>Карта</b> — вы должны будете почувствовать скрытую карту.\n\n"
@@ -19,7 +18,8 @@ async def practice_menu_intuition(bot: Bot, call: types.CallbackQuery):
                                 reply_markup = kb.practice_menu_intuition_keyboard)
 
 
-@router.callback_query(IsReply(), F.data == 'practice_zalivka', flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data == 'practice_zalivka')
+@use_user_statistics
 async def practice_zalivka(bot: Bot, call: types.CallbackQuery, state="*"):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)

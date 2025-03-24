@@ -6,14 +6,23 @@ from filters.subscriptions import SubscriptionLevel
 import keyboard as kb
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
-@router.message(F.text.lower() == "практика", SubscriptionLevel(2), flags = {"use_user_statistics": True})
+@router.callback_query(F.data.startswith('get_practices_menu'), SubscriptionLevel(2))
+@use_user_statistics
+async def practice_menu_cb(call: types.CallbackQuery):
+    await call.message.reply(
+        f"<b>Интуиция</b> — практики на развитие интуиции.\n\n"
+        f"<b>Таро</b> — практики с картами Таро.\n\n"
+        f"<b>Медитации</b> — список полезных медитаций.\n\n"
+        f"<b>Практики</b> — различные эзотерические практики.", reply_markup = kb.practice_menu_general_keyboard)
+
+
+@router.message(F.text.lower() == "практика", SubscriptionLevel(2))
+@use_user_statistics
 async def practice_menu(message: types.Message):
     await message.reply(
         f"<b>Интуиция</b> — практики на развитие интуиции.\n\n"

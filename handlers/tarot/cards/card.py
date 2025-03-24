@@ -9,11 +9,9 @@ import keyboard as kb
 from aiogram import Router, F, types, Bot
 import constants as config
 from handlers.tarot.cards.cardsImage import set_card_image, set_days_card_image
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def get_one_card(bot: Bot, message: types.Message, user_id: int, *keyboard: Any) -> Tuple[str, int]:
@@ -36,7 +34,8 @@ async def get_one_card(bot: Bot, message: types.Message, user_id: int, *keyboard
     return choice, num
 
 
-@router.message(F.text.lower().startswith("карта"), flags = {"use_user_statistics": True})
+@router.message(F.text.lower().startswith("карта"))
+@use_user_statistics
 async def get_card(message: types.Message, bot: Bot):
     card_found = False
 

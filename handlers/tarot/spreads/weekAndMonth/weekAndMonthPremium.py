@@ -13,11 +13,9 @@ from PIL import ImageDraw
 from io import BytesIO
 
 from functions.pdf.createFile import create_pdf
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def get_week_spread_premium(user_id, bot, message, spread_name):
@@ -73,7 +71,8 @@ async def get_week_spread_premium(user_id, bot, message, spread_name):
 
 
 @router.callback_query(IsReply(), F.data.in_({'create_week_premium_spread', 'create_month_premium_spread'}),
-                       or_f(SubscriptionLevel(3), IsBooster()), flags = {"use_user_statistics": True})
+                       or_f(SubscriptionLevel(3), IsBooster()))
+@use_user_statistics
 @typing_animation_decorator(initial_message = "Раскладываю и трактую, ждите")
 async def get_premium_spread_image(call: CallbackQuery, bot: Bot):
     spread_name = call.data.split("_")[1]

@@ -2,20 +2,18 @@ from constants import FONT_L
 import random
 from PIL import Image, ImageDraw
 from PIL import ImageFilter
-from io import BytesIO
 import numpy as np
 from aiogram import types, Router, F, Bot
 from database import execute_query
 from filters.baseFilters import IsReply
 from functions.cards.create import get_path_cards, get_gradient_3d, get_path_background, get_buffered_image
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
-@router.callback_query(IsReply(), F.data == 'practice_history', flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data == 'practice_history')
+@use_user_statistics
 async def practice_history(bot: Bot, call: types.CallbackQuery):
     image = await get_image_history()
 

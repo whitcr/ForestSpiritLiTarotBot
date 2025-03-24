@@ -19,11 +19,9 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from typing import Union
 
 from functions.messages.messages import typing_animation_decorator
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def generate_ex_decks_keyboard(triplet_type: Union["mtriplet", "striplet"]):
@@ -101,7 +99,8 @@ async def send_triplet_image(bot, image, text, date, message, triplet_type: Unio
 
 
 @typing_animation_decorator(initial_message = "Раскладываю")
-@router.message(F.text.lower().startswith("мтриплет"), SubscriptionLevel(2), flags = {"use_user_statistics": True})
+@router.message(F.text.lower().startswith("мтриплет"), SubscriptionLevel(2))
+@use_user_statistics
 async def get_mtriplet(message: types.Message, bot: Bot):
     try:
 
@@ -173,7 +172,8 @@ async def get_mtriplet(message: types.Message, bot: Bot):
 
 
 @typing_animation_decorator(initial_message = "Раскладываю")
-@router.message(F.text.lower().startswith("стриплет"), SubscriptionLevel(2), flags = {"use_user_statistics": True})
+@router.message(F.text.lower().startswith("стриплет"), SubscriptionLevel(2))
+@use_user_statistics
 async def get_striplet(message: types.Message, bot: Bot):
     try:
 

@@ -11,11 +11,9 @@ from functions.cards.create import get_choice_spread
 from constants import FONT_M
 from constants import DECK_MAP
 from keyboard import create_week_spread_keyboard, create_month_spread_keyboard
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @typing_animation_decorator(initial_message = "Раскладываю")
@@ -80,13 +78,15 @@ async def create_spread_image(bot, call: CallbackQuery, spread_type: str):
     await send_image_six_cards(bot, call.message, call.from_user.first_name, image, spread_type)
 
 
-@router.callback_query(IsReply(), F.data == 'create_month_spread', flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data == 'create_month_spread')
+@use_user_statistics
 async def get_month_spread_image(call: CallbackQuery, bot: Bot):
     await call.answer()
     await create_spread_image(bot, call, 'месяца')
 
 
-@router.callback_query(IsReply(), F.data == 'create_week_spread', flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data == 'create_week_spread')
+@use_user_statistics
 async def get_week_spread_image(call: CallbackQuery, bot: Bot):
     await call.answer()
     await create_spread_image(bot, call, 'недели')

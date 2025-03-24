@@ -2,7 +2,7 @@ from aiogram import types, Router, F, Bot
 
 from database import execute_select, execute_query
 from filters.baseFilters import IsReply
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 from tech.texts.affirmations import get_random_affirmations
 from functions.messages.messages import get_reply_message, get_chat_id
 
@@ -22,8 +22,6 @@ from handlers.tarot.cards.cardsImage import get_card_image_with_text
 from aiogram.types import InputMediaPhoto
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def create_day_keyboard(date, *callback_data):
@@ -211,14 +209,16 @@ async def today_spread(bot: Bot, message: types.Message, *spread_name):
     await get_day_spread_image(bot, message, date, message.from_user.id, message.from_user.first_name)
 
 
-@router.callback_query(IsReply(), F.data.startswith('today_spread'), flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data.startswith('today_spread'))
+@use_user_statistics
 async def process_callback_today_spread(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     date = pendulum.today('Europe/Kiev').format('DD.MM')
     await get_day_spread_image(bot, call.message, date, call.from_user.id, call.from_user.first_name)
 
 
-@router.callback_query(IsReply(), F.data.startswith('tomorrow_spread'), flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data.startswith('tomorrow_spread'))
+@use_user_statistics
 async def process_callback_tomorrow_spread(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     tomorrow = pendulum.tomorrow('Europe/Kiev').format('DD.MM')

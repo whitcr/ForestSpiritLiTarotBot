@@ -17,7 +17,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
 from handlers.tarot.spreads.spreadsConfig import SPREADS, get_name_by_cb_key, get_questions_by_name
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 
 class ChangeQuestionState(StatesGroup):
@@ -33,8 +33,6 @@ class ChangeDetailsState(StatesGroup):
 
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 class GptCallbackMeaning(CallbackData, prefix = "get_def_gpt_"):
@@ -152,8 +150,8 @@ async def format_callback_data(call, data):
     return "\n".join(get_cards), get_question, get_theme
 
 
-@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == True), SubscriptionLevel(2),
-                       flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == True), SubscriptionLevel(2))
+@use_user_statistics
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning,
                                          state: FSMContext):
     await call.answer()
@@ -187,8 +185,8 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
     await get_cards_meanings_premium(call, state)
 
 
-@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(1, True),
-                       flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(1, True))
+@use_user_statistics
 @typing_animation_decorator(initial_message = "Трактую")
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning):
     await call.answer()
@@ -226,7 +224,7 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
         text += f"{get_cards}"
 
     message = await get_cards_meanings(text)
-    await call.message.answer(message)
+    await call.message.answer(message, reply_to_message_id = await get_reply_message(call))
     # await call.message.answer(text)
 
 

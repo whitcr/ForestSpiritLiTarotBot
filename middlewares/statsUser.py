@@ -1,28 +1,21 @@
-from aiogram import BaseMiddleware
+from functools import wraps
 from aiogram.types import Message, CallbackQuery
-from typing import Dict, Any, Callable, Awaitable, Union
+from typing import Callable, Awaitable, Any, Union
 import keyboard as kb
-from constants import DAILY_LIMIT
 from database import execute_query, execute_select_all, execute_select
-from filters.subscriptions import get_subscription
+from constants import DAILY_LIMIT
 from datetime import datetime, timedelta
 
 
-async def update_user_statistics(event: Message | CallbackQuery, bot) -> bool:
-    if isinstance(event, Message):
-        user_id = event.from_user.id
-    elif isinstance(event, CallbackQuery):
-        user_id = event.from_user.id
-
+async def update_user_statistics(event: Union[Message, CallbackQuery], bot) -> bool:
+    user_id = event.from_user.id
     today = datetime.utcnow().date()
     week_start = today - timedelta(days = today.weekday())
     month_start = today.replace(day = 1)
 
     try:
-
         await notify_user(user_id, bot)
 
-        # Fetch the current counts and last update dates
         result = await execute_select_all(
             """
             SELECT daily_count, weekly_count, monthly_count, total_count,
@@ -33,7 +26,6 @@ async def update_user_statistics(event: Message | CallbackQuery, bot) -> bool:
             (user_id,)
         )
 
-        # Initialize user data if record is found
         if result and all(value is not None for value in result[0].values()):
             data = result[0]
             daily_count = data['daily_count'] if data['last_daily_update'] == today else 0
@@ -43,19 +35,16 @@ async def update_user_statistics(event: Message | CallbackQuery, bot) -> bool:
         else:
             daily_count = weekly_count = monthly_count = total_count = 0
 
-        # Check subscription and daily limit
         if daily_count >= DAILY_LIMIT:
             result = await execute_select("SELECT subscription FROM users WHERE user_id = $1", (user_id,))
             if result == 0:
-                return False  # User exceeded daily limit
+                return False
 
-        # Update counts
         daily_count += 1
         weekly_count += 1
         monthly_count += 1
         total_count += 1
 
-        # Perform insert or update based on record existence
         if result:
             await execute_query(
                 """
@@ -64,8 +53,7 @@ async def update_user_statistics(event: Message | CallbackQuery, bot) -> bool:
                     last_daily_update = $5, last_weekly_update = $6, last_monthly_update = $7
                 WHERE user_id = $8
                 """,
-                (daily_count, weekly_count, monthly_count, total_count,
-                 today, week_start, month_start, user_id)
+                (daily_count, weekly_count, monthly_count, total_count, today, week_start, month_start, user_id)
             )
         else:
             await execute_query(
@@ -75,37 +63,34 @@ async def update_user_statistics(event: Message | CallbackQuery, bot) -> bool:
                  last_daily_update, last_weekly_update, last_monthly_update, join_date)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 """,
-                (user_id, daily_count, weekly_count, monthly_count, total_count,
-                 today, week_start, month_start, today)
+                (user_id, daily_count, weekly_count, monthly_count, total_count, today, week_start, month_start, today)
             )
 
-    except Exception as e:
+    except Exception:
         return False
 
     return True
 
 
-class UserStatisticsMiddleware(BaseMiddleware):
-    async def __call__(
-            self,
-            handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
-            event: Union[CallbackQuery, Message],
-            data: Dict[str, Any]
-    ) -> Any:
-        print(data)
-        if not data.get("handler_flags", {}).get("use_user_statistics"):
-            print(1)
-            return await handler(event, data)
+def use_user_statistics(handler: Callable[..., Awaitable[Any]]):
+    @wraps(handler)
+    async def wrapper(event: Union[Message, CallbackQuery], *args, **kwargs):
+        bot = kwargs.get("bot")
+        if not bot:
+            raise ValueError("Bot instance is required for use_user_statistics")
 
-        bot = data.get("bot")
-        if await update_user_statistics(event, bot):
-            return await handler(event, data)
-        else:
+        if not await update_user_statistics(event, bot):
             user_id = event.from_user.id
-            await bot.send_message(user_id,
-                                   text = "Ваш дневной лимит раскладов окончен. Возвращайтесь завтра или приобретите "
-                                          "подписку с неограниченными раскладами",
-                                   reply_markup = kb.sub_keyboard)
+            await bot.send_message(
+                user_id,
+                text = "Ваш дневной лимит раскладов окончен. Возвращайтесь завтра или приобретите подписку.",
+                reply_markup = kb.sub_keyboard
+            )
+            return
+
+        return await handler(event, *args, **kwargs)
+
+    return wrapper
 
 
 async def notify_user(user_id, bot):

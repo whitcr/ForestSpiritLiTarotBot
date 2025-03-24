@@ -13,11 +13,9 @@ from functions.cards.create import get_buffered_image
 from functions.messages.messages import typing_animation_decorator
 from functions.statistics.getUserStats import get_user_statistics
 from keyboard import menu_private_keyboard, profile_keyboard
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @router.message(F.text.lower() == "меню")
@@ -38,7 +36,8 @@ async def get_user_profile(user_id: int):
     return await execute_select_all(query, (user_id,))
 
 
-@router.callback_query(F.data == "get_user_statistics", SubscriptionLevel(1), flags = {"use_user_statistics": True})
+@router.callback_query(F.data == "get_user_statistics", SubscriptionLevel(1))
+@use_user_statistics
 @typing_animation_decorator(initial_message = "Вычисляю статистику")
 async def get_formatted_card_statistics(callback_query: types.CallbackQuery, bot):
     await callback_query.answer()

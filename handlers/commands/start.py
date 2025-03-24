@@ -4,14 +4,14 @@ from aiogram.utils.markdown import hlink
 
 from events.user.referrals import get_referrals
 from keyboard import menu_private_keyboard
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 from tech.activities.contest.contest import contest_with_referral
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
 
 
-@router.message(CommandStart(), flags = {"use_user_statistics": True})
+@router.message(CommandStart())
+@use_user_statistics
 async def start(message: types.Message, bot: Bot):
     command_params = message.text
 

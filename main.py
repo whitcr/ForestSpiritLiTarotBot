@@ -11,7 +11,6 @@ from aiogram.types import Update
 from config import load_config
 from middlewares.logger import LoggingMiddleware
 from middlewares.statsHandler import HandlerStatisticsMiddleware
-from middlewares.statsUser import UserStatisticsMiddleware
 from routers import setup_routers
 
 from tech.schedule.setSchedule import schedule

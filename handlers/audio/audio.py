@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from database import execute_select_all, execute_select
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 AUDIO_MAP = {
     'медитация': 'meditations',
@@ -14,12 +14,10 @@ AUDIO_MAP = {
 }
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
-@router.message(F.text.lower().startswith(tuple(AUDIO_MAP.keys())), SubscriptionLevel(2),
-                flags = {"use_user_statistics": True})
+@router.message(F.text.lower().startswith(tuple(AUDIO_MAP.keys())), SubscriptionLevel(2))
+@use_user_statistics
 async def find_meditation(bot: Bot, message: types.Message):
     words = message.text.split()
     theme = AUDIO_MAP[words[0].lower()]
@@ -63,7 +61,8 @@ async def find_meditation(bot: Bot, message: types.Message):
                                  reply_to_message_id = message.message_id)
 
 
-@router.callback_query(IsReply(), F.data.startswith('show_audio'), flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data.startswith('show_audio'))
+@use_user_statistics
 async def process_callback_show_audio(bot: Bot, call: types.CallbackQuery):
     await call.answer()
     try:
@@ -102,7 +101,8 @@ async def process_callback_show_audio(bot: Bot, call: types.CallbackQuery):
         raise Exception
 
 
-@router.callback_query(IsReply(), F.data.startswith('show_random_audio'), flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), F.data.startswith('show_random_audio'))
+@use_user_statistics
 async def process_callback_show_random_audio(bot: Bot, call: types.CallbackQuery):
     await call.answer()
     theme = call.data.split('_')[3]

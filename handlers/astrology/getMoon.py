@@ -4,14 +4,13 @@ from bs4 import BeautifulSoup
 from random import randint
 from database import execute_select, execute_select_all
 from filters.subscriptions import SubscriptionLevel
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
-@router.message(F.text.lower() == "совет луны", SubscriptionLevel(1), flags = {"use_user_statistics": True})
+@router.message(F.text.lower() == "совет луны", SubscriptionLevel(1))
+@use_user_statistics
 async def get_moon_advice(message: types.Message):
     num = randint(0, 43)
     result = await execute_select_all("SELECT advice, name FROM moon_advice WHERE number = $1",
@@ -43,7 +42,8 @@ async def get_moon_today():
         return None
 
 
-@router.message(F.text.lower() == "луна", SubscriptionLevel(1), flags = {"use_user_statistics": True})
+@router.message(F.text.lower() == "луна", SubscriptionLevel(1))
+@use_user_statistics
 async def get_moon_text(message: types.Message):
     moon_data = await get_moon_today()
     if moon_data:

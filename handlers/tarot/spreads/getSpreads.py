@@ -10,7 +10,7 @@ from filters.baseFilters import IsReply
 from functions.cards.create import text_size
 from functions.cards.createThreeCards import send_image_three_cards, get_image_three_cards
 from functions.messages.messages import typing_animation_decorator, delete_message
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 from .spreadsConfig import SPREADS
 
 spread_buttons = []
@@ -25,8 +25,6 @@ builder.adjust(2)
 spreads_keyboard = builder.as_markup()
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def draw_spread(image, spread_name):
@@ -46,7 +44,8 @@ async def draw_spread(image, spread_name):
     return image
 
 
-@router.message(F.text.lower().startswith("триплет"), flags = {"use_user_statistics": True})
+@router.message(F.text.lower().startswith("триплет"))
+@use_user_statistics
 @typing_animation_decorator(initial_message = "Раскладываю")
 async def get_image_triplet(message: types.Message, bot: Bot):
     image, num = await get_image_three_cards(message.from_user.id)
@@ -109,7 +108,8 @@ async def get_spread(message: types.Message, bot: Bot):
 
 
 @typing_animation_decorator(initial_message = "Раскладываю")
-@router.callback_query(IsReply(), lambda call: call.data in SPREADS.keys(), flags = {"use_user_statistics": True})
+@router.callback_query(IsReply(), lambda call: call.data in SPREADS.keys())
+@use_user_statistics
 async def spreads_callback(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     try:

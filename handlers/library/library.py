@@ -12,14 +12,12 @@ from openai import AsyncOpenAI
 from filters.baseFilters import IsReply, IsAdmin
 from filters.subscriptions import SubscriptionLevel
 from functions.gpt.requests import get_gpt_response
-from middlewares.statsUser import UserStatisticsMiddleware
+from middlewares.statsUser import use_user_statistics
 
 BOOK_CHANNEL_ID = -1001607817353
 client = AsyncOpenAI(api_key = os.environ.get("OPENAI_API_KEY"))
 
 router = Router()
-router.message.middleware(UserStatisticsMiddleware())
-router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 class SaveBooks(StatesGroup):
@@ -110,7 +108,8 @@ async def save_book(message: Message, state: FSMContext, bot: Bot):
     await state.clear()
 
 
-@router.message(F.text.lower().startswith("книга"), SubscriptionLevel(1), flags = {"use_user_statistics": True})
+@router.message(F.text.lower().startswith("книга"), SubscriptionLevel(1))
+@use_user_statistics
 async def find_books(message: Message, bot: Bot):
     if message.chat.type == "private":
         if len(message.text.split(' ')) == 1:
