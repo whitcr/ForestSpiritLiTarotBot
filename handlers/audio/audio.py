@@ -5,6 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from database import execute_select_all, execute_select
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
+from middlewares.statsUser import UserStatisticsMiddleware
 
 AUDIO_MAP = {
     'медитация': 'meditations',
@@ -13,6 +14,8 @@ AUDIO_MAP = {
 }
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @router.message(F.text.lower().startswith(tuple(AUDIO_MAP.keys())), SubscriptionLevel(2),

@@ -13,8 +13,11 @@ from PIL import ImageDraw
 from io import BytesIO
 
 from functions.pdf.createFile import create_pdf
+from middlewares.statsUser import UserStatisticsMiddleware
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def get_week_spread_premium(user_id, bot, message, spread_name):

@@ -8,8 +8,11 @@ from database import execute_select
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
 from functions.store.temporaryStore import store_data, get_data_two_nums
+from middlewares.statsUser import UserStatisticsMiddleware
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 class Cards(StatesGroup):

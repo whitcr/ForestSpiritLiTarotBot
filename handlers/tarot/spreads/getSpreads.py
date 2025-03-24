@@ -10,6 +10,7 @@ from filters.baseFilters import IsReply
 from functions.cards.create import text_size
 from functions.cards.createThreeCards import send_image_three_cards, get_image_three_cards
 from functions.messages.messages import typing_animation_decorator, delete_message
+from middlewares.statsUser import UserStatisticsMiddleware
 from .spreadsConfig import SPREADS
 
 spread_buttons = []
@@ -24,6 +25,8 @@ builder.adjust(2)
 spreads_keyboard = builder.as_markup()
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def draw_spread(image, spread_name):

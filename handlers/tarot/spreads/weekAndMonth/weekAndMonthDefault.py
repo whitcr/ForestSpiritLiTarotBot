@@ -11,8 +11,11 @@ from functions.cards.create import get_choice_spread
 from constants import FONT_M
 from constants import DECK_MAP
 from keyboard import create_week_spread_keyboard, create_month_spread_keyboard
+from middlewares.statsUser import UserStatisticsMiddleware
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @typing_animation_decorator(initial_message = "Раскладываю")

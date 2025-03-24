@@ -4,8 +4,11 @@ from bs4 import BeautifulSoup
 from random import randint
 from database import execute_select, execute_select_all
 from filters.subscriptions import SubscriptionLevel
+from middlewares.statsUser import UserStatisticsMiddleware
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @router.message(F.text.lower() == "совет луны", SubscriptionLevel(1), flags = {"use_user_statistics": True})

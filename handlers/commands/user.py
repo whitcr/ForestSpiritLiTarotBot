@@ -13,8 +13,11 @@ from functions.cards.create import get_buffered_image
 from functions.messages.messages import typing_animation_decorator
 from functions.statistics.getUserStats import get_user_statistics
 from keyboard import menu_private_keyboard, profile_keyboard
+from middlewares.statsUser import UserStatisticsMiddleware
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @router.message(F.text.lower() == "меню")

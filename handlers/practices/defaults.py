@@ -6,7 +6,11 @@ from filters.subscriptions import SubscriptionLevel
 import keyboard as kb
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+from middlewares.statsUser import UserStatisticsMiddleware
+
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @router.message(F.text.lower() == "практика", SubscriptionLevel(2), flags = {"use_user_statistics": True})

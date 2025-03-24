@@ -92,18 +92,16 @@ class UserStatisticsMiddleware(BaseMiddleware):
             event: Union[CallbackQuery, Message],
             data: Dict[str, Any]
     ) -> Any:
-
+        print(data)
         if not data.get("handler_flags", {}).get("use_user_statistics"):
+            print(1)
             return await handler(event, data)
 
         bot = data.get("bot")
         if await update_user_statistics(event, bot):
             return await handler(event, data)
         else:
-            if isinstance(event, Message):
-                user_id = event.from_user.id
-            elif isinstance(event, CallbackQuery):
-                user_id = event.from_user.id
+            user_id = event.from_user.id
             await bot.send_message(user_id,
                                    text = "Ваш дневной лимит раскладов окончен. Возвращайтесь завтра или приобретите "
                                           "подписку с неограниченными раскладами",

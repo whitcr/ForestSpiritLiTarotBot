@@ -74,9 +74,6 @@ def main() -> None:
     dp.message.outer_middleware(stats_middleware)
     dp.callback_query.outer_middleware(stats_middleware)
 
-    dp.message.outer_middleware(UserStatisticsMiddleware())
-    dp.callback_query.outer_middleware(UserStatisticsMiddleware())
-
     dp.update.outer_middleware(CouponMiddleware())
 
     dp.update.outer_middleware(LoggingMiddleware())

@@ -12,8 +12,11 @@ from filters.baseFilters import IsReply
 from functions.cards.create import get_path_cards, get_choice_spread, get_random_num, text_size
 from handlers.tarot.spreads.getSpreads import get_image_three_cards
 from constants import FONT_L
+from middlewares.statsUser import UserStatisticsMiddleware
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @router.callback_query(IsReply(), F.data == 'practice_menu_tarot')

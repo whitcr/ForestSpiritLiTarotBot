@@ -19,7 +19,11 @@ from handlers.tarot.spreads.spreadsConfig import SPREADS, get_name_by_cb_key
 from aiogram.filters.callback_data import CallbackData
 from typing import Optional
 
+from middlewares.statsUser import UserStatisticsMiddleware
+
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 class NumbersCallbackFactory(CallbackData, prefix = "get_dop_"):

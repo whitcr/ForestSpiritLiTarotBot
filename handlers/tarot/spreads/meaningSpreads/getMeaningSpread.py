@@ -17,6 +17,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
 from handlers.tarot.spreads.spreadsConfig import SPREADS, get_name_by_cb_key, get_questions_by_name
+from middlewares.statsUser import UserStatisticsMiddleware
 
 
 class ChangeQuestionState(StatesGroup):
@@ -32,6 +33,8 @@ class ChangeDetailsState(StatesGroup):
 
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 class GptCallbackMeaning(CallbackData, prefix = "get_def_gpt_"):
@@ -156,7 +159,7 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
     await call.answer()
 
     choice = await get_choice_spread(call.from_user.id)
-    if choice is not 'raider':
+    if choice != 'raider':
         await call.message.answer("Трактовки могут быть сделаны только для колоды Райдер-Уэйт.")
         return
 
@@ -191,7 +194,7 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
     await call.answer()
 
     choice = await get_choice_spread(call.from_user.id)
-    if choice is not 'raider':
+    if choice != 'raider':
         await call.message.answer("Трактовки могут быть сделаны только для колоды Райдер-Уэйт.")
         return
 

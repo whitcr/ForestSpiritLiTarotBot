@@ -12,11 +12,14 @@ from openai import AsyncOpenAI
 from filters.baseFilters import IsReply, IsAdmin
 from filters.subscriptions import SubscriptionLevel
 from functions.gpt.requests import get_gpt_response
+from middlewares.statsUser import UserStatisticsMiddleware
 
 BOOK_CHANNEL_ID = -1001607817353
 client = AsyncOpenAI(api_key = os.environ.get("OPENAI_API_KEY"))
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 class SaveBooks(StatesGroup):

@@ -2,6 +2,7 @@ from aiogram import types, Router, F, Bot
 
 from database import execute_select, execute_query
 from filters.baseFilters import IsReply
+from middlewares.statsUser import UserStatisticsMiddleware
 from tech.texts.affirmations import get_random_affirmations
 from functions.messages.messages import get_reply_message, get_chat_id
 
@@ -21,6 +22,8 @@ from handlers.tarot.cards.cardsImage import get_card_image_with_text
 from aiogram.types import InputMediaPhoto
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def create_day_keyboard(date, *callback_data):

@@ -6,8 +6,11 @@ from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
 from functions.messages.messages import typing_animation_decorator, send_long_message
 from functions.gpt.requests import get_cards_day_meanings
+from middlewares.statsUser import UserStatisticsMiddleware
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @router.callback_query(IsReply(), F.data.startswith("get_day_spread_meaning"), SubscriptionLevel(1, True),

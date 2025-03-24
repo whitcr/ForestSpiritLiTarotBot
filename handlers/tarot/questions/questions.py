@@ -3,8 +3,11 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
+from middlewares.statsUser import UserStatisticsMiddleware
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def generate_keyboard(callback_data):

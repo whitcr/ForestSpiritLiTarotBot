@@ -8,8 +8,11 @@ from aiogram import types, Router, F, Bot
 from database import execute_query
 from filters.baseFilters import IsReply
 from functions.cards.create import get_path_cards, get_gradient_3d, get_path_background, get_buffered_image
+from middlewares.statsUser import UserStatisticsMiddleware
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 @router.callback_query(IsReply(), F.data == 'practice_history', flags = {"use_user_statistics": True})

@@ -19,8 +19,11 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from typing import Union
 
 from functions.messages.messages import typing_animation_decorator
+from middlewares.statsUser import UserStatisticsMiddleware
 
 router = Router()
+router.message.middleware(UserStatisticsMiddleware())
+router.callback_query.middleware(UserStatisticsMiddleware())
 
 
 async def generate_ex_decks_keyboard(triplet_type: Union["mtriplet", "striplet"]):
