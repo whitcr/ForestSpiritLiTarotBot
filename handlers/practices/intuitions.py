@@ -7,7 +7,7 @@ from filters.baseFilters import IsReply
 router = Router()
 
 
-@router.callback_query(IsReply(), F.data == 'practice_menu_intuition')
+@router.callback_query(IsReply(), F.data == 'practice_menu_intuition', flags = {"use_user_statistics": True})
 async def practice_menu_intuition(bot: Bot, call: types.CallbackQuery):
     await bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id,
                                 text = f"<b>Карта</b> — вы должны будете почувствовать скрытую карту.\n\n"
@@ -16,7 +16,7 @@ async def practice_menu_intuition(bot: Bot, call: types.CallbackQuery):
                                 reply_markup = kb.practice_menu_intuition_keyboard)
 
 
-@router.callback_query(IsReply(), F.data == 'practice_zalivka')
+@router.callback_query(IsReply(), F.data == 'practice_zalivka', flags = {"use_user_statistics": True})
 async def practice_zalivka(bot: Bot, call: types.CallbackQuery, state="*"):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)

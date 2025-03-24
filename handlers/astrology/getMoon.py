@@ -8,7 +8,7 @@ from filters.subscriptions import SubscriptionLevel
 router = Router()
 
 
-@router.message(F.text.lower() == "совет луны", SubscriptionLevel(1))
+@router.message(F.text.lower() == "совет луны", SubscriptionLevel(1), flags = {"use_user_statistics": True})
 async def get_moon_advice(message: types.Message):
     num = randint(0, 43)
     result = await execute_select("SELECT moon_advice.advice, moon_advice.name FROM moon_advice WHERE number = $1",
@@ -22,9 +22,9 @@ async def get_moon_today():
     url = "https://mirkosmosa.ru/lunar-calendar"
     try:
         r = requests.get(url)
-        r.raise_for_status()  # Raise an exception for non-2xx status codes
+        r.raise_for_status()
 
-        soup = BeautifulSoup(r.text, "lxml")  # Use lxml parser if available
+        soup = BeautifulSoup(r.text, "lxml")
 
         moon_zodiac_name = soup.select_one('.moon-zodiac_name')
         moon_phase = soup.select_one('.phase_data')
@@ -41,7 +41,7 @@ async def get_moon_today():
         return None
 
 
-@router.message(F.text.lower() == "луна", SubscriptionLevel(1))
+@router.message(F.text.lower() == "луна", SubscriptionLevel(1), flags = {"use_user_statistics": True})
 async def get_moon_text(message: types.Message):
     moon_data = await get_moon_today()
     if moon_data:

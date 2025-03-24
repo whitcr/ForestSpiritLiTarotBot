@@ -9,7 +9,7 @@ from tech.activities.contest.contest import contest_with_referral
 router = Router()
 
 
-@router.message(CommandStart())
+@router.message(CommandStart(), flags = {"use_user_statistics": True})
 async def start(message: types.Message, bot: Bot):
     command_params = message.text
 

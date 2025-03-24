@@ -9,7 +9,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 router = Router()
 
 
-@router.message(F.text.lower() == "практика", SubscriptionLevel(2))
+@router.message(F.text.lower() == "практика", SubscriptionLevel(2), flags = {"use_user_statistics": True})
 async def practice_menu(message: types.Message):
     await message.reply(
         f"<b>Интуиция</b> — практики на развитие интуиции.\n\n"

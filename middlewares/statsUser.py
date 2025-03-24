@@ -92,6 +92,10 @@ class UserStatisticsMiddleware(BaseMiddleware):
             event: Union[CallbackQuery, Message],
             data: Dict[str, Any]
     ) -> Any:
+
+        if not data.get("handler_flags", {}).get("use_user_statistics"):
+            return await handler(event, data)
+
         bot = data.get("bot")
         if await update_user_statistics(event, bot):
             return await handler(event, data)

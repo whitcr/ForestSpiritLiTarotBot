@@ -5,6 +5,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.filters import StateFilter
 import keyboard as kb
 from database import execute_select
+from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
 from functions.store.temporaryStore import store_data, get_data_two_nums
 
@@ -15,7 +16,8 @@ class Cards(StatesGroup):
     arcan = State()
 
 
-@router.message(StateFilter(None), F.text.lower() == "узнать аркан", SubscriptionLevel(1))
+@router.message(StateFilter(None), F.text.lower() == "узнать аркан", SubscriptionLevel(1),
+                flags = {"use_user_statistics": True})
 async def arcan_date(message: types.Message, state: FSMContext):
     await message.reply("Введите дату рождения в формате 31.01.2001.")
     await state.set_state(Cards.arcan)
@@ -67,29 +69,28 @@ async def get_arcan_date(message: types.Message, state: FSMContext):
     await state.clear()
 
 
-@router.callback_query(F.data == 'personal_date_arcane')
+@router.callback_query(IsReply(), F.data == 'personal_date_arcane')
 async def personal_date_arcane(call: types.CallbackQuery, bot: Bot):
     await call.answer()
-    if call.from_user.id == call.message.reply_to_message.from_user.id:
-        num1, num2 = await get_data_two_nums(call.message.message_id)
 
-        name = await execute_select(f"SELECT name FROM meaning_raider WHERE number = {num1}")
-        text = await execute_select(f"SELECT arcane_personal_date FROM meaning_raider WHERE number = {num1}")
+    num1, num2 = await get_data_two_nums(call.message.message_id)
 
-        await bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id,
-                                    text = f"Аркан Личности — <b> {name}</b>\n\n{text}",
-                                    reply_markup = kb.date_personal_arcane_keyboard)
+    name = await execute_select(f"SELECT name FROM meaning_raider WHERE number = {num1}")
+    text = await execute_select(f"SELECT arcane_personal_date FROM meaning_raider WHERE number = {num1}")
+
+    await bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id,
+                                text = f"Аркан Личности — <b> {name}</b>\n\n{text}",
+                                reply_markup = kb.date_personal_arcane_keyboard)
 
 
-@router.callback_query(F.data == 'personal_fate_arcane')
+@router.callback_query(IsReply(), F.data == 'personal_fate_arcane')
 async def personal_fate_arcane(call: types.CallbackQuery, bot: Bot):
     await call.answer()
-    if call.from_user.id == call.message.reply_to_message.from_user.id:
-        num1, num2 = await get_data_two_nums(call.message.message_id)
+    num1, num2 = await get_data_two_nums(call.message.message_id)
 
-        name = await execute_select(f"SELECT name FROM meaning_raider WHERE number = {num1}")
-        text = await execute_select(f"SELECT arcane_fate_date FROM meaning_raider WHERE number = {num1}")
+    name = await execute_select(f"SELECT name FROM meaning_raider WHERE number = {num1}")
+    text = await execute_select(f"SELECT arcane_fate_date FROM meaning_raider WHERE number = {num1}")
 
-        await bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id,
-                                    text = f"Аркан Судьбы — <b> {name}</b>\n\n{text}",
-                                    reply_markup = kb.date_fate_arcane_keyboard)
+    await bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id,
+                                text = f"Аркан Судьбы — <b> {name}</b>\n\n{text}",
+                                reply_markup = kb.date_fate_arcane_keyboard)

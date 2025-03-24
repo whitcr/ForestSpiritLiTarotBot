@@ -15,7 +15,8 @@ AUDIO_MAP = {
 router = Router()
 
 
-@router.message(F.text.lower().startswith(tuple(AUDIO_MAP.keys())), SubscriptionLevel(2))
+@router.message(F.text.lower().startswith(tuple(AUDIO_MAP.keys())), SubscriptionLevel(2),
+                flags = {"use_user_statistics": True})
 async def find_meditation(bot: Bot, message: types.Message):
     words = message.text.split()
     theme = AUDIO_MAP[words[0].lower()]
@@ -59,7 +60,7 @@ async def find_meditation(bot: Bot, message: types.Message):
                                  reply_to_message_id = message.message_id)
 
 
-@router.callback_query(IsReply(), F.data.startswith('show_audio'))
+@router.callback_query(IsReply(), F.data.startswith('show_audio'), flags = {"use_user_statistics": True})
 async def process_callback_show_audio(bot: Bot, call: types.CallbackQuery):
     await call.answer()
     try:
@@ -98,7 +99,7 @@ async def process_callback_show_audio(bot: Bot, call: types.CallbackQuery):
         raise Exception
 
 
-@router.callback_query(IsReply(), F.data.startswith('show_random_audio'))
+@router.callback_query(IsReply(), F.data.startswith('show_random_audio'), flags = {"use_user_statistics": True})
 async def process_callback_show_random_audio(bot: Bot, call: types.CallbackQuery):
     await call.answer()
     theme = call.data.split('_')[3]

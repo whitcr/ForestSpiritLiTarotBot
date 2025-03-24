@@ -27,7 +27,7 @@ async def practice_menu_tarot(bot: Bot, call: types.CallbackQuery):
                                 reply_markup = kb.practice_menu_tarot_keyboard)
 
 
-@router.callback_query(IsReply(), F.data == 'practice_triple')
+@router.callback_query(IsReply(), F.data == 'practice_triple', flags = {"use_user_statistics": True})
 async def practice_triple(bot: Bot, call: types.CallbackQuery):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
@@ -58,7 +58,7 @@ async def practice_triple(bot: Bot, call: types.CallbackQuery):
     await bot.send_photo(call.message.chat.id, photo = bio, caption = text)
 
 
-@router.callback_query(IsReply(), F.data == 'practice_card')
+@router.callback_query(IsReply(), F.data == 'practice_card', flags = {"use_user_statistics": True})
 async def practice_card(bot: Bot, call: types.CallbackQuery, state="*"):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
@@ -101,7 +101,7 @@ async def practice_card(bot: Bot, call: types.CallbackQuery, state="*"):
                              reply_markup = kb.practice_card_keyboard)
 
 
-@router.callback_query(IsReply(), F.data == 'practice_choose_card')
+@router.callback_query(IsReply(), F.data == 'practice_choose_card', flags = {"use_user_statistics": True})
 async def practice_choose_card(bot: Bot, call: types.CallbackQuery, state="*"):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
@@ -191,16 +191,16 @@ async def practice_card_answer(bot: Bot, call: types.CallbackQuery, state="*"):
         data['image_choose_card'] = None
 
 
-@router.callback_query(IsReply(), F.data == 'practice_quiz')
+@router.callback_query(IsReply(), F.data == 'practice_quiz', flags = {"use_user_statistics": True})
 async def practice_quiz(bot: Bot, call: types.CallbackQuery):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
 
     numbers = random.sample(range(0, 74), 3)
     for num in numbers:
-        card = await execute_select("select practice.name from practice where number = {}", (num,))
+        card = await execute_select("select practice.name from practice where number = $1", (num,))
 
-        correct_answer = await execute_select("select quiz_02 from practice where number = {}", (num,))
+        correct_answer = await execute_select("select quiz_02 from practice where number = $1", (num,))
 
         false = random.sample(range(0, 74), 4)
         if num in false:
@@ -208,7 +208,7 @@ async def practice_quiz(bot: Bot, call: types.CallbackQuery):
 
         answers = []
         for el in false:
-            false_answer = await execute_select("select quiz_02 from practice where number = {}", (el,))
+            false_answer = await execute_select("select quiz_02 from practice where number = $1", (el,))
 
             answers.append(false_answer)
         answers.append(correct_answer)

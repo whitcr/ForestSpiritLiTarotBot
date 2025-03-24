@@ -157,7 +157,8 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
     choice = await get_choice_spread(call.from_user.id)
     if choice is not 'raider':
         await call.message.answer("Трактовки могут быть сделаны только для колоды Райдер-Уэйт.")
-        
+        return
+
     count = await  execute_select("select paid_meanings from users where user_id = $1", (call.from_user.id,))
     if count > 0:
         await execute_query("update users set paid_meanings = paid_meanings - 1 where user_id = $1",
@@ -190,6 +191,7 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
     choice = await get_choice_spread(call.from_user.id)
     if choice is not 'raider':
         await call.message.answer("Трактовки могут быть сделаны только для колоды Райдер-Уэйт.")
+        return
 
     count = await execute_select("select paid_meanings from users where user_id = $1", (call.from_user.id,))
     if count > 0:

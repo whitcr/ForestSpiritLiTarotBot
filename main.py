@@ -11,6 +11,7 @@ from aiogram.types import Update
 from config import load_config
 from middlewares.logger import LoggingMiddleware
 from middlewares.statsHandler import HandlerStatisticsMiddleware
+from middlewares.statsUser import UserStatisticsMiddleware
 from routers import setup_routers
 
 from tech.schedule.setSchedule import schedule
@@ -72,6 +73,9 @@ def main() -> None:
 
     dp.message.outer_middleware(stats_middleware)
     dp.callback_query.outer_middleware(stats_middleware)
+
+    dp.message.outer_middleware(UserStatisticsMiddleware())
+    dp.callback_query.outer_middleware(UserStatisticsMiddleware())
 
     dp.update.outer_middleware(CouponMiddleware())
 

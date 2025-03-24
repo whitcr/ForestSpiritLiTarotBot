@@ -7,7 +7,7 @@ from filters.baseFilters import IsReply
 router = Router()
 
 
-@router.callback_query(IsReply(), F.data == 'practice_menu_meditation')
+@router.callback_query(IsReply(), F.data == 'practice_menu_meditation', flags = {"use_user_statistics": True})
 async def practice_zalivka_answer(bot: Bot, call: types.CallbackQuery):
     try:
         await call.answer()

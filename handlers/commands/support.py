@@ -3,18 +3,15 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.filters import Command
 
 from config import load_config
 
-# Создаём router
 router = Router()
 
 config = load_config()
 support_chat = config.tg_bot.support_chat
 
 
-# Храним состояние пользователя (ожидание ввода запроса)
 class SupportState(StatesGroup):
     waiting_for_question = State()
     waiting_for_answer = State()
@@ -41,7 +38,6 @@ async def help_command(event: Message | CallbackQuery):
         await event.message.edit_text(text, reply_markup = keyboard.as_markup())
 
 
-# 📌 Пользователь нажал "Написать вопрос/жалобу"
 @router.callback_query(F.data == "ask_support")
 async def ask_question(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer("Введите ваш запрос:")
@@ -49,7 +45,6 @@ async def ask_question(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-# 📌 Пользователь отправляет свой запрос
 @router.message(SupportState.waiting_for_question)
 async def receive_question(message: Message, bot: Bot, state: FSMContext):
     await state.clear()
@@ -58,12 +53,10 @@ async def receive_question(message: Message, bot: Bot, state: FSMContext):
     full_name = message.from_user.full_name
     username = f"(@{message.from_user.username})" if message.from_user.username else ""
 
-    # Кнопки для админа
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text = "✉ Ответить", callback_data = f"reply_{user_id}")
     keyboard.button(text = "👤 Перейти в ЛС", url = f"tg://user?id={user_id}")
 
-    # Отправляем админу
     await bot.send_message(
         support_chat,
         f"📩 *Новый запрос от {full_name}* {username}:\n\n"
@@ -75,17 +68,15 @@ async def receive_question(message: Message, bot: Bot, state: FSMContext):
     await message.answer("Ваш запрос отправлен. Ожидайте ответа.")
 
 
-# 📌 Админ нажал "Ответить"
 @router.callback_query(F.data.startswith("reply_"))
 async def ask_admin_reply(callback: CallbackQuery, state: FSMContext):
-    user_id = int(callback.data.split("_")[1])  # Получаем ID пользователя
-    await state.update_data(user_id = user_id)  # Сохраняем ID пользователя
+    user_id = int(callback.data.split("_")[1])
+    await state.update_data(user_id = user_id)
     await callback.message.answer("Введите ваш ответ:")
     await state.set_state(SupportState.waiting_for_answer)
     await callback.answer()
 
 
-# 📌 Админ отправляет ответ
 @router.message(SupportState.waiting_for_answer)
 async def send_admin_reply(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
@@ -97,7 +88,6 @@ async def send_admin_reply(message: Message, bot: Bot, state: FSMContext):
 
     await state.clear()
 
-    # Отправляем ответ пользователю
     await bot.send_message(
         user_id,
         f"📬 *Ответ от поддержки:*\n\n{message.text}",

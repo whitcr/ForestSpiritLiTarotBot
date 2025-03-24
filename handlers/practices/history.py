@@ -12,7 +12,7 @@ from functions.cards.create import get_path_cards, get_gradient_3d, get_path_bac
 router = Router()
 
 
-@router.callback_query(IsReply(), F.data == 'practice_history')
+@router.callback_query(IsReply(), F.data == 'practice_history', flags = {"use_user_statistics": True})
 async def practice_history(bot: Bot, call: types.CallbackQuery):
     image = await get_image_history()
 

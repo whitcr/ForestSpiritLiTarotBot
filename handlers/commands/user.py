@@ -8,8 +8,9 @@ import pendulum
 
 from constants import DECK_MAP, SUBS_TYPE
 from database import execute_query, execute_select_all
+from filters.subscriptions import SubscriptionLevel
 from functions.cards.create import get_buffered_image
-from functions.messages.messages import get_reply_message, get_chat_id, typing_animation_decorator
+from functions.messages.messages import typing_animation_decorator
 from functions.statistics.getUserStats import get_user_statistics
 from keyboard import menu_private_keyboard, profile_keyboard
 
@@ -34,7 +35,7 @@ async def get_user_profile(user_id: int):
     return await execute_select_all(query, (user_id,))
 
 
-@router.callback_query(F.data == "get_user_statistics")
+@router.callback_query(F.data == "get_user_statistics", SubscriptionLevel(1), flags = {"use_user_statistics": True})
 @typing_animation_decorator(initial_message = "Вычисляю статистику")
 async def get_formatted_card_statistics(callback_query: types.CallbackQuery, bot):
     await callback_query.answer()
@@ -106,13 +107,11 @@ async def generate_profile_summary(message, bot: Bot):
 
     paid_meanings = paid_meanings if paid_meanings else "0"
 
-    # Проверка на наличие значений для day_follow и установка текстов по умолчанию
     moon_follow = "Есть" if day_follow['moon_follow'] else 'Нет'
     day_card_follow = "Есть" if day_follow['day_card_follow'] else 'Нет'
     week_card_follow = "Есть" if day_follow['week_card_follow'] else 'Нет'
     month_card_follow = "Есть" if day_follow['month_card_follow'] else 'Нет'
 
-    # Формирование текста профиля
     profile_text = (
         f"📋 <b>Ваш профиль</b>\n\n"
         f"<b>Колода:</b> {deck_type}\n"
@@ -162,9 +161,9 @@ async def get_library(message: types.Message, bot: Bot):
 @router.message(F.text.lower() == "удалить расклад дня")
 async def delete_day_spread(message: types.Message):
     user_id = message.from_user.id
-    newdate = datetime.now(pytz.timezone('Europe/Kiev'))
-    date = newdate.strftime("%d.%m")
-    await execute_query("delete FROM spreads_day WHERE user_id = '{}' and date = '{}'", (user_id, date,))
+    new_date = datetime.now(pytz.timezone('Europe/Kiev'))
+    date = new_date.strftime("%d.%m")
+    await execute_query("delete FROM spreads_day WHERE user_id = $1 and date = $2", (user_id, date,))
     await message.reply("Ваш расклад дня удален, но даже не найдетесь, что он не проиграется.")
 
 
@@ -172,16 +171,5 @@ async def delete_day_spread(message: types.Message):
 async def delete_tomorrow_spread(message: types.Message):
     user_id = message.from_user.id
     tomorrow = pendulum.tomorrow('Europe/Kiev').format('DD.MM')
-    await execute_query("delete FROM spreads_day WHERE user_id = '{}' and date = '{}'", (user_id, tomorrow))
+    await execute_query("delete FROM spreads_day WHERE user_id = $1 and date = $2", (user_id, tomorrow))
     await message.reply("Ваш расклад на завтра удален, но даже не найдетесь, что он не проиграется.")
-
-
-@router.message(F.text.lower() == "!айди")
-async def test(message: types.Message, bot: Bot, admin_id):
-    await bot.send_message(admin_id, f"{message.from_user.id}")
-
-
-@router.message(F.text.lower() == "айди")
-async def get_id(message: types.Message, bot: Bot, admin_id):
-    await bot.send_message(admin_id,
-                           text = f"{message.from_user.id} - {message.from_user.first_name}")
