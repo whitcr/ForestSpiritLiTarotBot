@@ -208,14 +208,14 @@ async def today_spread(bot: Bot, message: types.Message, *spread_name):
     await get_day_spread_image(bot, message, date, message.from_user.id, message.from_user.first_name)
 
 
-@router.callback_query(IsReply(), F.data.startswith('today_spread'))
+@router.callback_query(IsReply(), F.data.startswith('today_spread'), flags = {"use_user_statistics": True})
 async def process_callback_today_spread(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     date = pendulum.today('Europe/Kiev').format('DD.MM')
     await get_day_spread_image(bot, call.message, date, call.from_user.id, call.from_user.first_name)
 
 
-@router.callback_query(IsReply(), F.data.startswith('tomorrow_spread'))
+@router.callback_query(IsReply(), F.data.startswith('tomorrow_spread'), flags = {"use_user_statistics": True})
 async def process_callback_tomorrow_spread(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     tomorrow = pendulum.tomorrow('Europe/Kiev').format('DD.MM')

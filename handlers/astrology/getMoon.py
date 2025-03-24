@@ -13,8 +13,8 @@ async def get_moon_advice(message: types.Message):
     num = randint(0, 43)
     result = await execute_select("SELECT moon_advice.advice, moon_advice.name FROM moon_advice WHERE number = $1",
                                   (num,))
-    moon_advice_text = result[0].replace("(", " ")
-    moon_name = result[1].replace("(", " ")
+    moon_advice_text = result.replace("(", " ")
+    moon_name = result.replace("(", " ")
     await message.answer(f'<b>{moon_name}</b> \n \n{moon_advice_text}')
 
 

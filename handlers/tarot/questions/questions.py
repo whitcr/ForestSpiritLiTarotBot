@@ -23,7 +23,7 @@ async def generate_keyboard(callback_data):
     return keyboard
 
 
-@router.message(F.text.lower() == "вопросы", SubscriptionLevel(1))
+@router.message(F.text.lower() == "вопросы", SubscriptionLevel(1), flags = {"use_user_statistics": True})
 async def get_menu_questions(message: types.Message):
     keyboard = await generate_keyboard("General")
     await message.reply("На какую тематику вы хотите получить список вопросов?", reply_markup = keyboard)

@@ -33,7 +33,7 @@ async def get_one_card(bot: Bot, message: types.Message, user_id: int, *keyboard
     return choice, num
 
 
-@router.message(F.text.lower().startswith("карта"))
+@router.message(F.text.lower().startswith("карта"), flags = {"use_user_statistics": True})
 async def get_card(message: types.Message, bot: Bot):
     card_found = False
 

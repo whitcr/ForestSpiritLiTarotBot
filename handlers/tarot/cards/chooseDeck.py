@@ -2,9 +2,7 @@ from aiogram import types, Router, F, Bot
 from constants import DECK_MAP
 from database import execute_query, execute_select
 from filters.baseFilters import IsReply
-from filters.subscriptions import SubscriptionLevel
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import InlineKeyboardButton
 import keyboard as kb
 
 router = Router()

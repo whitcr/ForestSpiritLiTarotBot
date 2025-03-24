@@ -149,7 +149,8 @@ async def format_callback_data(call, data):
     return "\n".join(get_cards), get_question, get_theme
 
 
-@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == True), SubscriptionLevel(2))
+@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == True), SubscriptionLevel(2),
+                       flags = {"use_user_statistics": True})
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning,
                                          state: FSMContext):
     await call.answer()
@@ -183,7 +184,8 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
     await get_cards_meanings_premium(call, state)
 
 
-@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(1, True))
+@router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(1, True),
+                       flags = {"use_user_statistics": True})
 @typing_animation_decorator(initial_message = "Трактую")
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning):
     await call.answer()

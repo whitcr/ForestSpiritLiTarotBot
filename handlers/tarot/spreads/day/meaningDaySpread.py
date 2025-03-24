@@ -10,7 +10,8 @@ from functions.gpt.requests import get_cards_day_meanings
 router = Router()
 
 
-@router.callback_query(IsReply(), F.data.startswith("get_day_spread_meaning"), SubscriptionLevel(1, True))
+@router.callback_query(IsReply(), F.data.startswith("get_day_spread_meaning"), SubscriptionLevel(1, True),
+                       flags = {"use_user_statistics": True})
 @typing_animation_decorator(initial_message = "Трактую")
 async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     await call.answer()
@@ -55,7 +56,8 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
         await call.message.answer(message)
 
 
-@router.callback_query(IsReply(), F.data.startswith("get_time_spread_meaning_"), SubscriptionLevel(1))
+@router.callback_query(IsReply(), F.data.startswith("get_time_spread_meaning_"), SubscriptionLevel(1),
+                       flags = {"use_user_statistics": True})
 @typing_animation_decorator(initial_message = "Трактую")
 async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     await call.answer()

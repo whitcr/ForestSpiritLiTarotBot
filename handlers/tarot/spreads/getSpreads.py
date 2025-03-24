@@ -43,7 +43,7 @@ async def draw_spread(image, spread_name):
     return image
 
 
-@router.message(F.text.lower().startswith("триплет"))
+@router.message(F.text.lower().startswith("триплет"), flags = {"use_user_statistics": True})
 @typing_animation_decorator(initial_message = "Раскладываю")
 async def get_image_triplet(message: types.Message, bot: Bot):
     image, num = await get_image_three_cards(message.from_user.id)
@@ -106,7 +106,7 @@ async def get_spread(message: types.Message, bot: Bot):
 
 
 @typing_animation_decorator(initial_message = "Раскладываю")
-@router.callback_query(IsReply(), lambda call: call.data in SPREADS.keys())
+@router.callback_query(IsReply(), lambda call: call.data in SPREADS.keys(), flags = {"use_user_statistics": True})
 async def spreads_callback(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     try:

@@ -2,7 +2,6 @@ import pytz
 from database import execute_select, execute_query
 from PIL import Image, ImageDraw
 from PIL import ImageFilter
-from io import BytesIO
 from datetime import datetime
 import asyncio
 import textwrap
@@ -15,14 +14,11 @@ from functions.cards.create import get_path_background, get_gradient_3d,\
     get_path_cards_sync, text_size, get_buffered_image, get_random_num
 from constants import FONT_L, FONT_S, FONT_XL
 import keyboard as kb
-from typing import Union
 from constants import DECK_MAP
-from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.filters.callback_data import CallbackData
 from typing import Union
 
-from functions.messages.messages import delete_message, typing_animation_decorator
+from functions.messages.messages import typing_animation_decorator
 
 router = Router()
 
@@ -102,7 +98,7 @@ async def send_triplet_image(bot, image, text, date, message, triplet_type: Unio
 
 
 @typing_animation_decorator(initial_message = "Раскладываю")
-@router.message(F.text.lower().startswith("мтриплет"), SubscriptionLevel(2))
+@router.message(F.text.lower().startswith("мтриплет"), SubscriptionLevel(2), flags = {"use_user_statistics": True})
 async def get_mtriplet(message: types.Message, bot: Bot):
     try:
 
@@ -174,7 +170,7 @@ async def get_mtriplet(message: types.Message, bot: Bot):
 
 
 @typing_animation_decorator(initial_message = "Раскладываю")
-@router.message(F.text.lower().startswith("стриплет"), SubscriptionLevel(2))
+@router.message(F.text.lower().startswith("стриплет"), SubscriptionLevel(2), flags = {"use_user_statistics": True})
 async def get_striplet(message: types.Message, bot: Bot):
     try:
 
@@ -274,7 +270,7 @@ async def set_triplets_choices(call: types.CallbackQuery, bot: Bot):
 @router.callback_query(IsReply(), lambda call: call.data.endswith('_experimental'))
 async def get_ex_choices(call: types.CallbackQuery, bot: Bot):
     await call.answer()
-    print(call.data)
+
     type = call.data.split('_')[0]
     keyboard = await generate_ex_decks_keyboard(type)
     if call.data == f"{type}_clear_experimental":

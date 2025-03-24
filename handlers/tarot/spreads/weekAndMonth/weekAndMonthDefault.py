@@ -1,10 +1,8 @@
-from aiogram.types import CallbackQuery, BufferedInputFile, InputFile
-from database import execute_query, execute_select
+from aiogram.types import CallbackQuery
+from database import execute_select
 from filters.baseFilters import IsReply
-from filters.subscriptions import get_subscription, SubscriptionLevel
 from functions.cards.createSixCards import send_image_six_cards, create_image_six_cards, create_meaning_keyboard
 from functions.messages.messages import get_reply_message, typing_animation_decorator
-from handlers.tarot.spreads.weekAndMonth.weekAndMonthPremium import get_week_spread_premium
 from PIL import ImageDraw
 
 from aiogram import types, Router, F, Bot
@@ -79,13 +77,13 @@ async def create_spread_image(bot, call: CallbackQuery, spread_type: str):
     await send_image_six_cards(bot, call.message, call.from_user.first_name, image, spread_type)
 
 
-@router.callback_query(IsReply(), F.data == 'create_month_spread')
+@router.callback_query(IsReply(), F.data == 'create_month_spread', flags = {"use_user_statistics": True})
 async def get_month_spread_image(call: CallbackQuery, bot: Bot):
     await call.answer()
     await create_spread_image(bot, call, 'месяца')
 
 
-@router.callback_query(IsReply(), F.data == 'create_week_spread')
+@router.callback_query(IsReply(), F.data == 'create_week_spread', flags = {"use_user_statistics": True})
 async def get_week_spread_image(call: CallbackQuery, bot: Bot):
     await call.answer()
     await create_spread_image(bot, call, 'недели')

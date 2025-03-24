@@ -64,8 +64,8 @@ async def process_subscription(call: types.CallbackQuery, bot: Bot):
     for i in range(1, 4):
         text += f"{SUBS_TYPE[i]['name']} — {SUBS_TYPE[i]['stars']} звезд/{SUBS_TYPE[i]['euros']} евро/{SUBS_TYPE[i]['rubles']} рублей за месяц\n\n"
 
-    text += ("Выберите тип подписки или трактовки для покупки. \n\nОтдельная покупка трактовок позволит вам"
-             " использовать команду 'Трактовка' в обычных раскладах и раскладах на день:")
+    text += (
+        "Выберите тип подписки или трактовки для покупки. \n\nВы также можете приобрести дополнительные платные трактовки, если вам не хватает:")
 
     sub_keyboard = await get_sub_type_keyboard()
 

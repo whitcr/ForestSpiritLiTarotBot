@@ -86,7 +86,7 @@ async def generate_dop(choice, call):
     return random_number
 
 
-@router.callback_query(IsReply(), NumbersCallbackFactory.filter())
+@router.callback_query(IsReply(), NumbersCallbackFactory.filter(), flags = {"use_user_statistics": True})
 async def process_callback_get_dop(call: types.CallbackQuery, bot: Bot,
                                    callback_data: NumbersCallbackFactory, api_token: str):
     await call.answer()
