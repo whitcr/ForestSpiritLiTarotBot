@@ -114,10 +114,8 @@ async def create_gpt_keyboard(user_id, buttons, nums, prev_callback_data=None, c
     callback_data_premium = create_callback_data(nums, d1cards, d2cards, d3cards, premium = True,
                                                  spread_name = spread_name)
 
-    choice = await get_choice_spread(user_id)
-    if choice == 'raider':
-        buttons.extend([[InlineKeyboardButton(text = 'Трактовка', callback_data = callback_data_default),
-                         InlineKeyboardButton(text = 'Трактовка+', callback_data = callback_data_premium)]])
+    buttons.extend([[InlineKeyboardButton(text = 'Трактовка', callback_data = callback_data_default),
+                     InlineKeyboardButton(text = 'Трактовка+', callback_data = callback_data_premium)]])
 
     return buttons
 
@@ -129,8 +127,6 @@ async def format_callback_data(call, data):
     question = call.message.reply_to_message.text.replace("триплет", "")
     if question.strip():
         get_question = question
-
-    print(data)
 
     spread_key = data.get('spread_name')
     if spread_key:
@@ -158,6 +154,10 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
                                          state: FSMContext):
     await call.answer()
 
+    choice = await get_choice_spread(call.from_user.id)
+    if choice is not 'raider':
+        await call.message.answer("Трактовки могут быть сделаны только для колоды Райдер-Уэйт.")
+        
     count = await  execute_select("select paid_meanings from users where user_id = $1", (call.from_user.id,))
     if count > 0:
         await execute_query("update users set paid_meanings = paid_meanings - 1 where user_id = $1",
@@ -187,6 +187,10 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning):
     await call.answer()
 
+    choice = await get_choice_spread(call.from_user.id)
+    if choice is not 'raider':
+        await call.message.answer("Трактовки могут быть сделаны только для колоды Райдер-Уэйт.")
+
     count = await execute_select("select paid_meanings from users where user_id = $1", (call.from_user.id,))
     if count > 0:
         await execute_query("update users set paid_meanings = paid_meanings - 1 where user_id = $1",
@@ -213,8 +217,6 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
             text += f"Вопрос: {get_question}. \n\n"
     if get_cards:
         text += f"{get_cards}"
-
-    print(text)
 
     message = await get_cards_meanings(text)
     await call.message.answer(message)

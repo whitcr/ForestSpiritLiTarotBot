@@ -146,23 +146,23 @@ async def create_day_spread_image(user_id, username, date):
     return image, num, affirmation_num
 
 
-async def get_day_spread_image(bot: Bot, message: types.Message, date):
+async def get_day_spread_image(bot: Bot, message: types.Message, date, user_id, username):
     reply_to_message_id = await get_reply_message(message)
     chat_id = await get_chat_id(message)
 
     file_id = await execute_select(
         "SELECT file_id FROM spreads_day WHERE user_id = $1 AND date = $2",
-        (message.from_user.id, date)
+        (user_id, date)
     )
 
     if file_id:
         file_id = await execute_select(
             "SELECT file_id FROM spreads_day WHERE user_id = $1 AND date = $2",
-            (message.from_user.id, date)
+            (user_id, date)
         )
 
         choice = await execute_select(
-            f"select deck_type from spreads_day where user_id = {message.from_user.id} and date = '{date}' ")
+            f"select deck_type from spreads_day where user_id = {user_id} and date = '{date}' ")
 
         if choice == 'raider':
             keyboard = await create_day_keyboard(date)
@@ -174,10 +174,9 @@ async def get_day_spread_image(bot: Bot, message: types.Message, date):
                                  reply_to_message_id = reply_to_message_id)
 
     else:
-        image, cards, affirmation_num = await create_day_spread_image(message.from_user.id,
-                                                                      message.from_user.first_name, date)
+        image, cards, affirmation_num = await create_day_spread_image(user_id, username, date)
 
-        choice = await get_choice_spread(message.from_user.id)
+        choice = await get_choice_spread(user_id)
 
         if choice == 'raider':
             keyboard = await create_day_keyboard(date)
@@ -193,7 +192,7 @@ async def get_day_spread_image(bot: Bot, message: types.Message, date):
             " day_conclusion, day_advice, day_aware, affirmation_of_day, file_id, deck_type) "
             "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
             (
-                date, message.from_user.id, cards[0], cards[1], cards[2], cards[3], cards[4], cards[5],
+                date, user_id, cards[0], cards[1], cards[2], cards[3], cards[4], cards[5],
                 affirmation_num,
                 file_id, choice)
         )
@@ -201,23 +200,23 @@ async def get_day_spread_image(bot: Bot, message: types.Message, date):
 
 async def tomorrow_spread(bot: Bot, message: types.Message, *spread_name):
     tomorrow = pendulum.tomorrow('Europe/Kiev').format('DD.MM')
-    await get_day_spread_image(bot, message, tomorrow)
+    await get_day_spread_image(bot, message, tomorrow, message.from_user.id, message.from_user.first_name)
 
 
 async def today_spread(bot: Bot, message: types.Message, *spread_name):
     date = pendulum.today('Europe/Kiev').format('DD.MM')
-    await get_day_spread_image(bot, message, date)
+    await get_day_spread_image(bot, message, date, message.from_user.id, message.from_user.first_name)
 
 
 @router.callback_query(IsReply(), F.data.startswith('today_spread'))
 async def process_callback_today_spread(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     date = pendulum.today('Europe/Kiev').format('DD.MM')
-    await get_day_spread_image(bot, call.message, date)
+    await get_day_spread_image(bot, call.message, date, call.from_user.id, call.from_user.first_name)
 
 
 @router.callback_query(IsReply(), F.data.startswith('tomorrow_spread'))
 async def process_callback_tomorrow_spread(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     tomorrow = pendulum.tomorrow('Europe/Kiev').format('DD.MM')
-    await get_day_spread_image(bot, call.message, tomorrow)
+    await get_day_spread_image(bot, call.message, tomorrow, call.from_user.id, call.from_user.first_name)
