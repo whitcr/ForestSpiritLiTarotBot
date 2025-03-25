@@ -9,7 +9,6 @@ router = Router()
 
 
 @router.callback_query(IsReply(), F.data == 'practice_menu_meditation')
-@use_user_statistics
 async def practice_zalivka_answer(bot: Bot, call: types.CallbackQuery):
     try:
         await call.answer()

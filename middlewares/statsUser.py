@@ -75,7 +75,8 @@ async def update_user_statistics(event: Union[Message, CallbackQuery], bot) -> b
 def use_user_statistics(handler: Callable[..., Awaitable[Any]]):
     @wraps(handler)
     async def wrapper(event: Union[Message, CallbackQuery], *args, **kwargs):
-        bot = kwargs.get("bot")
+
+        bot = event.bot
         if not bot:
             raise ValueError("Bot instance is required for use_user_statistics")
 
@@ -100,6 +101,7 @@ async def notify_user(user_id, bot):
         await execute_query("UPDATE users SET notification = $1 WHERE user_id = $2", (True, user_id))
         await execute_query("UPDATE users SET paid_meanings = paid_meanings + 10 WHERE user_id = $1", (user_id,))
         await bot.send_message(user_id,
-                               "— Спасибо, что пользуетесь Ли. На данный момент был запущен тестовый режим крупного обновления, поэтому некоторый функционал был расширен, когда как другой будет доступен только при приобретении подписки. \n"
+                               "— Спасибо, что пользуетесь Ли. На данный момент был запущен тестовый режим крупного обновления, поэтому некоторый функционал был расширен, "
+                               "тогда как другой будет доступен только при приобретении подписки. \n"
                                "Если у вас возникли вопросы или проблемы, пишите в поддержку с помощью команды 'помощь'. Список команд -  https://telegra.ph/Lesnoj-Duh-Li-10-10 \n\n"
                                "В качестве бонуса вам были начислены 10 индивидуальных трактовок, чтобы вы могли попробовать новый функционал.")

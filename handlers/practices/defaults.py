@@ -12,7 +12,6 @@ router = Router()
 
 
 @router.callback_query(F.data.startswith('get_practices_menu'), SubscriptionLevel(2))
-@use_user_statistics
 async def practice_menu_cb(call: types.CallbackQuery):
     await call.message.reply(
         f"<b>Интуиция</b> — практики на развитие интуиции.\n\n"
@@ -22,7 +21,6 @@ async def practice_menu_cb(call: types.CallbackQuery):
 
 
 @router.message(F.text.lower() == "практика", SubscriptionLevel(2))
-@use_user_statistics
 async def practice_menu(message: types.Message):
     await message.reply(
         f"<b>Интуиция</b> — практики на развитие интуиции.\n\n"
