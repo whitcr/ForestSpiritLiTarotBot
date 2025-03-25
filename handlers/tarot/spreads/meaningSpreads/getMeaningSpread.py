@@ -1,5 +1,4 @@
 from aiogram import types, Router, F
-from aiogram.filters import or_f
 
 from database import execute_select, execute_query
 from filters.baseFilters import IsReply
@@ -224,7 +223,7 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
         text += f"{get_cards}"
 
     message = await get_cards_meanings(text)
-    await call.message.answer(message, reply_to_message_id = await get_reply_message(call))
+    await call.message.answer(message, reply_to_message_id = call.message.message_id)
     # await call.message.answer(text)
 
 
@@ -275,7 +274,7 @@ async def get_cards_meanings_premium(call, state: FSMContext):
     if data.get('get_message'):
         reply_message = data.get('get_message')
     else:
-        reply_message = await get_reply_message(call)
+        reply_message = call.message.message_id
 
     try:
         await call.message.answer(text = message_text, reply_markup = premium_inline_kb,
