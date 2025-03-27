@@ -7,7 +7,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram import types, Router
 
 from constants import DECK_MAP, SUBS_TYPE, COUPONS
-from database import execute_query, execute_select_all
+from database import execute_query, execute_select_all, execute_select
 from filters.baseFilters import IsAdmin
 from aiogram import F, Bot
 
@@ -27,7 +27,7 @@ class AdminStates(StatesGroup):
     waiting_paid_spreads_amount = State()
 
 
-@router.message(IsAdmin(), F.text.lower().startswith("!профиль"))
+@router.message(IsAdmin(), F.text.lower().startswith("!п"))
 async def admin_view_profile(message: types.Message, bot: Bot):
     args = message.text.split()
 
@@ -40,9 +40,9 @@ async def admin_view_profile(message: types.Message, bot: Bot):
             user_id = int(args[1])
         else:
             username = args[1].lstrip('@')
-            user_id_result = await execute_query("SELECT user_id FROM users WHERE username = $1", (username,))
-            if user_id_result and user_id_result[0]:
-                user_id = user_id_result[0][0]
+            user_id_result = await execute_select("SELECT user_id FROM users WHERE username = $1", (username,))
+            if user_id_result and user_id_result:
+                user_id = user_id_result
             else:
                 await message.reply(f"Пользователь с именем @{username} не найден.")
                 return
