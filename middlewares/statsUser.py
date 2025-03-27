@@ -55,9 +55,23 @@ async def update_user_statistics(event: Union[Message, CallbackQuery], bot) -> b
                 """,
                 (daily_count, weekly_count, monthly_count, total_count, today, week_start, month_start, user_id)
             )
+
+            us = await execute_select("SELECT username FROM users WHERE user_id = $1", (user_id,))
+            
+            if not us:
+                username = event.from_user.username if event.from_user.username else "Без ника"
+                name = event.from_user.full_name if event.from_user.full_name else "Без имени"
+                await execute_query(
+                    """
+                    UPDATE users
+                    SET username = $1, name = $2
+                    WHERE user_id = $3
+                    """,
+                    (username, name, user_id)
+                )
         else:
-            username = event.from_user.username if event.from_user.username else None
-            name = event.from_user.full_name if event.from_user.full_name else None
+            username = event.from_user.username if event.from_user.username else "Без ника"
+            name = event.from_user.full_name if event.from_user.full_name else "Без имени"
 
             await execute_query(
                 """

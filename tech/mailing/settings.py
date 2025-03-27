@@ -39,7 +39,7 @@ async def generate_mail_kb(user_id):
 async def day_follow(message: types.Message):
     keyboard = await generate_mail_kb(message.from_user.id)
     if keyboard:
-        await message.reply("Какую информацию вы хотите получать ежедневно?\n 🟢 - включить, 🔴 - выключить",
+        await message.reply("Какую информацию вы хотите получать ежедневно?\n 🟢 - включено, 🔴 - выключено",
                             reply_markup = keyboard)
 
 
@@ -50,7 +50,7 @@ async def day_follow_cb(call: types.CallbackQuery, bot: Bot):
     if keyboard:
         await bot.edit_message_text(chat_id = call.message.chat.id,
                                     message_id = call.message.message_id,
-                                    text = "Какую информацию вы хотите получать ежедневно?\n 🟢 - включить, 🔴 - выключить",
+                                    text = "Какую информацию вы хотите получать ежедневно?\n 🟢 - включено, 🔴 - выключено",
                                     reply_markup = keyboard)
 
 
@@ -64,5 +64,5 @@ async def toggle_subscription(call: types.CallbackQuery, bot: Bot):
 
     keyboard = await generate_mail_kb(call.from_user.id)
     if keyboard:
-        await call.message.edit_text("Какую информацию вы хотите получать ежедневно?\n 🟢 - включить, 🔴 - выключить",
+        await call.message.edit_text("Какую информацию вы хотите получать ежедневно?\n 🟢 - включено, 🔴 - выключено",
                                      reply_markup = keyboard)

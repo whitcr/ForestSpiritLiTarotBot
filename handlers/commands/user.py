@@ -52,6 +52,7 @@ async def get_formatted_card_statistics(callback_query: types.CallbackQuery, bot
 
 
 @router.message(F.text.lower() == "мой профиль")
+@typing_animation_decorator(initial_message = "Узнаю о тебе все")
 async def generate_profile_summary_cmd(message: types.Message, bot: Bot):
     if message.chat.type == "private":
         await generate_profile_summary(message, bot)
@@ -60,6 +61,7 @@ async def generate_profile_summary_cmd(message: types.Message, bot: Bot):
 
 
 @router.callback_query(F.data == "get_my_profile")
+@typing_animation_decorator(initial_message = "Узнаю о тебе все")
 async def generate_profile_summary_cmd(call, bot: Bot):
     if call.message.chat.type == "private":
         await generate_profile_summary(call, bot)

@@ -28,7 +28,7 @@ def get_admin_keyboard():
         InlineKeyboardButton(text = "📊 Пользователи", callback_data = "admin_statistics_users"),
         InlineKeyboardButton(text = "📣 Рассылка всем", callback_data = "admin_mailing"),
         InlineKeyboardButton(text = "🔍 Узнать по айди", callback_data = "admin_get_by_id"),
-        InlineKeyboardButton(text = "🆔 Узнать айди", callback_data = "admin_get_id")
+        InlineKeyboardButton(text = "🆔 Узнать айди медиа", callback_data = "admin_get_id")
     )
 
     builder.adjust(2)
@@ -61,7 +61,7 @@ def get_confirm_mailing_keyboard():
     return builder.as_markup()
 
 
-@router.message(IsAdmin(), Command("panel"))
+@router.message(IsAdmin(), Command("пан"))
 async def admin_panel(message: Message):
     await message.answer("Панель администратора активирована:", reply_markup = get_admin_keyboard())
 

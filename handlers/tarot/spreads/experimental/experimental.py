@@ -98,8 +98,8 @@ async def send_triplet_image(bot, image, text, date, message, triplet_type: Unio
                          reply_to_message_id = reply_to_message_id)
 
 
-@typing_animation_decorator(initial_message = "Раскладываю")
 @router.message(F.text.lower().startswith("мтриплет"), SubscriptionLevel(2))
+@typing_animation_decorator(initial_message = "Раскладываю")
 @use_user_statistics
 async def get_mtriplet(message: types.Message, bot: Bot):
     try:
@@ -171,8 +171,8 @@ async def get_mtriplet(message: types.Message, bot: Bot):
         await message.reply("— Что-то пошло не так, скорее всего у вас выбрано менее 3 колод.")
 
 
-@typing_animation_decorator(initial_message = "Раскладываю")
 @router.message(F.text.lower().startswith("стриплет"), SubscriptionLevel(2))
+@typing_animation_decorator(initial_message = "Раскладываю")
 @use_user_statistics
 async def get_striplet(message: types.Message, bot: Bot):
     try:

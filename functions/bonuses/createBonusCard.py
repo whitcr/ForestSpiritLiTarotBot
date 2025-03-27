@@ -14,6 +14,7 @@ from events.user.referrals import get_referral_count, get_names_from_array_ids
 from functions.messages.messages import typing_animation_decorator
 from functions.subscription.sub import give_sub
 from handlers.tarot.spreads.weekAndMonth.weekAndMonthDefault import create_spread_image
+from handlers.tarot.spreads.weekAndMonth.weekAndMonthPremium import get_week_spread_premium
 from keyboard import me_keyboard
 
 router = Router()
@@ -741,14 +742,18 @@ async def activate_weekly_spread(user_id, bot, call):
     await bot.send_message(
         user_id,
         "🔮 Ваш бонус «Расклад на неделю от Ли» активирован!\n\n")
-    await create_spread_image(bot, call, 'недели')
+
+    await execute_query("DELETE FROM spreads_week WHERE user_id = $1", (user_id,))
+    await get_week_spread_premium(user_id, bot, False, "недели")
 
 
 async def activate_monthly_spread(user_id, bot, call):
     await bot.send_message(
         user_id,
         "🔮 Ваш бонус «Расклад на месяц от Ли» активирован!\n\n")
-    await create_spread_image(bot, call, 'месяца')
+
+    await execute_query("DELETE FROM spreads_month WHERE user_id = $1", (user_id,))
+    await get_week_spread_premium(user_id, bot, False, "месяца")
 
 
 async def activate_week_premium(user_id, bot, call):

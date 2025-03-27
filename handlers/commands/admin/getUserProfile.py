@@ -102,6 +102,8 @@ async def show_user_profile(message, user_id):
     week_card_follow = "Есть" if day_follow['week_card_follow'] else 'Нет'
     month_card_follow = "Есть" if day_follow['month_card_follow'] else 'Нет'
 
+    referrals = len(referrals) if referrals else 0
+
     user_link = f'<a href="tg://user?id={user_id}">{user_id}</a>'
 
     profile_text = (
@@ -119,7 +121,7 @@ async def show_user_profile(message, user_id):
         f"<b>Взаимодействий:</b> {interactions}\n"
         f"<b>Буст:</b> {booster}\n"
         f"<b>Приглашенных на расклады:</b> {referrals_paid}\n"
-        f"<b>Приглашенных в Ли:</b> {len(referrals)}\n"
+        f"<b>Приглашенных в Ли:</b> {referrals}\n"
         f"<b>Платных раскладов:</b> {paid_spread}\n"
     )
 
@@ -142,7 +144,7 @@ async def show_user_profile(message, user_id):
     await message.answer(profile_text, reply_markup = admin_profile_keyboard)
 
 
-@router.callback_query(lambda c: c.data.startswith("admin_meanings_"))
+@router.callback_query(IsAdmin(), F.startswith("admin_meanings_"))
 async def admin_meanings_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
@@ -173,7 +175,7 @@ async def admin_meanings_callback(callback_query: types.CallbackQuery):
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("admin_coupons_"))
+@router.callback_query(IsAdmin(), F.startswith("admin_coupons_"))
 async def admin_coupons_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
@@ -200,7 +202,7 @@ async def admin_coupons_callback(callback_query: types.CallbackQuery):
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("coupon_type_"))
+@router.callback_query(IsAdmin(), F.startswith("coupon_type_"))
 async def coupon_type_callback(callback_query: types.CallbackQuery):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
@@ -230,7 +232,7 @@ async def coupon_type_callback(callback_query: types.CallbackQuery):
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("admin_subscription_"))
+@router.callback_query(IsAdmin(), F.startswith("admin_subscription_"))
 async def admin_subscription_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
@@ -260,7 +262,7 @@ async def admin_subscription_callback(callback_query: types.CallbackQuery):
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("sub_type_"))
+@router.callback_query(IsAdmin(), F.startswith("sub_type_"))
 async def sub_type_callback(callback_query: types.CallbackQuery):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
@@ -298,7 +300,7 @@ async def sub_type_callback(callback_query: types.CallbackQuery):
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("admin_referrals_"))
+@router.callback_query(IsAdmin(), F.startswith("admin_referrals_"))
 async def admin_referrals_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
@@ -325,7 +327,7 @@ async def admin_referrals_callback(callback_query: types.CallbackQuery):
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("admin_paidspreads_"))
+@router.callback_query(IsAdmin(), F.startswith("admin_paidspreads_"))
 async def admin_referrals_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
@@ -357,7 +359,7 @@ async def admin_referrals_callback(callback_query: types.CallbackQuery):
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("add_meanings_"))
+@router.callback_query(IsAdmin(), F.startswith("add_meanings_"))
 async def add_meanings_callback(callback_query: types.CallbackQuery):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
@@ -385,7 +387,7 @@ async def manual_meanings_callback(callback_query: types.CallbackQuery, state: F
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("add_coupon_"))
+@router.callback_query(IsAdmin(), F.startswith("add_coupon_"))
 async def add_coupon_callback(callback_query: types.CallbackQuery, bot: Bot):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
@@ -405,7 +407,7 @@ async def add_coupon_callback(callback_query: types.CallbackQuery, bot: Bot):
     await show_user_profile(callback_query.message, user_id)
 
 
-@router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_coupon_"))
+@router.callback_query(StateFilter(None), F.startswith("manual_coupon_"))
 async def manual_coupon_callback(callback_query: types.CallbackQuery, state: FSMContext):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
@@ -422,7 +424,7 @@ async def manual_coupon_callback(callback_query: types.CallbackQuery, state: FSM
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("add_sub_"))
+@router.callback_query(IsAdmin(), F.startswith("add_sub_"))
 async def add_subscription_callback(callback_query: types.CallbackQuery, bot: Bot):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
@@ -438,7 +440,7 @@ async def add_subscription_callback(callback_query: types.CallbackQuery, bot: Bo
     await show_user_profile(callback_query.message, user_id)
 
 
-@router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_sub_"))
+@router.callback_query(StateFilter(None), F.startswith("manual_sub_"))
 async def manual_sub_callback(callback_query: types.CallbackQuery, state: FSMContext):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
@@ -455,7 +457,7 @@ async def manual_sub_callback(callback_query: types.CallbackQuery, state: FSMCon
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("cancel_subscription_"))
+@router.callback_query(F.startswith("cancel_subscription_"))
 async def cancel_subscription_callback(callback_query: types.CallbackQuery, bot: Bot):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer("Подписка отменена!")
@@ -468,7 +470,7 @@ async def cancel_subscription_callback(callback_query: types.CallbackQuery, bot:
     await show_user_profile(callback_query.message, user_id)
 
 
-@router.callback_query(lambda c: c.data.startswith("add_referrals_"))
+@router.callback_query(IsAdmin(), F.startswith("add_referrals_"))
 async def add_referrals_callback(callback_query: types.CallbackQuery, bot: Bot):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
@@ -484,7 +486,7 @@ async def add_referrals_callback(callback_query: types.CallbackQuery, bot: Bot):
     await show_user_profile(callback_query.message, user_id)
 
 
-@router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_referrals_"))
+@router.callback_query(StateFilter(None), F.data.startswith("manual_referrals_"))
 async def manual_referrals_callback(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
@@ -497,7 +499,7 @@ async def manual_referrals_callback(callback_query: types.CallbackQuery, state: 
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("add_paidspreads_"))
+@router.callback_query(IsAdmin(), F.startswith("add_paidspreads_"))
 async def add_paid_spreads_callback(callback_query: types.CallbackQuery, bot: Bot):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
@@ -513,7 +515,7 @@ async def add_paid_spreads_callback(callback_query: types.CallbackQuery, bot: Bo
     await show_user_profile(callback_query.message, user_id)
 
 
-@router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_paidspreads_"))
+@router.callback_query(StateFilter(None), F.data.startswith("manual_paidspreads_"))
 async def manual_paid_spreads_callback(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
@@ -526,7 +528,7 @@ async def manual_paid_spreads_callback(callback_query: types.CallbackQuery, stat
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("back_to_profile_"))
+@router.callback_query(F.data.startswith("back_to_profile_"))
 async def back_to_profile_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.message.delete()
