@@ -11,13 +11,12 @@ router = Router()
 
 @router.callback_query(F.data.startswith('get_practices_menu'), SubscriptionLevel(2))
 async def practice_menu_cb(call: types.CallbackQuery):
-    await call.message.edit_text(chat_id = call.message.chat.id,
-                                 message_id = call.message.message_id,
-                                 text = f"<b>Интуиция</b> — практики на развитие интуиции.\n\n"
-                                        f"<b>Таро</b> — практики с картами Таро.\n\n"
-                                        f"<b>Медитации</b> — список полезных медитаций.\n\n"
-                                        f"<b>Практики</b> — различные эзотерические практики.",
-                                 reply_markup = kb.practice_menu_general_keyboard)
+    await call.message.edit_text(
+        text = f"<b>Интуиция</b> — практики на развитие интуиции.\n\n"
+               f"<b>Таро</b> — практики с картами Таро.\n\n"
+               f"<b>Медитации</b> — список полезных медитаций.\n\n"
+               f"<b>Практики</b> — различные эзотерические практики.",
+        reply_markup = kb.practice_menu_general_keyboard)
 
 
 @router.message(F.text.lower() == "практика", SubscriptionLevel(2))
