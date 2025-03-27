@@ -24,6 +24,7 @@ class AdminStates(StatesGroup):
     waiting_coupon_amount = State()
     waiting_sub_days = State()
     waiting_referrals_amount = State()
+    waiting_paid_spreads_amount = State()
 
 
 @router.message(IsAdmin(), F.text.lower().startswith("!профиль"))
@@ -129,6 +130,9 @@ async def show_user_profile(message, user_id):
             [
                 InlineKeyboardButton(text = "🔄 Подписка", callback_data = f"admin_subscription_{user_id}"),
                 InlineKeyboardButton(text = "👥 Друзья", callback_data = f"admin_referrals_{user_id}")
+            ],
+            [
+                InlineKeyboardButton(text = "👁 Платные расклады", callback_data = f"admin_paid_spreads_{user_id}")
             ]
         ]
     )
@@ -319,7 +323,38 @@ async def admin_referrals_callback(callback_query: types.CallbackQuery):
     )
 
 
-# Обработчики для добавления трактовок
+@router.callback_query(lambda c: c.data.startswith("admin_paid_spreads_"))
+async def admin_referrals_callback(callback_query: types.CallbackQuery):
+    user_id = int(callback_query.data.split('_')[-1])
+    await callback_query.answer()
+    referrals_keyboard = InlineKeyboardMarkup(
+        inline_keyboard = [
+            [
+                InlineKeyboardButton(text = "+1", callback_data = f"add_paid_spreads_{user_id}_1"),
+                InlineKeyboardButton(text = "+2", callback_data = f"add_paid_spreads_{user_id}_2"),
+                InlineKeyboardButton(text = "+3", callback_data = f"add_paid_spreads_{user_id}_3")
+            ],
+            [
+                InlineKeyboardButton(text = "+4", callback_data = f"add_paid_spreads_{user_id}_4"),
+                InlineKeyboardButton(text = "+5", callback_data = f"add_paid_spreads_{user_id}_5"),
+                InlineKeyboardButton(text = "+6", callback_data = f"add_paid_spreads_{user_id}_6")
+            ],
+            [
+                InlineKeyboardButton(text = "+10", callback_data = f"add_paid_spreads_{user_id}_10"),
+                InlineKeyboardButton(text = "Ввести вручную", callback_data = f"add_paid_spreads_{user_id}")
+            ],
+            [
+                InlineKeyboardButton(text = "🔙 Назад к профилю", callback_data = f"back_to_profile_{user_id}")
+            ]
+        ]
+    )
+
+    await callback_query.message.edit_text(
+        f"Выберите количество платных раскладов для добавления пользователю (ID: {user_id}):",
+        reply_markup = referrals_keyboard
+    )
+
+
 @router.callback_query(lambda c: c.data.startswith("add_meanings_"))
 async def add_meanings_callback(callback_query: types.CallbackQuery):
     parts = callback_query.data.split('_')
@@ -460,6 +495,35 @@ async def manual_referrals_callback(callback_query: types.CallbackQuery, state: 
     )
 
 
+@router.callback_query(lambda c: c.data.startswith("add_paid_spreads_"))
+async def add_paid_spreads_callback(callback_query: types.CallbackQuery, bot: Bot):
+    parts = callback_query.data.split('_')
+    user_id = int(parts[2])
+    amount = int(parts[3])
+
+    await bot.send_message(logger_chat, f"Добавлено {amount} друзей пользователю {user_id}!")
+    await execute_query(
+        "UPDATE users SET paid_spreads = paid_spreads + $1 WHERE user_id = $2",
+        (amount, user_id)
+    )
+    await callback_query.message.edit_text(text = f"Добавлено {amount} платных раскладов пользователю {user_id}!",
+                                           reply_markup = None)
+    await show_user_profile(callback_query.message, user_id)
+
+
+@router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_paid_spreads_"))
+async def manual_paid_spreads_callback(callback_query: types.CallbackQuery, state: FSMContext):
+    user_id = int(callback_query.data.split('_')[-1])
+    await callback_query.answer()
+    await state.set_state("waiting_paid_spreads_amount")
+    await state.update_data(user_id = user_id)
+
+    await callback_query.message.edit_text(
+        f"Введите количество платных раскладов для добавления пользователю (ID: {user_id}):\n"
+        f"Отправьте число в следующем сообщении."
+    )
+
+
 @router.callback_query(lambda c: c.data.startswith("back_to_profile_"))
 async def back_to_profile_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
@@ -584,6 +648,32 @@ async def process_referrals_amount(message: types.Message, state: FSMContext):
         )
 
         await message.reply(f"Добавлено {amount} друзей пользователю с ID {user_id}.")
+
+        await state.clear()
+
+        await show_user_profile(message, user_id)
+
+    except ValueError:
+        await message.reply("Введите корректное число.")
+
+
+@router.message(AdminStates.waiting_paid_spreads_amount)
+async def process_paid_spreads_amount(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    user_id = data.get("user_id")
+
+    try:
+        amount = int(message.text.strip())
+        if amount <= 0:
+            await message.reply("Количество должно быть положительным числом.")
+            return
+
+        await execute_query(
+            "UPDATE users SET paid_spreads = paid_spreads + $1 WHERE user_id = $2",
+            (amount, user_id)
+        )
+
+        await message.reply(f"Добавлено {amount} платных раскладов пользователю с ID {user_id}.")
 
         await state.clear()
 
