@@ -74,10 +74,16 @@ async def practice_triple(call: types.CallbackQuery):
     draw_text.text((759, 990), 'from @ForestSpiritLi', font = FONT_L, fill = 'white')
     draw_text.text((770, 20), 'Трактовка триплета', font = FONT_L, fill = 'white')
 
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
+    keyboard.button(text = 'Еще триплет!', callback_data = f'practice_triple')
+
     text = "Трактуйте карты на заданную тему. \n<code>Спорьте, рассуждайте, думайте, ответов не будет.</code>"
     await call.message.answer_photo(
         photo = await get_buffered_image(image),
-        caption = text
+        caption = text,
+        reply_markup = keyboard.as_markup(),
+        reply_to_message_id = call.message.reply_to_message.message_id
     )
 
 
@@ -218,7 +224,7 @@ async def practice_card_answer(call: types.CallbackQuery, bot: Bot):
 
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
-    keyboard.button(text = 'Еще триплет!', callback_data = f'practice_triple')
+    keyboard.button(text = 'Еще карту!', callback_data = f'practice_card')
 
     await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image_card),
                          reply_markup = keyboard.as_markup(),
@@ -261,7 +267,7 @@ async def practice_choose_card_answer(call: types.CallbackQuery, bot: Bot):
 
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
-    keyboard.button(text = 'Еще карту!', callback_data = f'practice_choose_card')
+    keyboard.button(text = 'Еще триплет!', callback_data = f'practice_choose_card')
 
     await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image),
                          reply_markup = keyboard.as_markup(),

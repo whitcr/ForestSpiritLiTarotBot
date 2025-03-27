@@ -13,7 +13,7 @@ router = Router()
 
 
 @router.callback_query(IsReply(), F.data == 'practice_history')
-@typing_animation_decorator(initial_message = "Создаю историю...")
+@typing_animation_decorator(initial_message = "Создаю историю")
 @use_user_statistics
 async def practice_history(call: types.CallbackQuery, bot: Bot):
     await call.answer()
