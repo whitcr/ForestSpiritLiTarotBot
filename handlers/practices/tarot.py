@@ -218,6 +218,7 @@ async def practice_card_answer(call: types.CallbackQuery, bot: Bot):
 
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
+    keyboard.button(text = 'Еще триплет!', callback_data = f'practice_triple')
 
     await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image_card),
                          reply_markup = keyboard.as_markup(),
@@ -260,6 +261,7 @@ async def practice_choose_card_answer(call: types.CallbackQuery, bot: Bot):
 
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
+    keyboard.button(text = 'Еще карту!', callback_data = f'practice_choose_card')
 
     await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image),
                          reply_markup = keyboard.as_markup(),
@@ -301,6 +303,14 @@ async def practice_quiz(call: types.CallbackQuery, bot: Bot):
             correct_option_id = c,
             is_anonymous = False
         )
+
+        keyboard = InlineKeyboardBuilder()
+        keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
+        keyboard.button(text = 'Еще вопросы!', callback_data = f'practice_quiz')
+
+        await bot.send_message(call.message.chat.id, text = 'Ответьте на вопросы о значениях карт выше.',
+                               reply_markup = keyboard.as_markup(),
+                               reply_to_message_id = call.message.reply_to_message.message_id)
 
 
 async def check_correct_answer(answers, correct_answer):

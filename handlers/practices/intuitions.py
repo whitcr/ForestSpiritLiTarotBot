@@ -67,6 +67,9 @@ async def practice_zalivka_answer(call: types.CallbackQuery, bot: Bot):
         "SELECT zalivka_original FROM zalivka WHERE number = $1",
         (num,)
     )
-
-    # Send original image
-    await bot.send_photo(call.message.chat.id, photo = photo_original)
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
+    keyboard.button(text = 'Еще заливку!', callback_data = f'practice_zalivka')
+    await bot.send_photo(call.message.chat.id, photo = photo_original,
+                         reply_markup = keyboard.as_markup(),
+                         reply_to_message_id = call.message.reply_to_message.message_id)
