@@ -218,7 +218,8 @@ async def practice_card_answer(call: types.CallbackQuery, bot: Bot):
     keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
 
     await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image_card),
-                         reply_markup = keyboard.as_markup())
+                         reply_markup = keyboard.as_markup(),
+                         reply_to_message_id = call.message.reply_to_message.message_id)
 
 
 @router.callback_query(IsReply(), F.data.startswith('practice_choose_card_answer:'))
@@ -259,7 +260,8 @@ async def practice_choose_card_answer(call: types.CallbackQuery, bot: Bot):
     keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
 
     await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image),
-                         reply_markup = keyboard.as_markup())
+                         reply_markup = keyboard.as_markup(),
+                         reply_to_message_id = call.message.reply_to_message.message_id)
 
 
 @router.callback_query(IsReply(), F.data == 'practice_quiz')
