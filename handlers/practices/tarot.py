@@ -25,6 +25,7 @@ router = Router()
 
 @router.callback_query(IsReply(), F.data == 'practice_menu_tarot')
 async def practice_menu_tarot(call: types.CallbackQuery, bot: Bot):
+    await call.answer()
     try:
         await call.message.edit_text(
             text = (
@@ -45,7 +46,8 @@ async def practice_menu_tarot(call: types.CallbackQuery, bot: Bot):
                 "<b>История</b> — трактовка карт в виде истории.\n\n"
                 "<b>Викторина</b> — вопросы о значениях карт"
             ),
-            reply_markup = kb.practice_menu_tarot_keyboard
+            reply_markup = kb.practice_menu_tarot_keyboard,
+            reply_to_message_id = call.message.reply_to_message.message_id
         )
 
 
