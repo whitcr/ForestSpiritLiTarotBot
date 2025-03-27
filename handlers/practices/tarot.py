@@ -25,26 +25,35 @@ router = Router()
 
 @router.callback_query(IsReply(), F.data == 'practice_menu_tarot')
 async def practice_menu_tarot(call: types.CallbackQuery, bot: Bot):
-    await call.message.edit_text(
-        text = (
-            "<b>Карта</b> — вы должны будете почувствовать скрытую карту.\n\n"
-            "<b>Выбор карты</b> — вам надо будете почувствовать определенную карту.\n\n"
-            "<b>Триплет</b> — трактовка карт на заданную тему.\n\n"
-            "<b>История</b> — трактовка карт в виде истории.\n\n"
-            "<b>Викторина</b> — вопросы о значениях карт"
-        ),
-        reply_markup = kb.practice_menu_tarot_keyboard
-    )
+    try:
+        await call.message.edit_text(
+            text = (
+                "<b>Карта</b> — вы должны будете почувствовать скрытую карту.\n\n"
+                "<b>Выбор карты</b> — вам надо будете почувствовать определенную карту.\n\n"
+                "<b>Триплет</b> — трактовка карт на заданную тему.\n\n"
+                "<b>История</b> — трактовка карт в виде истории.\n\n"
+                "<b>Викторина</b> — вопросы о значениях карт"
+            ),
+            reply_markup = kb.practice_menu_tarot_keyboard
+        )
+    except Exception:
+        await call.message.answer(
+            text = (
+                "<b>Карта</b> — вы должны будете почувствовать скрытую карту.\n\n"
+                "<b>Выбор карты</b> — вам надо будете почувствовать определенную карту.\n\n"
+                "<b>Триплет</b> — трактовка карт на заданную тему.\n\n"
+                "<b>История</b> — трактовка карт в виде истории.\n\n"
+                "<b>Викторина</b> — вопросы о значениях карт"
+            ),
+            reply_markup = kb.practice_menu_tarot_keyboard
+        )
 
 
 @router.callback_query(IsReply(), F.data == 'practice_triple')
 @use_user_statistics
-async def practice_triple(call: types.CallbackQuery, bot: Bot):
+async def practice_triple(call: types.CallbackQuery):
     await call.answer()
-    await bot.delete_message(
-        chat_id = call.message.chat.id,
-        message_id = call.message.message_id
-    )
+    await call.message.delete()
 
     image, _ = await get_image_three_cards(call.from_user.id)
 
@@ -64,8 +73,7 @@ async def practice_triple(call: types.CallbackQuery, bot: Bot):
     draw_text.text((770, 20), 'Трактовка триплета', font = FONT_L, fill = 'white')
 
     text = "Трактуйте карты на заданную тему. \n<code>Спорьте, рассуждайте, думайте, ответов не будет.</code>"
-    await bot.send_photo(
-        call.message.chat.id,
+    await call.message.answer_photo(
         photo = await get_buffered_image(image),
         caption = text
     )
@@ -76,10 +84,7 @@ async def practice_triple(call: types.CallbackQuery, bot: Bot):
 @use_user_statistics
 async def practice_card(call: types.CallbackQuery, bot: Bot):
     await call.answer()
-    await bot.delete_message(
-        chat_id = call.message.chat.id,
-        message_id = call.message.message_id
-    )
+    await call.message.delete()
 
     image_card = Image.new('RGB', (1920, 1080), color = 'white')
     choice = await get_choice_spread(call.from_user.id)
@@ -108,8 +113,7 @@ async def practice_card(call: types.CallbackQuery, bot: Bot):
     draw_text.text((698, 20), 'Какую карту вы чувствуете?', font = FONT_L, fill = 'black')
 
     text = "Сосредоточьтесь и почувстуйте энергию, исходящую от картинки.\n<code>При вызове нового задания ответ прошлого будет утерян, \nответ может узнать только тот, кто взял задание. </code>"
-    await bot.send_photo(
-        call.message.chat.id,
+    await call.message.answer_photo(
         photo = await get_buffered_image(image_card),
         caption = text,
         reply_markup = builder.as_markup(),
@@ -210,7 +214,11 @@ async def practice_card_answer(call: types.CallbackQuery, bot: Bot):
     draw_text.text((759, 990), 'from @ForestSpiritLi', font = FONT_L, fill = 'black')
     draw_text.text((750, 20), 'Ответ', font = FONT_L, fill = 'black')
 
-    await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image_card))
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
+
+    await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image_card),
+                         reply_markup = keyboard.as_markup())
 
 
 @router.callback_query(IsReply(), F.data.startswith('practice_choose_card_answer:'))
@@ -247,7 +255,11 @@ async def practice_choose_card_answer(call: types.CallbackQuery, bot: Bot):
     draw_text = ImageDraw.Draw(image)
     draw_text.text((759, 990), 'from @ForestSpiritLi', font = FONT_L, fill = 'black')
 
-    await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image))
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
+
+    await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image),
+                         reply_markup = keyboard.as_markup())
 
 
 @router.callback_query(IsReply(), F.data == 'practice_quiz')
