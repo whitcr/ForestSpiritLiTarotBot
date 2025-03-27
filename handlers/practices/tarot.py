@@ -162,16 +162,9 @@ async def practice_choose_card(call: types.CallbackQuery, bot: Bot):
 
     builder = InlineKeyboardBuilder()
     builder.button(
-        text = "Показать карту",
+        text = "Показать ответ",
         callback_data = f"practice_choose_card_answer:{num[0]}:{num[1]}:{num[2]}"
     )
-
-    para = textwrap.wrap(f'Найдите карту {card_name}', width = 30)
-    current_h, pad = 50, 10
-    for line in para:
-        w, h = text_size(line, FONT_L)
-        draw_text.text(((1920 - w) / 2, current_h), line, font = FONT_L, fill = 'black')
-        current_h += h + pad
 
     card_back = Image.open('./images/cards/raider/back.jpg')
     card_back = card_back.resize((w, h))
@@ -179,6 +172,13 @@ async def practice_choose_card(call: types.CallbackQuery, bot: Bot):
     image.paste(card_back, ((3 * x + 2 * w), y))
     image.paste(card_back, ((2 * x + w), y))
     image.paste(card_back, (x, y))
+
+    para = textwrap.wrap(f'Найдите карту {card_name}', width = 30)
+    current_h, pad = 50, 10
+    for line in para:
+        w, h = text_size(line, FONT_L)
+        draw_text.text(((1920 - w) / 2, current_h), line, font = FONT_L, fill = 'black')
+        current_h += h + pad
 
     text = f"Сосредоточьтесь и почувстуйте энергию карты {card_name}.\n<code>При вызове нового задания ответ прошлого будет утерян, \nответ может узнать только тот, кто взял задание. </code>"
     await bot.send_photo(
@@ -242,6 +242,7 @@ async def practice_choose_card_answer(call: types.CallbackQuery, bot: Bot):
     for i, path in enumerate(card_paths):
         path = Image.open(path).resize((w, h))
         images.append(path)
+
     image.paste(images[2], ((3 * x + 2 * w), y))
     image.paste(images[1], ((2 * x + w), y))
     image.paste(images[0], (x, y))
