@@ -18,7 +18,7 @@ router = Router()
 
 
 @router.callback_query(IsReply(), F.data == 'practice_menu_tarot')
-async def practice_menu_tarot(bot: Bot, call: types.CallbackQuery):
+async def practice_menu_tarot(call: types.CallbackQuery, bot: Bot):
     await bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id,
                                 text = f"<b>Карта</b> — вы должны будете почувствовать скрытую карту.\n\n"
                                        f"<b>Выбор карты</b> — вам надо будет почувствовать определенную карту.\n\n"
@@ -30,7 +30,7 @@ async def practice_menu_tarot(bot: Bot, call: types.CallbackQuery):
 
 @router.callback_query(IsReply(), F.data == 'practice_triple')
 @use_user_statistics
-async def practice_triple(bot: Bot, call: types.CallbackQuery):
+async def practice_triple(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
 
@@ -62,7 +62,7 @@ async def practice_triple(bot: Bot, call: types.CallbackQuery):
 
 @router.callback_query(IsReply(), F.data == 'practice_card')
 @use_user_statistics
-async def practice_card(bot: Bot, call: types.CallbackQuery, state="*"):
+async def practice_card(call: types.CallbackQuery, bot: Bot, state="*"):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
 
@@ -106,7 +106,7 @@ async def practice_card(bot: Bot, call: types.CallbackQuery, state="*"):
 
 @router.callback_query(IsReply(), F.data == 'practice_choose_card')
 @use_user_statistics
-async def practice_choose_card(bot: Bot, call: types.CallbackQuery, state="*"):
+async def practice_choose_card(call: types.CallbackQuery, bot: Bot, state="*"):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
 
@@ -176,7 +176,7 @@ async def practice_choose_card(bot: Bot, call: types.CallbackQuery, state="*"):
 
 
 @router.callback_query(IsReply(), F.data == 'practice_card_answer')
-async def practice_card_answer(bot: Bot, call: types.CallbackQuery, state="*"):
+async def practice_card_answer(call: types.CallbackQuery, bot: Bot, state="*"):
     await call.answer()
     try:
         async with state.proxy() as data:
@@ -188,7 +188,7 @@ async def practice_card_answer(bot: Bot, call: types.CallbackQuery, state="*"):
 
 
 @router.callback_query(IsReply(), F.data == 'practice_choose_card_answer')
-async def practice_card_answer(bot: Bot, call: types.CallbackQuery, state="*"):
+async def practice_card_answer(call: types.CallbackQuery, bot: Bot, state="*"):
     async with state.proxy() as data:
         image_card = data['image_choose_card']
         await bot.send_photo(call.message.chat.id, photo = image_card)
@@ -197,7 +197,7 @@ async def practice_card_answer(bot: Bot, call: types.CallbackQuery, state="*"):
 
 @router.callback_query(IsReply(), F.data == 'practice_quiz')
 @use_user_statistics
-async def practice_quiz(bot: Bot, call: types.CallbackQuery):
+async def practice_quiz(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     await bot.delete_message(chat_id = call.message.chat.id, message_id = call.message.message_id)
 

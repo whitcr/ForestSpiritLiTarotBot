@@ -30,7 +30,8 @@ async def practice_menu(message: types.Message):
 
 
 @router.callback_query(IsReply(), F.data == 'practice_menu_practice')
-async def practice_practices(bot: Bot, call: types.CallbackQuery):
+async def practice_practices(call: types.CallbackQuery, bot: Bot):
+    print(1)
     await call.answer()
     try:
         await bot.edit_message_text(chat_id = call.message.chat.id,
@@ -42,7 +43,7 @@ async def practice_practices(bot: Bot, call: types.CallbackQuery):
 
 
 @router.callback_query(IsReply(), F.data.startswith('practices_'))
-async def process_callback_practices(bot: Bot, call: types.CallbackQuery):
+async def process_callback_practices(call: types.CallbackQuery, bot: Bot):
     try:
         await call.answer()
         keyword = call.data.split('_')[1]
@@ -69,7 +70,7 @@ async def process_callback_practices(bot: Bot, call: types.CallbackQuery):
 
 
 @router.callback_query(IsReply(), F.data.startswith('show_practice'))
-async def process_callback_show_practice(bot: Bot, call: types.CallbackQuery):
+async def process_callback_show_practice(call: types.CallbackQuery, bot: Bot):
     await call.answer()
     try:
         if call.from_user.id == call.message.reply_to_message.from_user.id:

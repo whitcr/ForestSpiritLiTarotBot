@@ -14,7 +14,7 @@ router = Router()
 
 @router.callback_query(IsReply(), F.data == 'practice_history')
 @use_user_statistics
-async def practice_history(bot: Bot, call: types.CallbackQuery):
+async def practice_history(call: types.CallbackQuery, bot: Bot):
     image = await get_image_history()
 
     draw_text = ImageDraw.Draw(image)

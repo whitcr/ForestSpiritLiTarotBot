@@ -9,7 +9,7 @@ router = Router()
 
 
 @router.callback_query(IsReply(), F.data == 'practice_menu_meditation')
-async def practice_zalivka_answer(bot: Bot, call: types.CallbackQuery):
+async def practice_zalivka_answer(call: types.CallbackQuery, bot: Bot):
     try:
         await call.answer()
 
@@ -35,7 +35,7 @@ async def practice_zalivka_answer(bot: Bot, call: types.CallbackQuery):
 
 
 @router.callback_query(IsReply(), F.data.startswith('show_meditations'))
-async def process_callback_show_meditations(bot: Bot, call: types.CallbackQuery):
+async def process_callback_show_meditations(call: types.CallbackQuery, bot: Bot):
     try:
         await call.answer()
         if call.from_user.id == call.message.reply_to_message.from_user.id:
