@@ -4,17 +4,19 @@ from PIL import Image, ImageDraw
 from PIL import ImageFilter
 import numpy as np
 from aiogram import types, Router, F, Bot
-from database import execute_query
 from filters.baseFilters import IsReply
 from functions.cards.create import get_path_cards, get_gradient_3d, get_path_background, get_buffered_image
+from functions.messages.messages import typing_animation_decorator
 from middlewares.statsUser import use_user_statistics
 
 router = Router()
 
 
 @router.callback_query(IsReply(), F.data == 'practice_history')
+@typing_animation_decorator(initial_message = "Создаю историю...")
 @use_user_statistics
 async def practice_history(call: types.CallbackQuery, bot: Bot):
+    await call.answer()
     image = await get_image_history()
 
     draw_text = ImageDraw.Draw(image)
@@ -27,15 +29,11 @@ async def practice_history(call: types.CallbackQuery, bot: Bot):
 
     text = f"<b><u>Трактовка Истории</u></b>\n\nВам нужно растрактовать историю, которую поведали нам карты. "\
            f"Не ограничивайте себя, проявите все свои знания, главно сделайте это интересно и чтобы это подходило к значениям карт! \n\n"\
-           f"<i>У каждого могут быть разные рассказы и в этом вся прелесть, не бойтесь ошибиться и не бойтесь сказать что-то не так, наоборот проявите смекалку и каплю юмора, если она будет уместна. </i> \n\n"\
            f"Первые три карты по вертикали это карты, которые описывают главного героя. "\
            f"После — карты, описывающие саму историю, их связывает некая белая полоса, которая показывает хронологический порядок событий."\
-           f" И последние три карты описывают главное событие истории.\n\n"\
-           f"Жду ваших замечательных историй в комментариях!"
+           f" И последние три карты описывают главное событие истории."
 
-    msg = await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image), caption = text)
-    file_id = msg.photo[-1].file_id
-    await execute_query("UPDATE posting SET file_id ='{}' where post = 'history'", (file_id,))
+    await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image), caption = text)
 
 
 async def get_image_history():

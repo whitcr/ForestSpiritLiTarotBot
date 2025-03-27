@@ -2,10 +2,8 @@ from aiogram import types, Router, F, Bot
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from database import execute_select_all
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from filters.baseFilters import IsReply
-from middlewares.statsUser import use_user_statistics
 
 router = Router()
 
@@ -52,11 +50,12 @@ async def process_callback_show_meditations(call: types.CallbackQuery, bot: Bot)
         if len(meditations) == 1:
             pass
         elif index == 0:
-            keyboard.button(text = '<--', callback_data = f'show_meditations_{len(meditations) - 1}')
             keyboard.button(text = '-->', callback_data = f'show_meditations_{index + 1}')
+            keyboard.button(text = '<--', callback_data = f'show_meditations_{len(meditations) - 1}')
         elif index == len(meditations) - 1:
-            keyboard.button(text = '<--', callback_data = f'show_meditations_{index - 1}')
             keyboard.button(text = '-->', callback_data = f'show_meditations_0')
+            keyboard.button(text = '<--', callback_data = f'show_meditations_{index - 1}')
+
         else:
             keyboard.button(text = '-->', callback_data = f'show_meditations_{index + 1}')
             keyboard.button(text = '<--', callback_data = f'show_meditations_{index - 1}')
