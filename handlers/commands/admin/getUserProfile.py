@@ -325,14 +325,13 @@ async def add_meanings_callback(callback_query: types.CallbackQuery):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
     amount = int(parts[3])
-    await callback_query.answer(f"Добавлено {amount} трактовок пользователю!")
+
     await execute_query(
         "UPDATE users SET paid_meanings = paid_meanings + $1 WHERE user_id = $2",
         (amount, user_id)
     )
-    await callback_query.message.edit_text(chat_id = callback_query.message.chat.id,
-                                           message_id = callback_query.message.message_id,
-                                           text = f"Добавлено {amount} трактовок пользователю с ID {user_id}!")
+    await callback_query.message.edit_text(
+        text = f"Добавлено {amount} трактовок пользователю с ID {user_id}!", reply_markup = None)
     await show_user_profile(callback_query.message, user_id)
 
 
@@ -364,9 +363,8 @@ async def add_coupon_callback(callback_query: types.CallbackQuery, bot: Bot):
         f"UPDATE users SET {column} = {column} + $1 WHERE user_id = $2",
         (amount, user_id)
     )
-    await callback_query.message.edit_text(chat_id = callback_query.message.chat.id,
-                                           message_id = callback_query.message.message_id,
-                                           text = f"Добавлено {amount} {coupon_type} купонов пользователю {user_id}!")
+    await callback_query.message.edit_text(text = f"Добавлено {amount} {coupon_type} купонов пользователю {user_id}!",
+                                           reply_markup = None)
     await show_user_profile(callback_query.message, user_id)
 
 
@@ -398,9 +396,8 @@ async def add_subscription_callback(callback_query: types.CallbackQuery, bot: Bo
     date = await give_sub(user_id, days, sub_type)
     await bot.send_message(logger_chat,
                            f"Установлена подписка {sub_type} на {days} дней для {user_id}! Закончится {date}")
-    await callback_query.message.edit_text(chat_id = callback_query.message.chat.id,
-                                           message_id = callback_query.message.message_id,
-                                           text = f"Установлена подписка {sub_type} на {days} дней для {user_id}! Закончится {date}")
+    await callback_query.message.edit_text(
+        text = f"Установлена подписка {sub_type} на {days} дней для {user_id}! Закончится {date}", reply_markup = None)
     await show_user_profile(callback_query.message, user_id)
 
 
@@ -445,9 +442,8 @@ async def add_referrals_callback(callback_query: types.CallbackQuery, bot: Bot):
         "UPDATE users SET referrals_paid = referrals_paid + $1 WHERE user_id = $2",
         (amount, user_id)
     )
-    await callback_query.message.edit_text(chat_id = callback_query.message.chat.id,
-                                           message_id = callback_query.message.message_id,
-                                           text = f"Добавлено {amount} друзей пользователю {user_id}!")
+    await callback_query.message.edit_text(text = f"Добавлено {amount} друзей пользователю {user_id}!",
+                                           reply_markup = None)
     await show_user_profile(callback_query.message, user_id)
 
 

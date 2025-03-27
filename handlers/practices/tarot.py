@@ -120,7 +120,7 @@ async def practice_card(call: types.CallbackQuery, bot: Bot):
     draw_text.text((759, 990), 'from @ForestSpiritLi', font = FONT_L, fill = 'black')
     draw_text.text((698, 20), 'Какую карту вы чувствуете?', font = FONT_L, fill = 'black')
 
-    text = "Сосредоточьтесь и почувстуйте энергию, исходящую от картинки.\n<code>При вызове нового задания ответ прошлого будет утерян, \nответ может узнать только тот, кто взял задание. </code>"
+    text = "Сосредоточьтесь и почувстуйте энергию, исходящую от картинки.\n<code>Ответ может узнать только тот, кто взял задание. </code>"
     await call.message.answer_photo(
         photo = await get_buffered_image(image_card),
         caption = text,
@@ -192,7 +192,7 @@ async def practice_choose_card(call: types.CallbackQuery, bot: Bot):
         draw_text.text(((1920 - w) / 2, current_h), line, font = FONT_L, fill = 'black')
         current_h += h + pad
 
-    text = f"Сосредоточьтесь и почувстуйте энергию карты {card_name}.\n<code>При вызове нового задания ответ прошлого будет утерян, \nответ может узнать только тот, кто взял задание. </code>"
+    text = f"Сосредоточьтесь и почувстуйте энергию карты {card_name}.\n<code>Ответ может узнать только тот, кто взял задание. </code>"
     await bot.send_photo(
         call.message.chat.id,
         photo = await get_buffered_image(image),
@@ -203,7 +203,7 @@ async def practice_choose_card(call: types.CallbackQuery, bot: Bot):
 
 
 @router.callback_query(IsReply(), F.data.startswith('practice_card_answer:'))
-async def practice_card_answer(call: types.CallbackQuery, bot: Bot):
+async def practice_card_answer(call: types.CallbackQuery):
     await call.answer()
 
     choice = await get_choice_spread(call.from_user.id)
@@ -226,13 +226,12 @@ async def practice_card_answer(call: types.CallbackQuery, bot: Bot):
     keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
     keyboard.button(text = 'Еще карту!', callback_data = f'practice_card')
 
-    await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image_card),
-                         reply_markup = keyboard.as_markup(),
-                         reply_to_message_id = call.message.reply_to_message.message_id)
+    await call.message.edit_media(media = await get_buffered_image(image_card),
+                                  reply_markup = keyboard.as_markup())
 
 
 @router.callback_query(IsReply(), F.data.startswith('practice_choose_card_answer:'))
-async def practice_choose_card_answer(call: types.CallbackQuery, bot: Bot):
+async def practice_choose_card_answer(call: types.CallbackQuery):
     await call.answer()
     choice = await get_choice_spread(call.from_user.id)
 
@@ -269,9 +268,8 @@ async def practice_choose_card_answer(call: types.CallbackQuery, bot: Bot):
     keyboard.button(text = 'Меню', callback_data = f'practice_menu_tarot')
     keyboard.button(text = 'Еще триплет!', callback_data = f'practice_choose_card')
 
-    await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image),
-                         reply_markup = keyboard.as_markup(),
-                         reply_to_message_id = call.message.reply_to_message.message_id)
+    await call.message.edit_media(media = await get_buffered_image(image),
+                                  reply_markup = keyboard.as_markup())
 
 
 @router.callback_query(IsReply(), F.data == 'practice_quiz')
