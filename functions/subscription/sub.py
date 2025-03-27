@@ -1,17 +1,20 @@
 from datetime import datetime, timedelta
 import pytz
 
-from database import execute_query
+from database import execute_query, execute_select_all, execute_select
 
 
 async def give_sub(user_id, days, sub_type):
-    current_sub_data = await execute_query(
+    current_sub_data = await execute_select(
         "SELECT subscription_date FROM users WHERE user_id = $1", (user_id,)
     )
 
-    if current_sub_data:
-        current_date = datetime.strptime(current_sub_data[0], "%Y-%m-%d").date()
-        date = current_date + timedelta(days = days)
+    current_sub_type = await execute_select(
+        "SELECT subscription FROM users WHERE user_id = $1", (user_id,)
+    )
+
+    if current_sub_data and current_sub_type == sub_type:
+        date = current_sub_data + timedelta(days = days)
     else:
         date = datetime.now(pytz.timezone('Europe/Kiev')).date() + timedelta(days = days)
 

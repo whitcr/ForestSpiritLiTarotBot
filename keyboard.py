@@ -53,7 +53,8 @@ practice_menu_tarot_buttons = [
     ],
     [
         InlineKeyboardButton(text = "История", callback_data = "practice_history")
-    ]
+    ],
+    [InlineKeyboardButton(text = "Назад", callback_data = "get_practices_menu")]
 ]
 practice_menu_tarot_keyboard = InlineKeyboardMarkup(inline_keyboard = practice_menu_tarot_buttons)
 
@@ -62,7 +63,8 @@ practice_menu_intuition_buttons = [
         InlineKeyboardButton(text = "Карта", callback_data = "practice_card"),
         InlineKeyboardButton(text = "Выбор карты", callback_data = "practice_choose_card")
     ],
-    [InlineKeyboardButton(text = "Заливка", callback_data = "practice_zalivka")]
+    [InlineKeyboardButton(text = "Заливка", callback_data = "practice_zalivka")],
+    [InlineKeyboardButton(text = "Назад", callback_data = "get_practices_menu")]
 ]
 practice_menu_intuition_keyboard = InlineKeyboardMarkup(inline_keyboard = practice_menu_intuition_buttons)
 
@@ -94,7 +96,8 @@ practice_general_menu_practices_buttons = [
         InlineKeyboardButton(text = "Красота", callback_data = "practices_beauty"),
         InlineKeyboardButton(text = "Отношения", callback_data = "practices_relationship")
     ],
-    [InlineKeyboardButton(text = "Разное", callback_data = "practices_other")]
+    [InlineKeyboardButton(text = "Разное", callback_data = "practices_other")],
+    [InlineKeyboardButton(text = "Назад", callback_data = "get_practices_menu")]
 ]
 practice_general_menu_practices_keyboard = InlineKeyboardMarkup(
     inline_keyboard = practice_general_menu_practices_buttons)

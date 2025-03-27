@@ -16,7 +16,7 @@ from handlers.commands.user import get_user_profile
 
 router = Router()
 
-logger_chat = -4739443638
+logger_chat = -4668410440
 
 
 class AdminStates(StatesGroup):
@@ -55,7 +55,7 @@ async def admin_view_profile(message: types.Message, bot: Bot):
 async def show_user_profile(message, user_id):
     user_profile = await get_user_profile(user_id)
 
-    bonuses = await execute_select_all("SELECT paid_spread, referrals_paid, referrals FROM users WHERE user_id = $1",
+    bonuses = await execute_select_all("SELECT paid_spreads, referrals_paid, referrals FROM users WHERE user_id = $1",
                                        (user_id,))
 
     paid_spread, referrals_paid, referrals = bonuses[0]
@@ -231,13 +231,13 @@ async def admin_subscription_callback(callback_query: types.CallbackQuery):
     subscription_keyboard = InlineKeyboardMarkup(
         inline_keyboard = [
             [
-                InlineKeyboardButton(text = "Базовая", callback_data = f"sub_type_{user_id}_1")
+                InlineKeyboardButton(text = "Шут", callback_data = f"sub_type_{user_id}_1")
             ],
             [
-                InlineKeyboardButton(text = "Продвинутая", callback_data = f"sub_type_{user_id}_2")
+                InlineKeyboardButton(text = "Маг", callback_data = f"sub_type_{user_id}_2")
             ],
             [
-                InlineKeyboardButton(text = "Премиум", callback_data = f"sub_type_{user_id}_3")
+                InlineKeyboardButton(text = "Жрица", callback_data = f"sub_type_{user_id}_3")
             ],
             [
                 InlineKeyboardButton(text = "Отменить подписку", callback_data = f"cancel_subscription_{user_id}")
@@ -258,7 +258,7 @@ async def admin_subscription_callback(callback_query: types.CallbackQuery):
 async def sub_type_callback(callback_query: types.CallbackQuery):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
-    sub_type = parts[3]
+    sub_type = int(parts[3])
     await callback_query.answer()
 
     sub_name = SUBS_TYPE[sub_type]['name']
@@ -330,7 +330,9 @@ async def add_meanings_callback(callback_query: types.CallbackQuery):
         "UPDATE users SET paid_meanings = paid_meanings + $1 WHERE user_id = $2",
         (amount, user_id)
     )
-
+    await callback_query.message.edit_text(chat_id = callback_query.message.chat.id,
+                                           message_id = callback_query.message.message_id,
+                                           text = f"Добавлено {amount} трактовок пользователю с ID {user_id}!")
     await show_user_profile(callback_query.message, user_id)
 
 
@@ -354,16 +356,17 @@ async def add_coupon_callback(callback_query: types.CallbackQuery, bot: Bot):
     coupon_type = parts[3]
     amount = int(parts[4])
     await callback_query.answer()
-    await bot.send_message(logger_chat, f"Добавлено {amount} {coupon_type} купонов пользователю!")
+    await bot.send_message(logger_chat, f"Добавлено {amount} {coupon_type} купонов пользователю {user_id}!")
 
     column = COUPONS[coupon_type]["field"]
 
-    # Добавляем купоны пользователю
     await execute_query(
         f"UPDATE users SET {column} = {column} + $1 WHERE user_id = $2",
         (amount, user_id)
     )
-
+    await callback_query.message.edit_text(chat_id = callback_query.message.chat.id,
+                                           message_id = callback_query.message.message_id,
+                                           text = f"Добавлено {amount} {coupon_type} купонов пользователю {user_id}!")
     await show_user_profile(callback_query.message, user_id)
 
 
@@ -388,12 +391,16 @@ async def manual_coupon_callback(callback_query: types.CallbackQuery, state: FSM
 async def add_subscription_callback(callback_query: types.CallbackQuery, bot: Bot):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
-    sub_type = parts[3]
+    sub_type = int(parts[3])
     days = int(parts[4])
     await callback_query.answer()
-    await bot.send_message(logger_chat, f"Установлена подписка {sub_type} на {days} дней!")
-    date = await give_sub(user_id, days, sub_type)
 
+    date = await give_sub(user_id, days, sub_type)
+    await bot.send_message(logger_chat,
+                           f"Установлена подписка {sub_type} на {days} дней для {user_id}! Закончится {date}")
+    await callback_query.message.edit_text(chat_id = callback_query.message.chat.id,
+                                           message_id = callback_query.message.message_id,
+                                           text = f"Установлена подписка {sub_type} на {days} дней для {user_id}! Закончится {date}")
     await show_user_profile(callback_query.message, user_id)
 
 
@@ -432,13 +439,15 @@ async def add_referrals_callback(callback_query: types.CallbackQuery, bot: Bot):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
     amount = int(parts[3])
-    await callback_query.answer(f"Добавлено {amount} друзей пользователю!")
-    await bot.send_message(logger_chat, f"Добавлено {amount} друзей пользователю!")
+
+    await bot.send_message(logger_chat, f"Добавлено {amount} друзей пользователю {user_id}!")
     await execute_query(
         "UPDATE users SET referrals_paid = referrals_paid + $1 WHERE user_id = $2",
         (amount, user_id)
     )
-
+    await callback_query.message.edit_text(chat_id = callback_query.message.chat.id,
+                                           message_id = callback_query.message.message_id,
+                                           text = f"Добавлено {amount} друзей пользователю {user_id}!")
     await show_user_profile(callback_query.message, user_id)
 
 

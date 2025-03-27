@@ -54,14 +54,14 @@ async def process_callback_show_meditations(call: types.CallbackQuery, bot: Bot)
             if len(meditations) == 1:
                 pass
             elif index == 0:
-                keyboard.button('-->', callback_data = f'show_meditations_{index + 1}')
-                keyboard.button('<--', callback_data = f'show_meditations_{len(meditations) - 1}')
+                keyboard.button(text = '-->', callback_data = f'show_meditations_{index + 1}')
+                keyboard.button(text = '<--', callback_data = f'show_meditations_{len(meditations) - 1}')
             elif index == len(meditations) - 1:
-                keyboard.button('-->', callback_data = f'show_meditations_0')
-                keyboard.button('<--', callback_data = f'show_meditations_{index - 1}')
+                keyboard.button(text = '-->', callback_data = f'show_meditations_0')
+                keyboard.button(text = '<--', callback_data = f'show_meditations_{index - 1}')
             else:
-                keyboard.button('<--', callback_data = f'show_meditations_{index - 1}')
-                keyboard.button('-->', callback_data = f'show_meditations_{index + 1}')
+                keyboard.button(text = '<--', callback_data = f'show_meditations_{index - 1}')
+                keyboard.button(text = '-->', callback_data = f'show_meditations_{index + 1}')
 
             keyboard.adjust(2)
 
