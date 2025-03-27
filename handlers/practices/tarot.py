@@ -173,7 +173,7 @@ async def practice_choose_card(call: types.CallbackQuery, bot: Bot):
         draw_text.text(((1920 - w) / 2, current_h), line, font = FONT_L, fill = 'black')
         current_h += h + pad
 
-    card_back = Image.open('./cards/cards/raider/back.jpg')
+    card_back = Image.open('./images/cards/raider/back.jpg')
     card_back = card_back.resize((w, h))
 
     image.paste(card_back, ((3 * x + 2 * w), y))
@@ -206,13 +206,9 @@ async def practice_card_answer(call: types.CallbackQuery, bot: Bot):
     draw_text = ImageDraw.Draw(image_card)
     draw_text.text((759, 990), 'from @ForestSpiritLi', font = FONT_L, fill = 'black')
 
-    card_back = Image.open('./images/cards/raider/back.jpg')
-    card_back = card_back.resize((520, 850))
-    image_card.paste(card_back, (700, 100))
-
     draw_text = ImageDraw.Draw(image_card)
     draw_text.text((759, 990), 'from @ForestSpiritLi', font = FONT_L, fill = 'black')
-    draw_text.text((698, 20), 'Ответ', font = FONT_L, fill = 'black')
+    draw_text.text((750, 20), 'Ответ', font = FONT_L, fill = 'black')
 
     await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image_card))
 

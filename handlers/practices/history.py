@@ -56,7 +56,7 @@ async def get_image_history():
     image = Image.fromarray(np.uint8(array))
     path = await get_path_background()
 
-    color = Image.open('./cards/tech/design_posts/backcolor.png').convert("RGBA")
+    color = Image.open('./images/tech/design_posts/backcolor.png').convert("RGBA")
     color = color.resize((2800, 1970))
     background = Image.open(path).convert("RGBA")
     background = background.resize((2800, 1970))

@@ -27,7 +27,7 @@ async def practice_menu_intuition(call: types.CallbackQuery, bot: Bot):
 
 
 @router.callback_query(IsReply(), F.data == 'practice_zalivka')
-@typing_animation_decorator(initial_message = "Создаю...")
+@typing_animation_decorator(initial_message = "Создаю")
 @use_user_statistics
 async def practice_zalivka(call: types.CallbackQuery, bot: Bot):
     await call.answer()

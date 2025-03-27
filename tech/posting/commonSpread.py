@@ -20,7 +20,7 @@ async def get_image_common_spread(message: types.Message, bot: Bot):
 
     image = await get_post_template()
 
-    cards = Image.open('./cards/tech/design_posts/common_spread.png').convert("RGBA")
+    cards = Image.open('./images/tech/design_posts/common_spread.png').convert("RGBA")
 
     image.paste(cards, (1, 1), cards)
 
@@ -38,10 +38,10 @@ async def get_image_common_spread(message: types.Message, bot: Bot):
     length = len(para)
     if length == 1:
         current_h, pad = 160, 10
-        FONT = ImageFont.truetype("./cards/tech/fonts/1246-font.otf", 100)
+        FONT = ImageFont.truetype("./images/tech/fonts/1246-font.otf", 100)
     elif length == 2:
         current_h, pad = 140, 10
-        FONT = ImageFont.truetype("./cards/tech/fonts/1246-font.otf", 80)
+        FONT = ImageFont.truetype("./images/tech/fonts/1246-font.otf", 80)
 
     for line in para:
         w, h = text_size(line, FONT)

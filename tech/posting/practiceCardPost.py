@@ -41,7 +41,7 @@ async def practice_choose_card_post(bot, channel_id, admin_id):
         draw_text.text(((1920 - w) / 2, current_h), line, font = FONT_L, fill = 'black')
         current_h += h + pad
 
-    card_back = Image.open('./cards/cards/raider/back.jpg')
+    card_back = Image.open('./images/cards/raider/back.jpg')
     card_back = card_back.resize((w, h))
 
     image.paste(card_back, ((3 * x + 2 * w), y))

@@ -47,7 +47,7 @@ async def post_text(message: types.Message, state: FSMContext, bot: Bot):
 
     background_path = await get_path_background()
 
-    color = Image.open('./cards/tech/design_posts/backcolor.png').convert("RGBA")
+    color = Image.open('./images/tech/design_posts/backcolor.png').convert("RGBA")
 
     background = Image.open(background_path).convert("RGBA")
     background = background.resize((1920, 1080))
@@ -56,7 +56,7 @@ async def post_text(message: types.Message, state: FSMContext, bot: Bot):
     image = Image.blend(color, background, alpha = .2)
 
     num = randint(1, 6)
-    path_design = Image.open(f'./cards/tech/design_posts/{num}.png').convert("RGBA")
+    path_design = Image.open(f'./images/tech/design_posts/{num}.png').convert("RGBA")
     image.paste(path_design, (1, 1), path_design)
 
     draw = ImageDraw.Draw(image)
@@ -66,10 +66,10 @@ async def post_text(message: types.Message, state: FSMContext, bot: Bot):
     length = len(para)
     if length == 1:
         current_h, pad = 370, 10
-        FONT = ImageFont.truetype("./cards/tech/fonts/1246-font.otf", 300)
+        FONT = ImageFont.truetype("./images/tech/fonts/1246-font.otf", 300)
     elif length == 2:
         current_h, pad = 270, 10
-        FONT = ImageFont.truetype("./cards/tech/fonts/1246-font.otf", 250)
+        FONT = ImageFont.truetype("./images/tech/fonts/1246-font.otf", 250)
 
     for line in para:
         w, h = text_size(line, FONT)

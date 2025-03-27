@@ -31,7 +31,7 @@ async def create_mem(call: types.CallbackQuery, state: FSMContext):
 @router.message(content_types = ['photo'], state = Meme.photo)
 async def get_meme_photo(message: types.Message, state: FSMContext, bot: Bot):
     meme = await bot.get_file(message.photo[-1].file_id)
-    await meme.download(destination_file = './cards/schedule/memes/meme.jpg')
+    await meme.download(destination_file = './images/schedule/memes/meme.jpg')
     await message.answer("Какую карту разместить?")
     await state.set_state(Meme.card)
 
@@ -45,10 +45,10 @@ async def get_meme_card(message: types.Message, state: FSMContext, bot: Bot):
     num = await execute_select("select number from meaning_raider where name = $1;", (card,))
 
     choice = await get_choice_spread(message.from_user.id)
-    card_path = f"./cards/cards/{choice}/{num}.jpg"
+    card_path = f"./images/cards/{choice}/{num}.jpg"
 
     card = Image.open(card_path).resize((1400, 2160))
-    photo = Image.open('./cards/schedule/memes/meme.jpg')
+    photo = Image.open('./images/schedule/memes/meme.jpg')
 
     max_x = card.width - photo.width
     max_y = card.height - photo.height
