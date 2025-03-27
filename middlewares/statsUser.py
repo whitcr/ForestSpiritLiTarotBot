@@ -56,14 +56,19 @@ async def update_user_statistics(event: Union[Message, CallbackQuery], bot) -> b
                 (daily_count, weekly_count, monthly_count, total_count, today, week_start, month_start, user_id)
             )
         else:
+            username = event.from_user.username if event.from_user.username else None
+            name = event.from_user.full_name if event.from_user.full_name else None
+
             await execute_query(
                 """
                 INSERT INTO users 
-                (user_id, daily_count, weekly_count, monthly_count, total_count,
+                (user_id, username, name, cards_type, daily_count, weekly_count, monthly_count, total_count,
                  last_daily_update, last_weekly_update, last_monthly_update, join_date)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, &10, $11)
                 """,
-                (user_id, daily_count, weekly_count, monthly_count, total_count, today, week_start, month_start, today)
+                (user_id, username, name, 'raider', daily_count, weekly_count, monthly_count, total_count, today,
+                 week_start,
+                 month_start, today)
             )
 
     except Exception:

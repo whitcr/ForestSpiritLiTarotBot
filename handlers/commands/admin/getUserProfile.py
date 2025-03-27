@@ -102,8 +102,10 @@ async def show_user_profile(message, user_id):
     week_card_follow = "Есть" if day_follow['week_card_follow'] else 'Нет'
     month_card_follow = "Есть" if day_follow['month_card_follow'] else 'Нет'
 
+    user_link = f'<a href="tg://user?id={user_id}">{user_id}</a>'
+
     profile_text = (
-        f"📋 <b>Профиль пользователя</b> (ID: {user_id})\n\n"
+        f"📋 <b>Профиль пользователя</b> (ID: {user_link})\n\n"
         f"<b>Колода:</b> {deck_type}\n"
         f"<b>Подписка:</b> {subscription}\n"
         f"<b>Конец подписки:</b> {subscription_date}\n"
@@ -132,7 +134,7 @@ async def show_user_profile(message, user_id):
                 InlineKeyboardButton(text = "👥 Друзья", callback_data = f"admin_referrals_{user_id}")
             ],
             [
-                InlineKeyboardButton(text = "👁 Платные расклады", callback_data = f"admin_paid_spreads_{user_id}")
+                InlineKeyboardButton(text = "👁 Платные расклады", callback_data = f"admin_paidspreads_{user_id}")
             ]
         ]
     )
@@ -323,25 +325,25 @@ async def admin_referrals_callback(callback_query: types.CallbackQuery):
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("admin_paid_spreads_"))
+@router.callback_query(lambda c: c.data.startswith("admin_paidspreads_"))
 async def admin_referrals_callback(callback_query: types.CallbackQuery):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
     referrals_keyboard = InlineKeyboardMarkup(
         inline_keyboard = [
             [
-                InlineKeyboardButton(text = "+1", callback_data = f"add_paid_spreads_{user_id}_1"),
-                InlineKeyboardButton(text = "+2", callback_data = f"add_paid_spreads_{user_id}_2"),
-                InlineKeyboardButton(text = "+3", callback_data = f"add_paid_spreads_{user_id}_3")
+                InlineKeyboardButton(text = "+1", callback_data = f"add_paidspreads_{user_id}_1"),
+                InlineKeyboardButton(text = "+2", callback_data = f"add_paidspreads_{user_id}_2"),
+                InlineKeyboardButton(text = "+3", callback_data = f"add_paidspreads_{user_id}_3")
             ],
             [
-                InlineKeyboardButton(text = "+4", callback_data = f"add_paid_spreads_{user_id}_4"),
-                InlineKeyboardButton(text = "+5", callback_data = f"add_paid_spreads_{user_id}_5"),
-                InlineKeyboardButton(text = "+6", callback_data = f"add_paid_spreads_{user_id}_6")
+                InlineKeyboardButton(text = "+4", callback_data = f"add_paidspreads_{user_id}_4"),
+                InlineKeyboardButton(text = "+5", callback_data = f"add_paidspreads_{user_id}_5"),
+                InlineKeyboardButton(text = "+6", callback_data = f"add_paidspreads_{user_id}_6")
             ],
             [
-                InlineKeyboardButton(text = "+10", callback_data = f"add_paid_spreads_{user_id}_10"),
-                InlineKeyboardButton(text = "Ввести вручную", callback_data = f"add_paid_spreads_{user_id}")
+                InlineKeyboardButton(text = "+10", callback_data = f"add_paidspreads_{user_id}_10"),
+                InlineKeyboardButton(text = "Ввести вручную", callback_data = f"add_paidspreads_{user_id}")
             ],
             [
                 InlineKeyboardButton(text = "🔙 Назад к профилю", callback_data = f"back_to_profile_{user_id}")
@@ -495,7 +497,7 @@ async def manual_referrals_callback(callback_query: types.CallbackQuery, state: 
     )
 
 
-@router.callback_query(lambda c: c.data.startswith("add_paid_spreads_"))
+@router.callback_query(lambda c: c.data.startswith("add_paidspreads_"))
 async def add_paid_spreads_callback(callback_query: types.CallbackQuery, bot: Bot):
     parts = callback_query.data.split('_')
     user_id = int(parts[2])
@@ -511,7 +513,7 @@ async def add_paid_spreads_callback(callback_query: types.CallbackQuery, bot: Bo
     await show_user_profile(callback_query.message, user_id)
 
 
-@router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_paid_spreads_"))
+@router.callback_query(StateFilter(None), lambda c: c.data.startswith("manual_paidspreads_"))
 async def manual_paid_spreads_callback(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = int(callback_query.data.split('_')[-1])
     await callback_query.answer()
