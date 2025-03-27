@@ -9,7 +9,7 @@ import textwrap
 import random
 import keyboard as kb
 from filters.baseFilters import IsReply
-from functions.cards.create import get_path_cards, get_choice_spread, get_random_num, text_size
+from functions.cards.create import get_path_cards, get_choice_spread, get_random_num, text_size, get_buffered_image
 from handlers.tarot.spreads.getSpreads import get_image_three_cards
 from constants import FONT_L
 from middlewares.statsUser import use_user_statistics
@@ -51,13 +51,8 @@ async def practice_triple(call: types.CallbackQuery, bot: Bot):
     draw_text.text((759, 990), 'from @ForestSpiritLi', font = FONT_L, fill = 'white')
     draw_text.text((770, 20), 'Трактовка триплета', font = FONT_L, fill = 'white')
 
-    bio = BytesIO()
-    bio.name = 'image.jpeg'
-    image.save(bio, 'JPEG')
-    bio.seek(0)
-
     text = "Трактуйте карты на заданную тему. \n<code>Спорьте, рассуждайте, думайте, ответов не будет.</code>"
-    await bot.send_photo(call.message.chat.id, photo = bio, caption = text)
+    await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image), caption = text)
 
 
 @router.callback_query(IsReply(), F.data == 'practice_card')
@@ -94,14 +89,9 @@ async def practice_card(call: types.CallbackQuery, bot: Bot, state="*"):
     draw_text.text((759, 990), 'from @ForestSpiritLi', font = FONT_L, fill = 'black')
     draw_text.text((698, 20), 'Какую карту вы чувствуете?', font = FONT_L, fill = 'black')
 
-    bio = BytesIO()
-    bio.name = 'image.jpeg'
-    with bio:
-        image_card.save(bio, 'JPEG')
-        bio.seek(0)
-        text = "Сосредоточьтесь и почувстуйте энергию, исходящую от картинки.\n<code>При вызове нового задания ответ прошлого будет утерян, \nответ может узнать только тот, кто взял задание. </code>"
-        await bot.send_photo(call.message.chat.id, photo = BufferedInputFile(bio), caption = text,
-                             reply_markup = kb.practice_card_keyboard)
+    text = "Сосредоточьтесь и почувстуйте энергию, исходящую от картинки.\n<code>При вызове нового задания ответ прошлого будет утерян, \nответ может узнать только тот, кто взял задание. </code>"
+    await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image_card), caption = text,
+                         reply_markup = kb.practice_card_keyboard)
 
 
 @router.callback_query(IsReply(), F.data == 'practice_choose_card')
@@ -165,14 +155,9 @@ async def practice_choose_card(call: types.CallbackQuery, bot: Bot, state="*"):
     image.paste(card_back, ((2 * x + w), y))
     image.paste(card_back, (x, y))
 
-    bio = BytesIO()
-    bio.name = 'image.jpeg'
-    with bio:
-        image.save(bio, 'JPEG')
-        bio.seek(0)
-        text = f"Сосредоточьтесь и почувстуйте энергию карты {card}.\n<code>При вызове нового задания ответ прошлого будет утерян, \nответ может узнать только тот, кто взял задание. </code>"
-        await bot.send_photo(call.message.chat.id, photo = BufferedInputFile(bio), caption = text,
-                             reply_markup = kb.practice_choose_card_keyboard)
+    text = f"Сосредоточьтесь и почувстуйте энергию карты {card}.\n<code>При вызове нового задания ответ прошлого будет утерян, \nответ может узнать только тот, кто взял задание. </code>"
+    await bot.send_photo(call.message.chat.id, photo = await get_buffered_image(image), caption = text,
+                         reply_markup = kb.practice_choose_card_keyboard)
 
 
 @router.callback_query(IsReply(), F.data == 'practice_card_answer')

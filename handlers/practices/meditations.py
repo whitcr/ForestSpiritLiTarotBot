@@ -17,9 +17,8 @@ async def practice_zalivka_answer(call: types.CallbackQuery, bot: Bot):
 
         meditations = await execute_select_all("SELECT text, name FROM meditation_text")
 
-        keyboard = InlineKeyboardMarkup()
-        button_right = InlineKeyboardButton('Больше медитаций!', callback_data = f'show_meditations_{1}')
-        keyboard.add(button_right)
+        keyboard = InlineKeyboardBuilder()
+        keyboard.button(text = 'Больше медитаций!', callback_data = f'show_meditations_{1}')
 
         current_meditation_index = 0
         current_meditation = meditations[current_meditation_index]
@@ -31,7 +30,7 @@ async def practice_zalivka_answer(call: types.CallbackQuery, bot: Bot):
         await bot.edit_message_text(chat_id = call.message.chat.id,
                                     message_id = call.message.message_id,
                                     text = meditation_message,
-                                    reply_markup = keyboard)
+                                    reply_markup = keyboard.as_markup())
     except Exception:
         pass
 
@@ -40,34 +39,34 @@ async def practice_zalivka_answer(call: types.CallbackQuery, bot: Bot):
 async def process_callback_show_meditations(call: types.CallbackQuery, bot: Bot):
     try:
         await call.answer()
-        if call.from_user.id == call.message.reply_to_message.from_user.id:
-            meditations = await execute_select_all("SELECT text, name FROM meditation_text")
-            index = int(call.data.split('_')[2])
-            current_meditation = meditations[index]
-            title = current_meditation[1]
-            description = current_meditation[0]
+        meditations = await execute_select_all("SELECT text, name FROM meditation_text")
+        index = int(call.data.split('_')[2])
+        current_meditation = meditations[index]
+        title = current_meditation[1]
+        description = current_meditation[0]
 
-            meditation_message = f"<b>{title}:</b>\n\n{description}"
+        meditation_message = f"<b>{title}:</b>\n\n{description}"
 
-            keyboard = InlineKeyboardBuilder()
+        keyboard = InlineKeyboardBuilder()
 
-            if len(meditations) == 1:
-                pass
-            elif index == 0:
-                keyboard.button(text = '-->', callback_data = f'show_meditations_{index + 1}')
-                keyboard.button(text = '<--', callback_data = f'show_meditations_{len(meditations) - 1}')
-            elif index == len(meditations) - 1:
-                keyboard.button(text = '-->', callback_data = f'show_meditations_0')
-                keyboard.button(text = '<--', callback_data = f'show_meditations_{index - 1}')
-            else:
-                keyboard.button(text = '<--', callback_data = f'show_meditations_{index - 1}')
-                keyboard.button(text = '-->', callback_data = f'show_meditations_{index + 1}')
+        if len(meditations) == 1:
+            pass
+        elif index == 0:
+            keyboard.button(text = '<--', callback_data = f'show_meditations_{len(meditations) - 1}')
+            keyboard.button(text = '-->', callback_data = f'show_meditations_{index + 1}')
+        elif index == len(meditations) - 1:
+            keyboard.button(text = '<--', callback_data = f'show_meditations_{index - 1}')
+            keyboard.button(text = '-->', callback_data = f'show_meditations_0')
+        else:
+            keyboard.button(text = '-->', callback_data = f'show_meditations_{index + 1}')
+            keyboard.button(text = '<--', callback_data = f'show_meditations_{index - 1}')
 
-            keyboard.adjust(2)
+        keyboard.button(text = 'Меню', callback_data = f'get_practices_menu')
+        keyboard.adjust(2)
 
-            await bot.edit_message_text(chat_id = call.message.chat.id,
-                                        message_id = call.message.message_id,
-                                        text = meditation_message,
-                                        reply_markup = keyboard.as_markup())
+        await bot.edit_message_text(chat_id = call.message.chat.id,
+                                    message_id = call.message.message_id,
+                                    text = meditation_message,
+                                    reply_markup = keyboard.as_markup())
     except Exception:
         pass

@@ -5,9 +5,6 @@ from database import execute_select_all
 from filters.baseFilters import IsReply
 from filters.subscriptions import SubscriptionLevel
 import keyboard as kb
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-from middlewares.statsUser import use_user_statistics
 
 router = Router()
 
@@ -91,15 +88,17 @@ async def process_callback_show_practice(call: types.CallbackQuery, bot: Bot):
     if len(practices) == 1:
         pass
     elif index == 0:
-        keyboard.button(text = '-->', callback_data = f'show_practice_{index + 1}_{keyword}')
         keyboard.button(text = '<--',
                         callback_data = f'show_practice_{len(practices) - 1}_{keyword}')
+        keyboard.button(text = '-->', callback_data = f'show_practice_{index + 1}_{keyword}')
     elif index == len(practices) - 1:
-        keyboard.button(text = '-->', callback_data = f'show_practice_0_{keyword}')
         keyboard.button(text = '<--', callback_data = f'show_practice_{index - 1}_{keyword}')
+        keyboard.button(text = '-->', callback_data = f'show_practice_0_{keyword}')
     else:
         keyboard.button(text = '<--', callback_data = f'show_practice_{index - 1}_{keyword}')
         keyboard.button(text = '-->', callback_data = f'show_practice_{index + 1}_{keyword}')
+
+    keyboard.button(text = 'Меню', callback_data = f'get_practices_menu')
 
     keyboard.adjust(2)
 
