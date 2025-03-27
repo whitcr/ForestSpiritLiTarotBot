@@ -232,10 +232,7 @@ async def practice_choose_card_answer(call: types.CallbackQuery, bot: Bot):
     w, h, x, y, col1, col2 = deck_configs.get(choice, (500, 830, 105, 140, 0, 150))
 
     image = Image.new('RGB', (1920, 1080), color = 'white')
-    num = []
-    num[0] = call.data.split(':')[1]
-    num[1] = call.data.split(':')[2]
-    num[2] = call.data.split(':')[3]
+    num = [call.data.split(':')[1], call.data.split(':')[2], call.data.split(':')[3]]
 
     card_paths = [await get_path_cards(choice, num[i]) for i in range(3)]
     images = []
