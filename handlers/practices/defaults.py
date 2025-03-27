@@ -1,4 +1,5 @@
 from aiogram import types, Router, F, Bot
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from database import execute_select_all
 from filters.baseFilters import IsReply
@@ -31,7 +32,6 @@ async def practice_menu(message: types.Message):
 
 @router.callback_query(IsReply(), F.data == 'practice_menu_practice')
 async def practice_practices(call: types.CallbackQuery, bot: Bot):
-    print(1)
     await call.answer()
     try:
         await bot.edit_message_text(chat_id = call.message.chat.id,
@@ -47,12 +47,13 @@ async def process_callback_practices(call: types.CallbackQuery, bot: Bot):
     try:
         await call.answer()
         keyword = call.data.split('_')[1]
-        practices = await execute_select_all("SELECT name,text FROM practices_text WHERE keyword LIKE $1",
-                                             ('%' + keyword + '%',))
+        practices = await execute_select_all(
+            "SELECT name, text FROM practices_text WHERE keyword SIMILAR TO '%' || $1 || '%'",
+            (keyword,)
+        )
 
-        keyboard = InlineKeyboardMarkup()
-        button_right = InlineKeyboardButton('Больше практик!', callback_data = f'show_practice_{1}_{keyword}')
-        keyboard.add(button_right)
+        keyboard = InlineKeyboardBuilder()
+        keyboard.button(text = "Больше практик!", callback_data = f'show_practice_{1}_{keyword}')
 
         current_practices_index = 0
         current_practices = practices[current_practices_index]
@@ -64,46 +65,43 @@ async def process_callback_practices(call: types.CallbackQuery, bot: Bot):
         await bot.edit_message_text(chat_id = call.message.chat.id,
                                     message_id = call.message.message_id,
                                     text = practice_message,
-                                    reply_markup = keyboard)
+                                    reply_markup = keyboard.as_markup())
     except Exception:
         pass
 
 
 @router.callback_query(IsReply(), F.data.startswith('show_practice'))
 async def process_callback_show_practice(call: types.CallbackQuery, bot: Bot):
-    await call.answer()
-    try:
-        if call.from_user.id == call.message.reply_to_message.from_user.id:
-            index = int(call.data.split('_')[2])
-            keyword = call.data.split('_')[3]
-            practices = await execute_select_all("SELECT name, text FROM practices_text WHERE keyword LIKE $1",
-                                                 ('%' + keyword + '%',))
+    index = int(call.data.split('_')[2])
+    keyword = call.data.split('_')[3]
+    practices = await execute_select_all(
+        "SELECT name, text FROM practices_text WHERE keyword SIMILAR TO '%' || $1 || '%'",
+        (keyword,)
+    )
 
-            current_practice = practices[index]
-            title = current_practice[0]
-            description = current_practice[1]
-            practice_message = f"<b>{title}:</b>\n\n{description}"
+    current_practice = practices[index]
+    title = current_practice[0]
+    description = current_practice[1]
+    practice_message = f"<b>{title}:</b>\n\n{description}"
 
-            keyboard = InlineKeyboardMarkup(row_width = 2)
-            if len(practices) == 1:
-                pass
-            elif index == 0:
-                button_right = InlineKeyboardButton('-->', callback_data = f'show_practice_{index + 1}_{keyword}')
-                button_last = InlineKeyboardButton('<--',
-                                                   callback_data = f'show_practice_{len(practices) - 1}_{keyword}')
-                keyboard.row(button_last, button_right)
-            elif index == len(practices) - 1:
-                button_first = InlineKeyboardButton('-->', callback_data = f'show_practice_0_{keyword}')
-                button_left = InlineKeyboardButton('<--', callback_data = f'show_practice_{index - 1}_{keyword}')
-                keyboard.row(button_left, button_first)
-            else:
-                button_left = InlineKeyboardButton('<--', callback_data = f'show_practice_{index - 1}_{keyword}')
-                button_right = InlineKeyboardButton('-->', callback_data = f'show_practice_{index + 1}_{keyword}')
-                keyboard.row(button_left, button_right)
+    keyboard = InlineKeyboardBuilder()
 
-            await bot.edit_message_text(chat_id = call.message.chat.id,
-                                        message_id = call.message.message_id,
-                                        text = practice_message,
-                                        reply_markup = keyboard)
-    except Exception:
+    if len(practices) == 1:
         pass
+    elif index == 0:
+        keyboard.button(text = '-->', callback_data = f'show_practice_{index + 1}_{keyword}')
+        keyboard.button(text = '<--',
+                        callback_data = f'show_practice_{len(practices) - 1}_{keyword}')
+    elif index == len(practices) - 1:
+        keyboard.button(text = '-->', callback_data = f'show_practice_0_{keyword}')
+        keyboard.button(text = '<--', callback_data = f'show_practice_{index - 1}_{keyword}')
+    else:
+        keyboard.button(text = '<--', callback_data = f'show_practice_{index - 1}_{keyword}')
+        keyboard.button(text = '-->', callback_data = f'show_practice_{index + 1}_{keyword}')
+
+    keyboard.adjust(2)
+
+    await bot.edit_message_text(chat_id = call.message.chat.id,
+                                message_id = call.message.message_id,
+                                text = practice_message,
+                                reply_markup = keyboard.as_markup())

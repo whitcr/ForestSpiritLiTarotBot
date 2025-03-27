@@ -126,7 +126,7 @@ async def find_books(message: Message, bot: Bot):
             )
         else:
             keyword = message.text.split(' ')[1]
-            print(2, keyword)
+
             books = await execute_select_all(
                 "SELECT title, description, book_id FROM library WHERE EXISTS (SELECT 1 FROM unnest(keywords) keyword WHERE keyword ILIKE $1)",
                 (f"%{keyword}%",)

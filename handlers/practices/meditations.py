@@ -1,4 +1,6 @@
 from aiogram import types, Router, F, Bot
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from database import execute_select_all
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -47,25 +49,25 @@ async def process_callback_show_meditations(call: types.CallbackQuery, bot: Bot)
 
             meditation_message = f"<b>{title}:</b>\n\n{description}"
 
-            keyboard = InlineKeyboardMarkup(row_width = 2)
+            keyboard = InlineKeyboardBuilder()
+
             if len(meditations) == 1:
                 pass
             elif index == 0:
-                button_right = InlineKeyboardButton('-->', callback_data = f'show_meditations_{index + 1}')
-                button_last = InlineKeyboardButton('<--', callback_data = f'show_meditations_{len(meditations) - 1}')
-                keyboard.row(button_last, button_right)
+                keyboard.button('-->', callback_data = f'show_meditations_{index + 1}')
+                keyboard.button('<--', callback_data = f'show_meditations_{len(meditations) - 1}')
             elif index == len(meditations) - 1:
-                button_first = InlineKeyboardButton('-->', callback_data = f'show_meditations_0')
-                button_left = InlineKeyboardButton('<--', callback_data = f'show_meditations_{index - 1}')
-                keyboard.row(button_left, button_first)
+                keyboard.button('-->', callback_data = f'show_meditations_0')
+                keyboard.button('<--', callback_data = f'show_meditations_{index - 1}')
             else:
-                button_left = InlineKeyboardButton('<--', callback_data = f'show_meditations_{index - 1}')
-                button_right = InlineKeyboardButton('-->', callback_data = f'show_meditations_{index + 1}')
-                keyboard.row(button_left, button_right)
+                keyboard.button('<--', callback_data = f'show_meditations_{index - 1}')
+                keyboard.button('-->', callback_data = f'show_meditations_{index + 1}')
+
+            keyboard.adjust(2)
 
             await bot.edit_message_text(chat_id = call.message.chat.id,
                                         message_id = call.message.message_id,
                                         text = meditation_message,
-                                        reply_markup = keyboard)
+                                        reply_markup = keyboard.as_markup())
     except Exception:
         pass
