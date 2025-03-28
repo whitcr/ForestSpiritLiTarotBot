@@ -116,7 +116,7 @@ CALLBACK_COMMAND_MAPPING = {
     'get_my_profile': 'Мой профиль',
     'boosty_payment_': 'Оплата Boosty',
     'show_random_audio_sabliminals': 'Случайные сублиминалы',
-    'day_card_follow_': 'Подписка расклад дня',
+    'day_card_follow': 'Подписка расклад дня',
     'get_def_gpt_': 'Обычная трактовка',
     'approve_meanings': 'Подтвердить приобретение значения',
     'get_time_spread_meaning_': 'Получить значение расклада месяц/недели',
@@ -129,7 +129,8 @@ CALLBACK_COMMAND_MAPPING = {
     'get_meaning_premium': 'Премиум трактовка',
     'day_meaning_day_card_': 'Значение карты дня',
     'get_bonus_card': 'Получить бонусную карту',
-    'month_card_follow_': 'Подписка на расклад на месяц',
+    'month_card_follow': 'Подписка на расклад на месяц',
+    'week_card_follow': 'Подписка на расклад на неделю',
     'change_situation': 'Изменить ситуацию',
     'today_spread': 'Расклад на сегодня',
     'create_week_premium_spread': 'Премиум расклад на неделю',
@@ -171,7 +172,8 @@ CALLBACK_COMMAND_MAPPING = {
     'add_referrals_': 'Добавить рефералов',
     'admin_paid_spreads_': 'Добавление платных раскладов',
     'back_to_profile_': 'Вернуться в профиль',
-    'moon_follow_': 'Подписка на луну',
+    'moon_follow': 'Подписка на луну',
+    'get_mailing': 'Меню рассылки',
     'unknown_message': 'Неизвестное сообщение'
 }
 
@@ -232,7 +234,6 @@ def get_message_command(text: str) -> str:
 class HandlerStatisticsMiddleware(BaseMiddleware):
     def __init__(self, flush_interval: int = 60):
         self.stats_cache = StatisticsCache(flush_interval)
-        # Не запускаем задачу здесь - будем делать это в __call__
         self._auto_flush_started = False
 
     async def __call__(
@@ -241,12 +242,10 @@ class HandlerStatisticsMiddleware(BaseMiddleware):
             event: Message | CallbackQuery,
             data: Dict[str, Any]
     ) -> Any:
-        # Запускаем фоновую задачу при первом вызове мидлвари
         if not self._auto_flush_started:
             await self.stats_cache.start_auto_flush()  # Запускаем и ждем запуска
             self._auto_flush_started = True
 
-        # Определяем команду
         if isinstance(event, Message):
             command = get_message_command(event.text) if event.text else "unknown_message"
         elif isinstance(event, CallbackQuery):
@@ -254,8 +253,6 @@ class HandlerStatisticsMiddleware(BaseMiddleware):
         else:
             command = 'unknown_event'
 
-        # Создаем задачу для инкремента, но не ждем её завершения
-        asyncio.create_task(self.stats_cache.increment(command))
+        asyncio.create_task(self.stats_cache.increment(command.lower()))
 
-        # Сразу возвращаем управление обработчику
         return await handler(event, data)

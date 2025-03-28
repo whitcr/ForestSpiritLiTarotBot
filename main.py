@@ -66,7 +66,7 @@ def main() -> None:
     dp.callback_query.middleware(CheckingSubscription())
 
     dp.message.middleware(ThrottlingMiddleware())
-    dp.callback_query.middleware(ThrottlingMiddleware())
+    # dp.callback_query.middleware(ThrottlingMiddleware())
 
     stats_middleware = HandlerStatisticsMiddleware(flush_interval = 60)
 
