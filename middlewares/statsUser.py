@@ -13,80 +13,76 @@ async def update_user_statistics(event: Union[Message, CallbackQuery], bot) -> b
     week_start = today - timedelta(days = today.weekday())
     month_start = today.replace(day = 1)
 
-    try:
-        await notify_user(user_id, bot)
+    await notify_user(user_id, bot)
 
-        result = await execute_select_all(
+    result = await execute_select_all(
+        """
+        SELECT daily_count, weekly_count, monthly_count, total_count,
+               last_daily_update, last_weekly_update, last_monthly_update
+        FROM users
+        WHERE user_id = $1
+        """,
+        (user_id,)
+    )
+
+    if result and all(value is not None for value in result[0].values()):
+        data = result[0]
+        daily_count = data['daily_count'] if data['last_daily_update'] == today else 0
+        weekly_count = data['weekly_count'] if data['last_weekly_update'] == week_start else 0
+        monthly_count = data['monthly_count'] if data['last_monthly_update'] == month_start else 0
+        total_count = data['total_count']
+    else:
+        daily_count = weekly_count = monthly_count = total_count = 0
+
+    if daily_count >= DAILY_LIMIT:
+        result = await execute_select("SELECT subscription FROM users WHERE user_id = $1", (user_id,))
+        if result == 0:
+            return False
+
+    daily_count += 1
+    weekly_count += 1
+    monthly_count += 1
+    total_count += 1
+
+    if result:
+        await execute_query(
             """
-            SELECT daily_count, weekly_count, monthly_count, total_count,
-                   last_daily_update, last_weekly_update, last_monthly_update
-            FROM users
-            WHERE user_id = $1
+            UPDATE users
+            SET daily_count = $1, weekly_count = $2, monthly_count = $3, total_count = $4,
+                last_daily_update = $5, last_weekly_update = $6, last_monthly_update = $7
+            WHERE user_id = $8
             """,
-            (user_id,)
+            (daily_count, weekly_count, monthly_count, total_count, today, week_start, month_start, user_id)
         )
 
-        if result and all(value is not None for value in result[0].values()):
-            data = result[0]
-            daily_count = data['daily_count'] if data['last_daily_update'] == today else 0
-            weekly_count = data['weekly_count'] if data['last_weekly_update'] == week_start else 0
-            monthly_count = data['monthly_count'] if data['last_monthly_update'] == month_start else 0
-            total_count = data['total_count']
-        else:
-            daily_count = weekly_count = monthly_count = total_count = 0
+        us = await execute_select("SELECT username FROM users WHERE user_id = $1", (user_id,))
 
-        if daily_count >= DAILY_LIMIT:
-            result = await execute_select("SELECT subscription FROM users WHERE user_id = $1", (user_id,))
-            if result == 0:
-                return False
-
-        daily_count += 1
-        weekly_count += 1
-        monthly_count += 1
-        total_count += 1
-
-        if result:
+        if not us:
+            username = event.from_user.username if event.from_user.username else "Без ника"
+            name = event.from_user.full_name if event.from_user.full_name else "Без имени"
             await execute_query(
                 """
                 UPDATE users
-                SET daily_count = $1, weekly_count = $2, monthly_count = $3, total_count = $4,
-                    last_daily_update = $5, last_weekly_update = $6, last_monthly_update = $7
-                WHERE user_id = $8
+                SET username = $1, name = $2
+                WHERE user_id = $3
                 """,
-                (daily_count, weekly_count, monthly_count, total_count, today, week_start, month_start, user_id)
+                (username, name, user_id)
             )
+    else:
+        username = event.from_user.username if event.from_user.username else "Без ника"
+        name = event.from_user.full_name if event.from_user.full_name else "Без имени"
 
-            us = await execute_select("SELECT username FROM users WHERE user_id = $1", (user_id,))
-
-            if not us:
-                username = event.from_user.username if event.from_user.username else "Без ника"
-                name = event.from_user.full_name if event.from_user.full_name else "Без имени"
-                await execute_query(
-                    """
-                    UPDATE users
-                    SET username = $1, name = $2
-                    WHERE user_id = $3
-                    """,
-                    (username, name, user_id)
-                )
-        else:
-            username = event.from_user.username if event.from_user.username else "Без ника"
-            name = event.from_user.full_name if event.from_user.full_name else "Без имени"
-
-            await execute_query(
-                """
-                INSERT INTO users 
-                (user_id, username, name, cards_type, daily_count, weekly_count, monthly_count, total_count,
-                 last_daily_update, last_weekly_update, last_monthly_update, join_date)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, &10, $11)
-                """,
-                (user_id, username, name, 'raider', daily_count, weekly_count, monthly_count, total_count, today,
-                 week_start,
-                 month_start, today)
-            )
-
-    except Exception:
-        return False
+        await execute_query(
+            """
+            INSERT INTO users 
+            (user_id, username, name, cards_type, daily_count, weekly_count, monthly_count, total_count,
+             last_daily_update, last_weekly_update, last_monthly_update, join_date)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, &10, $11, $12)
+            """,
+            (user_id, username, name, 'raider', daily_count, weekly_count, monthly_count, total_count, today,
+             week_start,
+             month_start, today)
+        )
 
     return True
 
