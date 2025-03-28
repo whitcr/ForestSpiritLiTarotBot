@@ -18,11 +18,13 @@ class StatisticsCache:
         self.flush_interval = flush_interval
         self.last_flush = datetime.utcnow()
         self._lock = asyncio.Lock()
-        self._flush_task = None  # Инициализируем переменную для фоновой задачи
+        self._flush_task = None
+        self._is_running = False
 
     async def start_auto_flush(self):
         """Запускает авто-флаш в фоне, если ещё не запущено."""
-        if self._flush_task is None or self._flush_task.done():
+        if not self._is_running:
+            self._is_running = True
             self._flush_task = asyncio.create_task(self.auto_flush())
 
     async def increment(self, command: str):
@@ -35,21 +37,33 @@ class StatisticsCache:
 
     async def auto_flush(self):
         """Периодически сбрасывает данные в БД."""
-        while True:
-            await asyncio.sleep(self.flush_interval)
-            await self.flush()
+        try:
+            while True:
+                await asyncio.sleep(self.flush_interval)
+                await self.flush()
+        except asyncio.CancelledError:
+            self._is_running = False
+            raise
+        except Exception as e:
+            print(f"Error in auto_flush: {e}")
+            self._is_running = False
 
     async def flush(self):
         async with self._lock:
             if not self.cache:
                 return
 
-            now = datetime.utcnow()
-            today = now.date()
-            week_start = today - timedelta(days = today.weekday())
-            month_start = today.replace(day = 1)
+            cache_copy = dict(self.cache)
+            self.cache.clear()
+            self.last_flush = datetime.utcnow()
 
-            for command, counts in list(self.cache.items()):
+        now = datetime.utcnow()
+        today = now.date()
+        week_start = today - timedelta(days = today.weekday())
+        month_start = today.replace(day = 1)
+
+        for command, counts in cache_copy.items():
+            try:
                 result = await execute_select_all(
                     """
                     SELECT daily_count, weekly_count, monthly_count, total_count,
@@ -61,18 +75,16 @@ class StatisticsCache:
                 )
 
                 if result:
-                    record = result[0]
-                    counts['daily_count'] = counts['daily_count'] + record['daily_count']
-                    counts['weekly_count'] = counts['weekly_count'] + record['weekly_count']
-                    counts['monthly_count'] = counts['monthly_count'] + record['monthly_count']
-                    counts['total_count'] += record['total_count']
-
                     await execute_query(
                         """
                         UPDATE statistics_handler 
-                        SET daily_count = $1, weekly_count = $2, monthly_count = $3, 
-                            total_count = $4, last_daily_update = $5, 
-                            last_weekly_update = $6, last_monthly_update = $7
+                        SET daily_count = daily_count + $1, 
+                            weekly_count = weekly_count + $2, 
+                            monthly_count = monthly_count + $3, 
+                            total_count = total_count + $4, 
+                            last_daily_update = $5, 
+                            last_weekly_update = $6, 
+                            last_monthly_update = $7
                         WHERE command = $8
                         """,
                         (counts['daily_count'], counts['weekly_count'],
@@ -91,9 +103,11 @@ class StatisticsCache:
                          counts['monthly_count'], counts['total_count'],
                          today, week_start, month_start)
                     )
-
-            self.cache.clear()
-            self.last_flush = now
+            except Exception as e:
+                print(f"Error flushing command {command}: {e}")
+                async with self._lock:
+                    for k, v in counts.items():
+                        self.cache[command][k] += v
 
 
 CALLBACK_COMMAND_MAPPING = {
@@ -195,6 +209,8 @@ def get_command_name(callback_data: str) -> str:
 class HandlerStatisticsMiddleware(BaseMiddleware):
     def __init__(self, flush_interval: int = 60):
         self.stats_cache = StatisticsCache(flush_interval)
+        # Не запускаем задачу здесь - будем делать это в __call__
+        self._auto_flush_started = False
 
     async def __call__(
             self,
@@ -202,8 +218,12 @@ class HandlerStatisticsMiddleware(BaseMiddleware):
             event: Message | CallbackQuery,
             data: Dict[str, Any]
     ) -> Any:
-        await self.stats_cache.start_auto_flush()  # Гарантируем запуск фоновой задачи
+        # Запускаем фоновую задачу при первом вызове мидлвари
+        if not self._auto_flush_started:
+            await self.stats_cache.start_auto_flush()  # Запускаем и ждем запуска
+            self._auto_flush_started = True
 
+        # Определяем команду
         if isinstance(event, Message):
             words = event.text.lower().split()[:3] if event.text else []
             command = "_".join(words) if words and words[0] in ALLOWED_COMMANDS else "unknown_message"
@@ -212,5 +232,8 @@ class HandlerStatisticsMiddleware(BaseMiddleware):
         else:
             command = 'unknown_event'
 
+        # Создаем задачу для инкремента, но не ждем её завершения
         asyncio.create_task(self.stats_cache.increment(command))
+
+        # Сразу возвращаем управление обработчику
         return await handler(event, data)
