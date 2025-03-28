@@ -29,15 +29,17 @@ async def give_sub(user_id, days, sub_type):
 
 
 async def give_sub_meanings(user_id, sub, days):
-    amount = 100 if sub == 1 else 200 if sub == 2 else 300
-    if days == 30:
-        return amount
-    elif days == 90:
-        return amount * 3
-    elif days == 180:
-        return amount * 6
+    amount_per_30_days = {1: 100, 2: 200, 3: 300}.get(sub, 0)
 
-    await execute_query("update users set paid_meanings = paid_meanings + $1 where user_id = $2", (amount, user_id,))
+    if amount_per_30_days == 0:
+        return 0
+
+    total_amount = (amount_per_30_days / 30) * days
+
+    await execute_query("update users set paid_meanings = paid_meanings + $1 where user_id = $2",
+                        (total_amount, user_id,))
+
+    return total_amount
 
 
 async def give_meanings(user_id, amount):
