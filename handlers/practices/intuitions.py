@@ -12,7 +12,6 @@ router = Router()
 
 
 @router.callback_query(IsReply(), lambda callback: callback.data == 'practice_menu_intuition')
-@use_user_statistics
 async def practice_menu_intuition(call: types.CallbackQuery, bot: Bot):
     await bot.edit_message_text(
         chat_id = call.message.chat.id,

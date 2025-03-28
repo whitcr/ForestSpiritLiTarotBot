@@ -62,7 +62,6 @@ async def find_meditation(bot: Bot, message: types.Message):
 
 
 @router.callback_query(IsReply(), F.data.startswith('show_audio'))
-@use_user_statistics
 async def process_callback_show_audio(bot: Bot, call: types.CallbackQuery):
     await call.answer()
     try:
@@ -102,7 +101,6 @@ async def process_callback_show_audio(bot: Bot, call: types.CallbackQuery):
 
 
 @router.callback_query(IsReply(), F.data.startswith('show_random_audio'))
-@use_user_statistics
 async def process_callback_show_random_audio(bot: Bot, call: types.CallbackQuery):
     await call.answer()
     theme = call.data.split('_')[3]

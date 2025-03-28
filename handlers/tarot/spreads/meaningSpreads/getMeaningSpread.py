@@ -16,7 +16,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
 from handlers.tarot.spreads.spreadsConfig import SPREADS, get_name_by_cb_key, get_questions_by_name
-from middlewares.statsUser import use_user_statistics
 
 
 class ChangeQuestionState(StatesGroup):
@@ -150,7 +149,6 @@ async def format_callback_data(call, data):
 
 
 @router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == True), SubscriptionLevel(2))
-@use_user_statistics
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning,
                                          state: FSMContext):
     await call.answer()
@@ -185,7 +183,6 @@ async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_dat
 
 
 @router.callback_query(IsReply(), GptCallbackMeaning.filter(F.premium == False), SubscriptionLevel(1, True))
-@use_user_statistics
 @typing_animation_decorator(initial_message = "Трактую")
 async def get_gpt_response_cards_meaning(call: types.CallbackQuery, callback_data: GptCallbackMeaning):
     await call.answer()

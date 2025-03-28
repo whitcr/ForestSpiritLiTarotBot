@@ -34,9 +34,9 @@ async def get_random_num(choice, count, user_id=None):
     if count == 1:
         num = random.randint(min_num, max_num)
 
-        if user_id:
-            await get_user_card_statistics(user_id = user_id, num = num)
-            await get_statistic_card(num)
+        # if user_id:
+        #     await get_user_card_statistics(user_id = user_id, num = num)
+        #     await get_statistic_card(num)
         return num
 
     else:
@@ -46,10 +46,10 @@ async def get_random_num(choice, count, user_id=None):
             else list(itertools.islice((random.randint(0, max_num) for _ in range(count)), count))
         )
 
-        if user_id:
-            for num in nums:
-                await get_user_card_statistics(user_id = user_id, num = num)
-                await get_statistic_card(num)
+        # if user_id:
+        #     for num in nums:
+        #         await get_user_card_statistics(user_id = user_id, num = num)
+        #         await get_statistic_card(num)
         return nums
 
 

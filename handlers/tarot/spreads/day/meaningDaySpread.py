@@ -11,7 +11,6 @@ router = Router()
 
 
 @router.callback_query(IsReply(), F.data.startswith("get_day_spread_meaning"), SubscriptionLevel(1, True))
-@use_user_statistics
 @typing_animation_decorator(initial_message = "Трактую")
 async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     await call.answer()
@@ -57,7 +56,6 @@ async def process_callback_day_spread_meaning(call: types.CallbackQuery):
 
 
 @router.callback_query(IsReply(), F.data.startswith("get_time_spread_meaning_"), SubscriptionLevel(1))
-@use_user_statistics
 @typing_animation_decorator(initial_message = "Трактую")
 async def process_callback_day_spread_meaning(call: types.CallbackQuery):
     await call.answer()
