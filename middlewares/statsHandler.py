@@ -166,7 +166,6 @@ CALLBACK_COMMAND_MAPPING = {
     'broadcast_': 'Рассылка всем',
     'admin_get_id': 'Получить ID администратора',
     'add_meanings_': 'Добавить значения',
-    'Добавить купон': 'Тип купона',
     'add_coupon_': 'Добавить купон',
     'admin_coupons_': 'Добавить купон',
     'add_referrals_': 'Добавить рефералов',
@@ -181,7 +180,7 @@ ALLOWED_COMMANDS = {
     "стриплет", "колода", "карта", "значение", "расклад",
     "допы", "триплет", "саб", "мой профиль", 'карта', 'настройки', 'услуги',
     "расклад на день", "расклад на неделю",
-    "расклад на завтра", "расклад на месяц",
+    "расклад на завтра", "расклад на месяц", "практика"
 }
 
 COMMAND_ALIASES = {
@@ -197,12 +196,19 @@ ALLOWED_COMMANDS = {cmd.lower() for cmd in ALLOWED_COMMANDS}
 
 def get_command_name(callback_data: str) -> str:
     callback_data = callback_data.lower()
+
+    for prefix, command_name in CALLBACK_COMMAND_MAPPING.items():
+        if callback_data.startswith(prefix.lower()):
+            return command_name
+
     for command in sorted(ALLOWED_COMMANDS, key = len, reverse = True):
         if callback_data.startswith(command):
             return command
+
     for alias, standard in COMMAND_ALIASES.items():
         if callback_data.startswith(alias):
             return standard
+
     return callback_data
 
 
