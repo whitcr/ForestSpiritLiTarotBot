@@ -57,7 +57,7 @@ async def update_user_statistics(event: Union[Message, CallbackQuery], bot) -> b
             )
 
             us = await execute_select("SELECT username FROM users WHERE user_id = $1", (user_id,))
-            
+
             if not us:
                 username = event.from_user.username if event.from_user.username else "Без ника"
                 name = event.from_user.full_name if event.from_user.full_name else "Без имени"
@@ -123,4 +123,5 @@ async def notify_user(user_id, bot):
                                "— Спасибо, что пользуетесь Ли. На данный момент был запущен тестовый режим крупного обновления, поэтому некоторый функционал был расширен, "
                                "тогда как другой будет доступен только при приобретении подписки. \n"
                                "Если у вас возникли вопросы или проблемы, пишите в поддержку с помощью команды 'помощь'. Список команд -  https://telegra.ph/Lesnoj-Duh-Li-10-10 \n\n"
-                               "В качестве бонуса вам были начислены 10 индивидуальных трактовок, чтобы вы могли попробовать новый функционал.")
+                               "В качестве бонуса вам были начислены 10 индивидуальных трактовок, чтобы вы могли попробовать новый функционал.",
+                               reply_markup = kb.menu_private_keyboard)

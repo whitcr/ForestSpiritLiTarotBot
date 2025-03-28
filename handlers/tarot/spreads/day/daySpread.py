@@ -70,10 +70,11 @@ async def process_callback_day_meaning(call: types.CallbackQuery, bot: Bot):
         if 'dop' in theme:
             theme = 'day_card'
 
+        num = await execute_select(f"select {theme} from spreads_day where user_id = {user_id} and date = '{date}' ")
         choice = await execute_select(
             f"select deck_type from spreads_day where user_id = {call.from_user.id} and date = '{date}' ")
 
-        image, num = await get_card_image_with_text(call, theme, choice = choice)
+        image, num = await get_card_image_with_text(call, theme, num, choice = choice)
 
         keyboard = await create_day_keyboard(date, call.data)
         await bot.edit_message_media(chat_id = call.message.chat.id,
