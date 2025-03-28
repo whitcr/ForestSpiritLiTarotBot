@@ -212,6 +212,23 @@ def get_command_name(callback_data: str) -> str:
     return callback_data
 
 
+def get_message_command(text: str) -> str:
+    if not text:
+        return "unknown_message"
+
+    text = text.lower()
+
+    for command in sorted(ALLOWED_COMMANDS, key = len, reverse = True):
+        if text.startswith(command):
+            return command
+
+    first_word = text.split()[0]
+    if first_word in ALLOWED_COMMANDS:
+        return first_word
+
+    return "unknown_message"
+
+
 class HandlerStatisticsMiddleware(BaseMiddleware):
     def __init__(self, flush_interval: int = 60):
         self.stats_cache = StatisticsCache(flush_interval)
@@ -231,8 +248,7 @@ class HandlerStatisticsMiddleware(BaseMiddleware):
 
         # Определяем команду
         if isinstance(event, Message):
-            words = event.text.lower().split()[:3] if event.text else []
-            command = "_".join(words) if words and words[0] in ALLOWED_COMMANDS else "unknown_message"
+            command = get_message_command(event.text) if event.text else "unknown_message"
         elif isinstance(event, CallbackQuery):
             command = get_command_name(event.data)
         else:
