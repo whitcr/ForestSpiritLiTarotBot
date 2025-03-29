@@ -34,6 +34,8 @@ router = Router()
 
 
 class GptCallbackMeaning(CallbackData, prefix = "get_def_gpt_"):
+    premium: Optional[bool]
+
     card_1: int
     d1card_1: Optional[int]
     d2card_1: Optional[int]
@@ -51,8 +53,6 @@ class GptCallbackMeaning(CallbackData, prefix = "get_def_gpt_"):
 
     spread_name: Optional[str]
 
-    premium: Optional[bool]
-
     question: Optional[str]
     situation: Optional[str]
 
@@ -62,6 +62,7 @@ async def create_gpt_keyboard(user_id, buttons, nums, prev_callback_data=None, c
     def create_callback_data(nums, d1cards, d2cards, d3cards, premium=False, question=None, situation=None,
                              spread_name=None):
         return GptCallbackMeaning(
+            premium = premium,
             card_1 = nums[0], d1card_1 = d1cards[0],
             d2card_1 = d2cards[0],
             d3card_1 = d3cards[0],
@@ -72,7 +73,6 @@ async def create_gpt_keyboard(user_id, buttons, nums, prev_callback_data=None, c
             d2card_3 = d2cards[2],
             d3card_3 = d3cards[2],
             spread_name = SPREADS[spread_name]['cb_key'] if spread_name else None,
-            premium = premium,
             question = question,
             situation = situation
         ).pack()
