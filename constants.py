@@ -2,9 +2,9 @@ from PIL import ImageFont
 
 SUBS_TYPE = {
     0: {"name": "Без подписки", "stars": 0, "rubles": 0, "euros": 0},
-    1: {"name": "Шут", "stars": 100, "rubles": 170, "euros": 1.80},
-    2: {"name": "Маг", "stars": 150, "rubles": 250, "euros": 2.70},
-    3: {"name": "Жрица", "stars": 250, "rubles": 450, "euros": 4.60}
+    1: {"name": "Шут", "stars": 100, "rubles": 170, "euros": 1.80, "hryvnia": 80, },
+    2: {"name": "Маг", "stars": 150, "rubles": 250, "euros": 2.70, "hryvnia": 120, },
+    3: {"name": "Жрица", "stars": 250, "rubles": 450, "euros": 4.60, "hryvnia": 200, }
 }
 
 DURATION_DISCOUNTS = {
@@ -14,9 +14,9 @@ DURATION_DISCOUNTS = {
 }
 
 PAID_MEANINGS_COST = {
-    50: {"stars": 75, "rubles": 100, "euros": 1, "sale": 0},
-    100: {"stars": 150, "rubles": 200, "euros": 2, "sale": 10},
-    200: {"stars": 300, "rubles": 400, "euros": 4, "sale": 15},
+    50: {"stars": 75, "rubles": 100, "euros": 1, "hryvnia": 45, "sale": 0},
+    100: {"stars": 150, "rubles": 200, "euros": 2, "hryvnia": 100, "sale": 10},
+    200: {"stars": 300, "rubles": 400, "euros": 4, "hryvnia": 190, "sale": 15},
 }
 
 DAILY_LIMIT = 10

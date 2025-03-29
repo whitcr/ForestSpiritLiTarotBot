@@ -107,6 +107,9 @@ async def process_select_duration(call: types.CallbackQuery, bot: Bot):
         original_stars = SUBS_TYPE[sub_type]["stars"] * duration
         discounted_stars = calculate_discounted_price(SUBS_TYPE[sub_type]["stars"], duration)
 
+        original_hryvnia = SUBS_TYPE[sub_type]["hryvnia"] * duration
+        discounted_hryvnia = calculate_discounted_price(SUBS_TYPE[sub_type]["hryvnia"], duration)
+
         original_rubles = SUBS_TYPE[sub_type]["rubles"] * duration
         discounted_rubles = calculate_discounted_price(SUBS_TYPE[sub_type]["rubles"], duration)
 
@@ -123,6 +126,11 @@ async def process_select_duration(call: types.CallbackQuery, bot: Bot):
             text += f"• <b>{discounted_stars}</b> Stars вместо {original_stars} Stars\n"
         else:
             text += f"• <b>{discounted_stars}</b> Stars\n"
+
+        if DURATION_DISCOUNTS[duration] > 0:
+            text += f"• <b>{discounted_hryvnia}</b> ₴ вместо {original_hryvnia} ₽\n"
+        else:
+            text += f"• <b>{discounted_hryvnia}</b> ₴\n"
 
         if DURATION_DISCOUNTS[duration] > 0:
             text += f"• <b>{discounted_rubles}</b> ₽ вместо {original_rubles} ₽\n"
@@ -222,12 +230,14 @@ async def process_select_meanings(call: types.CallbackQuery, bot: Bot):
 
     for count, price_info in PAID_MEANINGS_COST.items():
         stars = price_info["stars"]
+        hryvnia = price_info["hryvnia"]
         rubles = price_info["rubles"]
         euros = price_info["euros"]
         sale = price_info["sale"]
 
         if sale > 0:
             discounted_stars = int(stars * (100 - sale) / 100)
+            discounted_hryvnia = int(hryvnia * (100 - sale) / 100)
             discounted_rubles = int(rubles * (100 - sale) / 100)
             discounted_euros = euros * (100 - sale) / 100
 
@@ -235,6 +245,7 @@ async def process_select_meanings(call: types.CallbackQuery, bot: Bot):
 
             text += f"<b>{count} трактовок{sale_text}:</b>\n"
             text += f"• <b>{discounted_stars}</b> Stars вместо {stars} Stars\n"
+            text += f"• <b>{discounted_hryvnia}</b> ₴ вместо {hryvnia} Stars\n"
             text += f"• <b>{discounted_rubles}</b> ₽ вместо {rubles} ₽\n"
             text += f"• <b>{discounted_euros:.2f}</b> € вместо {euros:.2f} €\n"
 
@@ -247,6 +258,7 @@ async def process_select_meanings(call: types.CallbackQuery, bot: Bot):
         else:
             text += f"<b>{count} трактовок:</b>\n"
             text += f"• <b>{stars}</b> Stars\n"
+            text += f"• <b>{hryvnia}</b> Stars\n"
             text += f"• <b>{rubles}</b> ₽\n"
             text += f"• <b>{euros:.2f}</b> €\n"
 
