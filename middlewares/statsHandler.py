@@ -143,7 +143,7 @@ CALLBACK_COMMAND_MAPPING = {
     'get_sub_menu': 'Получить меню подписки',
     'sub_type_': 'Тип подписки',
     'get_practices_menu': 'Меню практик',
-    'practice_menu_': 'Меню практики',
+    'practice_menu_': 'Меню практик',
     'approve_payment_': 'Подтвердить оплату',
     'select_meanings_type': 'Выбрать тип значений',
     'menu_return': 'Возврат в меню',
@@ -174,6 +174,7 @@ CALLBACK_COMMAND_MAPPING = {
     'back_to_profile_': 'Вернуться в профиль',
     'moon_follow': 'Подписка на луну',
     'get_mailing': 'Меню рассылки',
+    'get_dop_': 'Доп',
     'unknown_message': 'Неизвестное сообщение'
 }
 
