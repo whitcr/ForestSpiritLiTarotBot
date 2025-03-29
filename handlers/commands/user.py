@@ -61,7 +61,7 @@ async def generate_profile_summary_cmd(message: types.Message, bot: Bot):
 
 
 @router.callback_query(F.data == "get_my_profile")
-@typing_animation_decorator(initial_message = "Узнаю о тебе все")
+@typing_animation_decorator(initial_message = "Собираю информацию")
 async def generate_profile_summary_cmd(call, bot: Bot):
     if call.message.chat.type == "private":
         await generate_profile_summary(call, bot)
