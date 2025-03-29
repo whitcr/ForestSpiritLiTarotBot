@@ -128,7 +128,7 @@ async def process_select_duration(call: types.CallbackQuery, bot: Bot):
             text += f"• <b>{discounted_stars}</b> Stars\n"
 
         if DURATION_DISCOUNTS[duration] > 0:
-            text += f"• <b>{discounted_hryvnia}</b> ₴ вместо {original_hryvnia} ₽\n"
+            text += f"• <b>{discounted_hryvnia}</b> ₴ вместо {original_hryvnia} ₴\n"
         else:
             text += f"• <b>{discounted_hryvnia}</b> ₴\n"
 

@@ -268,17 +268,17 @@ async def get_cards_meanings_premium(call, state: FSMContext):
         f"Нажмите на кнопку 'Уточнить', чтобы трактовка была более четкой. (Опционально) \n\n "
     )
 
-    if data.get('get_message'):
-        reply_message = data.get('get_message')
-    else:
-        reply_message = call.message.message_id
+    # if data.get('get_message'):
+    #     reply_message = data.get('get_message')
+    # else:
+    #     reply_message = call.message.reply_to_message.message_id
 
     try:
         await call.message.answer(text = message_text, reply_markup = premium_inline_kb,
-                                  reply_to_message_id = reply_message)
+                                  reply_to_message_id = call.message.reply_to_message.message_id)
     except:
         await call.answer(text = message_text, reply_markup = premium_inline_kb,
-                          reply_to_message_id = reply_message)
+                          reply_to_message_id = call.message.reply_to_message.message_id)
 
 
 @router.callback_query(IsReply(), F.data == "change_question")
